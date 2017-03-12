@@ -5,18 +5,20 @@ using System.Collections.Specialized;
 using System;
 
 namespace RemoteFork.Plugins
-{    [PluginAttribute(Id = "acetorrentplay", Version = "0.2.b", Author = "ORAMAN", Name = "AceTorrentPlay", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
+{
+
+
+    [PluginAttribute(Id = "acetorrentplaybeta", Version = "0.2.b", Author = "ORAMAN", Name = "AceTorrentPlay (beta)", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
     public class AceTorrentPlay : IPlugin
     {
 
         private string IPAdress;
         private string PortRemoteFork = "8027";
         private string PLUGIN_PATH = "pluginPath";
+
         private string ProxyServr = "proxy.antizapret.prostovpn.org";
         private int ProxyPort = 3128;
-        private bool ProxyEnabler = false; //Вкл/выкл прокси сервер
-        private string TrackerServer = "http://nnmclub.to"; //  "http://nnm-club.me" -используемый адрес трекера, nnm-club.me работает через прокси
-
+        private bool ProxyEnabler = true;
 
         public Playlist GetInfo(IPluginContext context)
         {
@@ -32,18 +34,26 @@ namespace RemoteFork.Plugins
             return playlist;
         }
 
+
         public PluginApi.Plugins.Playlist GetList(IPluginContext context)
         {
-             IPAdress = context.GetRequestParams()["host"].Split(':')[0];
+       IPAdress = context.GetRequestParams()["host"].Split(':')[0];
 
-            if (context.GetRequestParams()["search"] != null)
-            {
-                return SearchList(context, context.GetRequestParams()["search"]);
-            }
+
 
             var path = context.GetRequestParams().Get(PLUGIN_PATH);
             path = ((((path == null)) ? "plugin" : "plugin;" + path));
 
+            if (context.GetRequestParams()["search"] != null)
+            {
+                switch (path)
+                {
+                    case "plugin;Search_NNM":
+                        return SearchListNNM(context, context.GetRequestParams()["search"]);
+                    case "plugin;Search_rutracker":
+                        break;
+                }
+            }
 
 
 
@@ -64,13 +74,11 @@ namespace RemoteFork.Plugins
 
             switch (PathSpliter[PathSpliter.Length - 1])
             {
-                //Трекер
-                case "PAGE":
-                    return GetPage(context, PathSpliter[PathSpliter.Length - 2]);
-                case "PAGEFILM":
-                    return GetTorrentPage(context, PathSpliter[PathSpliter.Length - 2]);
+                case "PAGENNM":
+                    return GetPAGENNM(context, PathSpliter[PathSpliter.Length - 2]);
+                case "PAGEFILMNNM":
+                    return GetTorrentPAGENNM(context, PathSpliter[PathSpliter.Length - 2]);
 
-                 //Торрент тв
                 case "ent":
                     return LastModifiedPlayList("ent", context);
                 case "child":
@@ -95,10 +103,9 @@ namespace RemoteFork.Plugins
                     return LastModifiedPlayList("relig", context);
                 case "sport":
                     return LastModifiedPlayList("sport", context);
-
-                    //Взрослый контент
+                //Взрослый контент
                 case "porn":
-                    return LastModifiedPlayList( "porn", context);
+                    return LastModifiedPlayList("porn", context);
                 case "all":
                     return LastModifiedPlayList("all", context);
             }
@@ -125,7 +132,14 @@ namespace RemoteFork.Plugins
                             items.Add(Item);
                         }
 
-                       
+                        //'Информация о запущенном файле 
+                        //Dim WC As New System.Net.WebClient
+                        //WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+                        //WC.Encoding = System.Text.Encoding.UTF8
+                        //Dim AceMadiaInfo As String
+                        //AceMadiaInfo = WC.DownloadString("http://127.0.0.1:6878/ace/manifest.m3u8?id=" & GetID(PathFiles, IPAdress) & "&format=json&use_api_events=1&use_stop_notifications=1")
+                        //System.system.IO.File.WriteAllText("d:\My Desktop\инфо.txt", AceMadiaInfo)
+
                         return PlayListPlugPar(items, context);
 
                     }
@@ -280,7 +294,6 @@ namespace RemoteFork.Plugins
                 items.Add(ItemTorrentTV);
                 items.Add(ItemNNMClub);
 
-
             }
             catch
             {
@@ -304,6 +317,7 @@ namespace RemoteFork.Plugins
                     Item.Link = Disk.Name.Replace("\\", "|");
                     Item.Type = ItemType.DIRECTORY;
                     Item.Description = Item.Name + "\n" + "\r" + " <html><p> Метка диска: " + Disk.VolumeLabel + "</html>";
+
                     items.Add(Item);
                 }
             }
@@ -313,9 +327,10 @@ namespace RemoteFork.Plugins
         }
 
         #region NNM Club
+        private string TrackerServer = "http://nnmclub.to"; //"http://nnm-club.me"
         private string Cookies = "phpbb2mysql_4_data=a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A32%3A%2296229c9a3405ae99cce1f3bc0cefce2e%22%3Bs%3A6%3A%22userid%22%3Bs%3A8%3A%2213287549%22%3B%7D";
 
-        public PluginApi.Plugins.Playlist SearchList(IPluginContext context, string search)
+        public PluginApi.Plugins.Playlist SearchListNNM(IPluginContext context, string search)
         {
 
             System.Net.WebRequest RequestPost = System.Net.WebRequest.Create(TrackerServer + "/forum/tracker.php");
@@ -328,7 +343,7 @@ namespace RemoteFork.Plugins
             RequestPost.Headers.Add("Cookie", Cookies);
             RequestPost.ContentType = "application/x-www-form-urlencoded";
             System.IO.Stream myStream = RequestPost.GetRequestStream();
-            string DataStr =  "prev_sd=1&prev_a=1&prev_my=0&prev_n=0&prev_shc=0&prev_shf=0&prev_sha=0&prev_shs=0&prev_shr=0&prev_sht=0&f%5B%5D=724&f%5B%5D=725&f%5B%5D=729&f%5B%5D=731&f%5B%5D=733&f%5B%5D=730&f%5B%5D=732&f%5B%5D=230&f%5B%5D=659&f%5B%5D=658&f%5B%5D=231&f%5B%5D=660&f%5B%5D=661&f%5B%5D=890&f%5B%5D=232&f%5B%5D=734&f%5B%5D=742&f%5B%5D=735&f%5B%5D=738&f%5B%5D=967&f%5B%5D=907&f%5B%5D=739&f%5B%5D=1109&f%5B%5D=736&f%5B%5D=737&f%5B%5D=898&f%5B%5D=935&f%5B%5D=871&f%5B%5D=973&f%5B%5D=960&f%5B%5D=1239&f%5B%5D=740&f%5B%5D=741&f%5B%5D=216&f%5B%5D=270&f%5B%5D=218&f%5B%5D=219&f%5B%5D=954&f%5B%5D=888&f%5B%5D=217&f%5B%5D=266&f%5B%5D=318&f%5B%5D=320&f%5B%5D=677&f%5B%5D=1177&f%5B%5D=319&f%5B%5D=678&f%5B%5D=885&f%5B%5D=908&f%5B%5D=909&f%5B%5D=910&f%5B%5D=911&f%5B%5D=912&f%5B%5D=220&f%5B%5D=221&f%5B%5D=222&f%5B%5D=882&f%5B%5D=889&f%5B%5D=224&f%5B%5D=225&f%5B%5D=226&f%5B%5D=227&f%5B%5D=891&f%5B%5D=682&f%5B%5D=694&f%5B%5D=884&f%5B%5D=1211&f%5B%5D=693&f%5B%5D=913&f%5B%5D=228&f%5B%5D=1150&f%5B%5D=254&f%5B%5D=321&f%5B%5D=255&f%5B%5D=906&f%5B%5D=256&f%5B%5D=257&f%5B%5D=258&f%5B%5D=883&f%5B%5D=955&f%5B%5D=905&f%5B%5D=271&f%5B%5D=1210&f%5B%5D=264&f%5B%5D=265&f%5B%5D=272&f%5B%5D=1262&f%5B%5D=1219&f%5B%5D=1221&f%5B%5D=1220&f%5B%5D=768&f%5B%5D=779&f%5B%5D=778&f%5B%5D=788&f%5B%5D=1288&f%5B%5D=787&f%5B%5D=1196&f%5B%5D=1141&f%5B%5D=777&f%5B%5D=786&f%5B%5D=803&f%5B%5D=776&f%5B%5D=785&f%5B%5D=1265&f%5B%5D=1289&f%5B%5D=774&f%5B%5D=775&f%5B%5D=1242&f%5B%5D=1140&f%5B%5D=782&f%5B%5D=773&f%5B%5D=1142&f%5B%5D=784&f%5B%5D=1195&f%5B%5D=772&f%5B%5D=771&f%5B%5D=783&f%5B%5D=1144&f%5B%5D=804&f%5B%5D=1290&f%5B%5D=770&f%5B%5D=922&f%5B%5D=780&f%5B%5D=781&f%5B%5D=769&f%5B%5D=799&f%5B%5D=800&f%5B%5D=791&f%5B%5D=798&f%5B%5D=797&f%5B%5D=790&f%5B%5D=793&f%5B%5D=794&f%5B%5D=789&f%5B%5D=796&f%5B%5D=792&f%5B%5D=795&f%5B%5D=713&f%5B%5D=706&f%5B%5D=577&f%5B%5D=894&f%5B%5D=578&f%5B%5D=580&f%5B%5D=579&f%5B%5D=953&f%5B%5D=581&f%5B%5D=806&f%5B%5D=714&f%5B%5D=761&f%5B%5D=809&f%5B%5D=924&f%5B%5D=812&f%5B%5D=576&f%5B%5D=590&f%5B%5D=591&f%5B%5D=588&f%5B%5D=823&f%5B%5D=589&f%5B%5D=598&f%5B%5D=652&f%5B%5D=596&f%5B%5D=600&f%5B%5D=819&f%5B%5D=599&f%5B%5D=956&f%5B%5D=959&f%5B%5D=597&f%5B%5D=594&f%5B%5D=593&f%5B%5D=595&f%5B%5D=582&f%5B%5D=587&f%5B%5D=583&f%5B%5D=584&f%5B%5D=586&f%5B%5D=585&f%5B%5D=614&f%5B%5D=603&f%5B%5D=1287&f%5B%5D=1282&f%5B%5D=1206&f%5B%5D=1200&f%5B%5D=1194&f%5B%5D=1062&f%5B%5D=974&f%5B%5D=609&f%5B%5D=1263&f%5B%5D=951&f%5B%5D=975&f%5B%5D=608&f%5B%5D=607&f%5B%5D=606&f%5B%5D=750&f%5B%5D=605&f%5B%5D=604&f%5B%5D=950&f%5B%5D=610&f%5B%5D=613&f%5B%5D=612&f%5B%5D=655&f%5B%5D=653&f%5B%5D=654&f%5B%5D=611&f%5B%5D=656&f%5B%5D=615&f%5B%5D=616&f%5B%5D=617&f%5B%5D=619&f%5B%5D=620&f%5B%5D=623&f%5B%5D=622&f%5B%5D=635&f%5B%5D=621&f%5B%5D=632&f%5B%5D=643&f%5B%5D=624&f%5B%5D=627&f%5B%5D=626&f%5B%5D=636&f%5B%5D=625&f%5B%5D=633&f%5B%5D=644&f%5B%5D=628&f%5B%5D=631&f%5B%5D=630&f%5B%5D=637&f%5B%5D=629&f%5B%5D=634&f%5B%5D=642&f%5B%5D=645&f%5B%5D=639&f%5B%5D=640&f%5B%5D=648&f%5B%5D=638&f%5B%5D=646&f%5B%5D=695&o=10&s=2&tm=-1&a=1&sd=1&ta=-1&sns=-1&sds=-1&nm=" +search +"&pn=&submit=Поиск";
+            string DataStr = "prev_sd=1&prev_a=1&prev_my=0&prev_n=0&prev_shc=0&prev_shf=0&prev_sha=0&prev_shs=0&prev_shr=0&prev_sht=0&f%5B%5D=724&f%5B%5D=725&f%5B%5D=729&f%5B%5D=731&f%5B%5D=733&f%5B%5D=730&f%5B%5D=732&f%5B%5D=230&f%5B%5D=659&f%5B%5D=658&f%5B%5D=231&f%5B%5D=660&f%5B%5D=661&f%5B%5D=890&f%5B%5D=232&f%5B%5D=734&f%5B%5D=742&f%5B%5D=735&f%5B%5D=738&f%5B%5D=967&f%5B%5D=907&f%5B%5D=739&f%5B%5D=1109&f%5B%5D=736&f%5B%5D=737&f%5B%5D=898&f%5B%5D=935&f%5B%5D=871&f%5B%5D=973&f%5B%5D=960&f%5B%5D=1239&f%5B%5D=740&f%5B%5D=741&f%5B%5D=216&f%5B%5D=270&f%5B%5D=218&f%5B%5D=219&f%5B%5D=954&f%5B%5D=888&f%5B%5D=217&f%5B%5D=266&f%5B%5D=318&f%5B%5D=320&f%5B%5D=677&f%5B%5D=1177&f%5B%5D=319&f%5B%5D=678&f%5B%5D=885&f%5B%5D=908&f%5B%5D=909&f%5B%5D=910&f%5B%5D=911&f%5B%5D=912&f%5B%5D=220&f%5B%5D=221&f%5B%5D=222&f%5B%5D=882&f%5B%5D=889&f%5B%5D=224&f%5B%5D=225&f%5B%5D=226&f%5B%5D=227&f%5B%5D=891&f%5B%5D=682&f%5B%5D=694&f%5B%5D=884&f%5B%5D=1211&f%5B%5D=693&f%5B%5D=913&f%5B%5D=228&f%5B%5D=1150&f%5B%5D=254&f%5B%5D=321&f%5B%5D=255&f%5B%5D=906&f%5B%5D=256&f%5B%5D=257&f%5B%5D=258&f%5B%5D=883&f%5B%5D=955&f%5B%5D=905&f%5B%5D=271&f%5B%5D=1210&f%5B%5D=264&f%5B%5D=265&f%5B%5D=272&f%5B%5D=1262&f%5B%5D=1219&f%5B%5D=1221&f%5B%5D=1220&f%5B%5D=768&f%5B%5D=779&f%5B%5D=778&f%5B%5D=788&f%5B%5D=1288&f%5B%5D=787&f%5B%5D=1196&f%5B%5D=1141&f%5B%5D=777&f%5B%5D=786&f%5B%5D=803&f%5B%5D=776&f%5B%5D=785&f%5B%5D=1265&f%5B%5D=1289&f%5B%5D=774&f%5B%5D=775&f%5B%5D=1242&f%5B%5D=1140&f%5B%5D=782&f%5B%5D=773&f%5B%5D=1142&f%5B%5D=784&f%5B%5D=1195&f%5B%5D=772&f%5B%5D=771&f%5B%5D=783&f%5B%5D=1144&f%5B%5D=804&f%5B%5D=1290&f%5B%5D=770&f%5B%5D=922&f%5B%5D=780&f%5B%5D=781&f%5B%5D=769&f%5B%5D=799&f%5B%5D=800&f%5B%5D=791&f%5B%5D=798&f%5B%5D=797&f%5B%5D=790&f%5B%5D=793&f%5B%5D=794&f%5B%5D=789&f%5B%5D=796&f%5B%5D=792&f%5B%5D=795&f%5B%5D=713&f%5B%5D=706&f%5B%5D=577&f%5B%5D=894&f%5B%5D=578&f%5B%5D=580&f%5B%5D=579&f%5B%5D=953&f%5B%5D=581&f%5B%5D=806&f%5B%5D=714&f%5B%5D=761&f%5B%5D=809&f%5B%5D=924&f%5B%5D=812&f%5B%5D=576&f%5B%5D=590&f%5B%5D=591&f%5B%5D=588&f%5B%5D=823&f%5B%5D=589&f%5B%5D=598&f%5B%5D=652&f%5B%5D=596&f%5B%5D=600&f%5B%5D=819&f%5B%5D=599&f%5B%5D=956&f%5B%5D=959&f%5B%5D=597&f%5B%5D=594&f%5B%5D=593&f%5B%5D=595&f%5B%5D=582&f%5B%5D=587&f%5B%5D=583&f%5B%5D=584&f%5B%5D=586&f%5B%5D=585&f%5B%5D=614&f%5B%5D=603&f%5B%5D=1287&f%5B%5D=1282&f%5B%5D=1206&f%5B%5D=1200&f%5B%5D=1194&f%5B%5D=1062&f%5B%5D=974&f%5B%5D=609&f%5B%5D=1263&f%5B%5D=951&f%5B%5D=975&f%5B%5D=608&f%5B%5D=607&f%5B%5D=606&f%5B%5D=750&f%5B%5D=605&f%5B%5D=604&f%5B%5D=950&f%5B%5D=610&f%5B%5D=613&f%5B%5D=612&f%5B%5D=655&f%5B%5D=653&f%5B%5D=654&f%5B%5D=611&f%5B%5D=656&f%5B%5D=615&f%5B%5D=616&f%5B%5D=617&f%5B%5D=619&f%5B%5D=620&f%5B%5D=623&f%5B%5D=622&f%5B%5D=635&f%5B%5D=621&f%5B%5D=632&f%5B%5D=643&f%5B%5D=624&f%5B%5D=627&f%5B%5D=626&f%5B%5D=636&f%5B%5D=625&f%5B%5D=633&f%5B%5D=644&f%5B%5D=628&f%5B%5D=631&f%5B%5D=630&f%5B%5D=637&f%5B%5D=629&f%5B%5D=634&f%5B%5D=642&f%5B%5D=645&f%5B%5D=639&f%5B%5D=640&f%5B%5D=648&f%5B%5D=638&f%5B%5D=646&f%5B%5D=695&o=10&s=2&tm=-1&a=1&sd=1&ta=-1&sns=-1&sds=-1&nm=" + search + "&pn=&submit=Поиск";
             byte[] DataByte = System.Text.Encoding.GetEncoding(1251).GetBytes(DataStr);
             myStream.Write(DataByte, 0, DataByte.Length);
             myStream.Close();
@@ -343,6 +358,7 @@ namespace RemoteFork.Plugins
             System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<tr class=\"prow).*?(</tr>)");
             System.Text.RegularExpressions.MatchCollection Result = Regex.Matches(ResponseFromServer.Replace("\n", "   "));
 
+
             if (Result.Count > 0)
             {
 
@@ -350,11 +366,11 @@ namespace RemoteFork.Plugins
                 {
                     Regex = new System.Text.RegularExpressions.Regex("(?<=href=\").*?(?=&amp;)");
                     Item Item = new Item();
-                    Item.Link = TrackerServer + "/forum/" + Regex.Matches(Match.Value)[0].Value + ";PAGEFILM";
+                    Item.Link = TrackerServer + "/forum/" + Regex.Matches(Match.Value)[0].Value + ";PAGEFILMNNM";
                     Regex = new System.Text.RegularExpressions.Regex("(?<=\"><b>).*?(?=</b>)");
                     Item.Name = Regex.Matches(Match.Value)[0].Value;
                     Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png";
-                    Item.Description = GetDescriptionSearhTorrent(Match.Value);
+                    Item.Description = GetDescriptionSearhNNM(Match.Value);
                     items.Add(Item);
                 }
             }
@@ -366,11 +382,11 @@ namespace RemoteFork.Plugins
 
                 items.Add(Item);
             }
-          
+            //Searches = ""
             return PlayListPlugPar(items, context);
         }
 
-        public string GetDescriptionSearhTorrent(string HTML)
+        public string GetDescriptionSearhNNM(string HTML)
         {
 
             System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=\"><b>).*?(?=</b>)");
@@ -397,7 +413,7 @@ namespace RemoteFork.Plugins
             Item Item = new Item();
 
             Item.Name = "Поиск";
-            Item.Link = "http";
+            Item.Link = "Search_NNM";
             Item.Type = ItemType.DIRECTORY;
             Item.SearchOn = "search_on";
             Item.ImageLink = "http://s1.iconbird.com/ico/0612/MustHave/w256h2561339195991Search256x256.png";
@@ -406,84 +422,84 @@ namespace RemoteFork.Plugins
 
             Item = new Item();
             Item.Name = "Новинки кино";
-            Item.Link = TrackerServer + "/forum/portal.php?c=10;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=10;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Наше кино";
-            Item.Link = TrackerServer + "/forum/portal.php?c=13;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=13;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Зарубежное кино";
-            Item.Link = TrackerServer + "/forum/portal.php?c=6;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=6;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "HD (3D) Кино";
-            Item.Link = TrackerServer + "/forum/portal.php?c=11;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=11;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Артхаус";
-            Item.Link = TrackerServer + "/forum/portal.php?c=17;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=17;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Наши сериалы";
-            Item.Link = TrackerServer + "/forum/portal.php?c=4;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=4;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Зарубежные сериалы";
-            Item.Link = TrackerServer + "/forum/portal.php?c=3;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=3;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Театр, МузВидео, Разное";
-            Item.Link = TrackerServer + "/forum/portal.php?c=21;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=21;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Док. TV-бренды";
-            Item.Link = TrackerServer + "/forum/portal.php?c=22;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=22;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Док. и телепередачи";
-            Item.Link = TrackerServer + "/forum/portal.php?c=23;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=23;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Спорт и Юмор";
-            Item.Link = TrackerServer + "/forum/portal.php?c=24;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=24;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
 
             Item = new Item();
             Item.Name = "Аниме и Манга";
-            Item.Link = TrackerServer + "/forum/portal.php?c=1;PAGE";
+            Item.Link = TrackerServer + "/forum/portal.php?c=1;PAGENNM";
             Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
@@ -491,7 +507,7 @@ namespace RemoteFork.Plugins
             return PlayListPlugPar(items, context);
         }
 
-        public PluginApi.Plugins.Playlist GetPage(IPluginContext context, string URL)
+        public PluginApi.Plugins.Playlist GetPAGENNM(IPluginContext context, string URL)
         {
 
             System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
@@ -517,37 +533,67 @@ namespace RemoteFork.Plugins
 
                 foreach (System.Text.RegularExpressions.Match MAtch in Regex.Matches(responseFromServer.Replace("\n", "   ")))
                 {
-                    Regex = new System.Text.RegularExpressions.Regex("(?<=title=\").*?(?=\">)");
+
                     Item Item = new Item();
-                    Item.Name = Regex.Matches(MAtch.Value)[1].Value;
+                    try
+                    {
+                        Regex = new System.Text.RegularExpressions.Regex("(?<=title=\").*?(?=\">)");
+                        Item.Name = Regex.Matches(MAtch.Value)[1].Value;
+                    }
+                    catch (Exception ex)
+                    {
+                        Item.Name = ex.Message;
+                    }
 
-                    Regex = new System.Text.RegularExpressions.Regex("(?<=<var class=\"portalImg\" title=\").*?(?=\">)");
-                    Item.ImageLink = Regex.Matches(MAtch.Value)[0].Value;
+                    try
+                    {
+                        Regex = new System.Text.RegularExpressions.Regex("(?<=<var class=\"portalImg\" title=\").*?(?=\">)");
+                        Item.ImageLink = Regex.Matches(MAtch.Value)[0].Value;
+                    }
+                    catch (Exception ex)
+                    {
+
+                    }
 
 
-                    Regex = new System.Text.RegularExpressions.Regex("(?<=<a class=\"pgenmed\" href=\").*?(?=&)");
-                    Item.Link = TrackerServer + "/forum/" + Regex.Matches(MAtch.Value)[0].Value + ";PAGEFILM";
+                    try
+                    {
+                        Regex = new System.Text.RegularExpressions.Regex("(?<=<a class=\"pgenmed\" href=\").*?(?=&)");
+                        Item.Link = TrackerServer + "/forum/" + Regex.Matches(MAtch.Value)[0].Value + ";PAGEFILMNNM";
+                    }
+                    catch (Exception ex)
+                    {
 
-                    Regex = new System.Text.RegularExpressions.Regex("(?<=<a class=\"pgenmed\" href=\").*?(?=&)");
-                    Item.Description = FormatDescription(MAtch.Value, Item.ImageLink);
+                    }
 
+                    try
+                    {
+                        Regex = new System.Text.RegularExpressions.Regex("(?<=<a class=\"pgenmed\" href=\").*?(?=&)");
+                        Item.Description = FormatDescription(MAtch.Value, Item.ImageLink);
+                    }
+                    catch (Exception ex)
+                    {
+                        Item.Description = ex.Message;
+                    }
 
                     items.Add(Item);
                 }
 
-                Regex = new System.Text.RegularExpressions.Regex("(?<=&nbsp;&nbsp;<a href=\").*?(?=sid=)");
-                System.Text.RegularExpressions.MatchCollection Rzult = Regex.Matches(responseFromServer);
-
-                Item ItemNext = new Item();
-                ItemNext.Name = ">> СЛЕДУЯЩАЯ СТРАНИЦА >>";
-                ItemNext.Link = TrackerServer + "/forum/" + Rzult[Rzult.Count - 1].Value.Replace("amp;", "") + ";PAGE";
-                ItemNext.Description = ItemNext.Link;
-                ItemNext.ImageLink = "http://files.lib.byu.edu/exhibits/the-great-war/arrow-right-big.png";
-                ItemNext.Type = ItemType.DIRECTORY;
-
-                items.Add(ItemNext);
-
-
+                try
+                {
+                    Regex = new System.Text.RegularExpressions.Regex("(?<=&nbsp;&nbsp;<a href=\").*?(?=sid=)");
+                    System.Text.RegularExpressions.MatchCollection Rzult = Regex.Matches(responseFromServer);
+                    Item ItemNext = new Item();
+                    ItemNext.Name = ">> СЛЕДУЯЩАЯ СТРАНИЦА >>";
+                    ItemNext.Link = TrackerServer + "/forum/" + Rzult[Rzult.Count - 1].Value.Replace("amp;", "") + ";PAGENNM";
+                    ItemNext.Description = ItemNext.Link;
+                    ItemNext.ImageLink = "http://files.lib.byu.edu/exhibits/the-great-war/arrow-right-big.png";
+                    ItemNext.Type = ItemType.DIRECTORY;
+                    items.Add(ItemNext);
+                }
+                catch (Exception ex)
+                {
+                }
 
             }
             catch (Exception ex)
@@ -555,14 +601,14 @@ namespace RemoteFork.Plugins
                 Item Item = new Item();
                 Item.Name = "ERROR";
                 Item.Description = ex.Message;
-                Item.Link = "plugin";
+                Item.Link = "";
                 items.Add(Item);
             }
             return PlayListPlugPar(items, context);
 
         }
 
-        public PluginApi.Plugins.Playlist GetTorrentPage(IPluginContext context, string URL)
+        public PluginApi.Plugins.Playlist GetTorrentPAGENNM(IPluginContext context, string URL)
         {
 
             System.Net.WebRequest RequestGet = System.Net.WebRequest.Create(URL);
@@ -580,7 +626,7 @@ namespace RemoteFork.Plugins
             reader.Close();
             dataStream.Close();
             Response.Close();
-           
+
             System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<span class=\"genmed\"><b><a href=\").*?(?=&amp;)");
             string TorrentPath = TrackerServer + "/forum/" + Regex.Matches(responseFromServer)[0].Value;
             System.Net.WebRequest RequestTorrent = System.Net.WebRequest.Create(TorrentPath);
@@ -600,20 +646,31 @@ namespace RemoteFork.Plugins
             dataStream.Close();
             Response.Close();
 
-
-            TorrentPlayList[] PlayListtoTorrent = GetFileListJSON(System.IO.Path.GetTempPath() + "TorrentTemp.torrent", IPAdress);
-
-
             System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
-            
-            foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
+            try
+            {
+                TorrentPlayList[] PlayListtoTorrent = GetFileListJSON(System.IO.Path.GetTempPath() + "TorrentTemp.torrent", IPAdress);
+
+                string Description = FormatDescriptionFile(responseFromServer);
+                foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
+                {
+                    Item Item = new Item();
+                    Item.Name = PlayListItem.Name;
+                    Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291videofile.png";
+                    Item.Link = PlayListItem.Link;
+                    Item.Type = ItemType.FILE;
+                    Item.Description = Description;
+                    items.Add(Item);
+                }
+
+            }
+            catch (Exception ex)
             {
                 Item Item = new Item();
-                Item.Name = PlayListItem.Name;
-                Item.ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291videofile.png";
-                Item.Link = PlayListItem.Link;
+                Item.Name = "ERROR";
+                Item.Link = "";
                 Item.Type = ItemType.FILE;
-                Item.Description = FormatDescriptionFile(responseFromServer);
+                Item.Description = ex.Message;
                 items.Add(Item);
             }
 
@@ -624,14 +681,22 @@ namespace RemoteFork.Plugins
         {
 
             HTML = HTML.Replace("\n", "   ");
-            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<span style=\"text-align:).*?(</span>)");
-            string Title = Regex.Matches(HTML)[0].Value;
 
+            string Title = null;
+            try
+            {
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<span style=\"text-align:).*?(</span>)");
+                Title = Regex.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+
+            }
 
             string SidsPirs = null;
             try
             {
-                Regex = new System.Text.RegularExpressions.Regex("(<table cellspacing=\"0\").*?(</table>)");
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<table cellspacing=\"0\").*?(</table>)");
                 SidsPirs = Regex.Matches(HTML)[0].Value;
             }
             catch (Exception ex)
@@ -643,7 +708,7 @@ namespace RemoteFork.Plugins
             string ImagePath = null;
             try
             {
-                Regex = new System.Text.RegularExpressions.Regex("(?<=<var class=\"postImg postImgAligned img-right\" title=\").*?(?=\">)");
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<var class=\"postImg postImgAligned img-right\" title=\").*?(?=\">)");
                 ImagePath = Regex.Matches(HTML)[0].Value;
             }
             catch (Exception ex)
@@ -655,14 +720,14 @@ namespace RemoteFork.Plugins
             string InfoFile = null;
             try
             {
-                Regex = new System.Text.RegularExpressions.Regex("(<div class=\"kpi\">).*(?=<div class=\"spoiler-wrap\">)");
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<div class=\"kpi\">).*(?=<div class=\"spoiler-wrap\">)");
                 InfoFile = Regex.Matches(HTML)[0].Value;
             }
             catch (Exception e)
             {
                 try
                 {
-                    Regex = new System.Text.RegularExpressions.Regex("(<br /><br /><span style=\"font-weight: bold\">).*?(<br />)");
+                    System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<br /><br /><span style=\"font-weight: bold\">).*?(<br />)");
 
                     System.Text.RegularExpressions.MatchCollection Match = Regex.Matches(HTML);
                     for (int I = 1; I < Match.Count; ++I)
@@ -683,7 +748,7 @@ namespace RemoteFork.Plugins
             string Opisanie = null;
             try
             {
-                Regex = new System.Text.RegularExpressions.Regex("(<span style=\"font-weight: bold\">Описание:</span><br />).*?(?=<div)");
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<span style=\"font-weight: bold\">Описание:</span><br />).*?(?=<div)");
                 Opisanie = Regex.Matches(HTML)[0].Value;
             }
             catch (Exception ex)
@@ -841,23 +906,21 @@ namespace RemoteFork.Plugins
             Item.ImageLink = "http://torrent-tv.ru/images/all_channels.png";
             items.Add(Item);
 
-            //Взрослый контент
-            //    Item = new Item();
-            //    Item.Type = ItemType.DIRECTORY;
-            //    Item.Name = "ЭРОТИКА";
-            //    Item.Link = "porn";
-            //    Item.ImageLink = "http://torrent-tv.ru/images/all_channels.png";
-            //    items.Add(Item);
+            //Item = new Item();
+            //Item.Type = ItemType.DIRECTORY;
+            //Item.Name = "ЭРОТИКА";
+            //Item.Link = "porn";
+            //Item.ImageLink = "http://torrent-tv.ru/images/all_channels.png";
+            //items.Add(Item);
 
-            //    Item = new Item();
-            //    Item.Type = ItemType.DIRECTORY;
-            //    Item.Name = "ВСЕ КАНАЛЫ";
-            //    Item.Link = "all";
-            //    Item.ImageLink = "http://torrent-tv.ru/images/all_channels.png";
-            //    items.Add(Item);
+            //Item = new Item();
+            //Item.Type = ItemType.DIRECTORY;
+            //Item.Name = "ВСЕ КАНАЛЫ";
+            //Item.Link = "all";
+            //Item.ImageLink = "http://torrent-tv.ru/images/all_channels.png";
+            //items.Add(Item);
 
-
-               return PlayListPlugPar(items, context);
+            return PlayListPlugPar(items, context);
         }
 
         public PluginApi.Plugins.Playlist LastModifiedPlayList(string NamePlayList, IPluginContext context)
@@ -883,7 +946,7 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                              Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
@@ -892,7 +955,7 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                               Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
@@ -907,27 +970,37 @@ namespace RemoteFork.Plugins
 
         public void UpdatePlayList(string NamePlayList, string PathFilePlayList, string PathFileUpdateTime, string LastModified)
         {
+
             System.IO.File.WriteAllText(PathFileUpdateTime, LastModified);
-            System.Net.WebClient WC = new System.Net.WebClient();
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
-            WC.Encoding = System.Text.Encoding.UTF8;
-            WC.Headers.Add("Accept-Encoding", "gzip, deflate");
-            byte[] Dat = WC.DownloadData("http://super-pomoyka.us.to/trash/ttv-list/ttv." + NamePlayList + ".iproxy.m3u?ip=" + IPAdress + ":" + PortAce);
 
 
-            System.IO.FileStream decompressedFileStream = System.IO.File.Create(PathFilePlayList);
-            System.IO.Compression.GZipStream decompressionStream = new System.IO.Compression.GZipStream(new System.IO.MemoryStream(Dat), System.IO.Compression.CompressionMode.Decompress);
-            decompressionStream.CopyTo(decompressedFileStream);
-            decompressedFileStream.Close();
-            decompressionStream.Close();
+            System.Net.WebRequest request = System.Net.WebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/ttv." + NamePlayList + ".iproxy.m3u?ip=" + IPAdress + ":" + PortAce);
+            request.Method = "GET";
+            request.ContentType = "text/html";
+            System.Net.WebResponse Response = request.GetResponse();
+            System.IO.Stream dataStream = Response.GetResponseStream();
+            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.UTF8);
+            string responseFromServer = reader.ReadToEnd();
+            reader.Close();
+            dataStream.Close();
+            Response.Close();
 
-            Dat = WC.DownloadData("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php");
-            decompressedFileStream = System.IO.File.Create(System.IO.Path.GetTempPath() + "MyTraf.tmp");
-            decompressionStream = new System.IO.Compression.GZipStream(new System.IO.MemoryStream(Dat), System.IO.Compression.CompressionMode.Decompress);
-            decompressionStream.CopyTo(decompressedFileStream);
-            decompressedFileStream.Close();
-            decompressionStream.Close();
-            WC.Dispose();
+            System.IO.File.WriteAllText(PathFilePlayList, responseFromServer);
+
+
+            request = System.Net.WebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php");
+            request.Method = "GET";
+            request.ContentType = "text/html";
+            Response = request.GetResponse();
+            dataStream = Response.GetResponseStream();
+            reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.UTF8);
+            responseFromServer = reader.ReadToEnd();
+            reader.Close();
+            dataStream.Close();
+            Response.Close();
+
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath() + "MyTraf.tmp", responseFromServer);
+          
         }
 
         #endregion
