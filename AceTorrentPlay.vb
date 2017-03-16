@@ -19,9 +19,10 @@ Namespace RemoteFork.Plugins
 
         Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
         Dim ProxyPort As Integer = 3128
-        Dim ProxyEnabler As Boolean = True
+        Dim ProxyEnabler As Boolean = False
 
-        Dim TrackerServerNNM As String = "http://nnm-club.me"   '"http://nnmclub.to"
+        Dim TrackerServerNNM As String = "http://nnmclub.to"   '"http://nnm-club.me" 
+
 
 #Region "Настройки"
         Dim ICO_Folder As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png"
@@ -83,14 +84,14 @@ Namespace RemoteFork.Plugins
             End With
             Items.Add(Item_FGPL)
 
-            With Item_NNM
-                .Name = "Настройка доступа к NNM-Club"
-                If ParametrSettings = "" Then .Link = "NNM-Club_Settings;SETTINGS" Else .Link = ";SETTINGS"
-                .ImageLink = ICO_SettingsFolder
-                .Link = ""
-                .Description = "ParametrSettings = " & ParametrSettings
-            End With
-            Items.Add(Item_NNM)
+            'With Item_NNM
+            '    .Name = "Настройка доступа к NNM-Club"
+            '    If ParametrSettings = "" Then .Link = "NNM-Club_Settings;SETTINGS" Else .Link = ";SETTINGS"
+            '    .ImageLink = ICO_SettingsFolder
+            '    .Link = ""
+            '    .Description = "ParametrSettings = " & ParametrSettings
+            'End With
+            'Items.Add(Item_NNM)
 
             PlayList.IsIptv = "false"
 
@@ -411,7 +412,7 @@ Namespace RemoteFork.Plugins
                 .Link = ";SETTINGS"
                 .Type = ItemType.DIRECTORY
                 .ImageLink = ICO_Settings
-                .Description = "В скором времени здесь появятся кое-какие настройки, пока же работает лишь один пункт, позволяющий выбрать метод запроса содержимого торрента. Тем у кого нео ткрывались многофайловые торренты просьба отписаться на форуме о результатах."
+                .Description = "В скором времени здесь появятся кое-какие настройки, пока же работает лишь один пункт, позволяющий выбрать метод запроса содержимого торрента. Тем у кого неоткрывались многофайловые торренты просьба отписаться на форуме о результатах."
             End With
             items.Add(ItemSettings)
 
