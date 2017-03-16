@@ -466,7 +466,7 @@ namespace RemoteFork.Plugins
             ItemSettings.Link = ";SETTINGS";
             ItemSettings.Type = ItemType.DIRECTORY;
             ItemSettings.ImageLink = ICO_Settings;
-            ItemSettings.Description = "В скором времени здесь появятся кое-какие настройки, пока же работает лишь один пункт, позволяющий выбрать метод запроса содержимого торрента. Тем у кого неоткрывались многофайловые торренты просьба отписаться на форуме о результатах.";
+            ItemSettings.Description = "В скором времени здесь появятся кое-какие настройки, пока же работает лишь один пункт, позволяющий выбрать метод запроса содержимого торрента. Тем у кого не открывались многофайловые торренты просьба отписаться на форуме о результатах.";
             items.Add(ItemSettings);
 
             return PlayListPlugPar(items, context);
