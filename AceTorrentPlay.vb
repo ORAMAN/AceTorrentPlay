@@ -806,7 +806,6 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
             Dim responseFromServer As String = reader.ReadToEnd
-            IO.File.WriteAllText("d:\My Desktop\trtr.html", responseFromServer, System.Text.Encoding.GetEncoding(1251)) ''''''''''''''''''"""""""""""""
             reader.Close()
             dataStream.Close()
             Response.Close()
