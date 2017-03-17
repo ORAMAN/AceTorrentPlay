@@ -8,7 +8,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.31.b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.33.b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -16,17 +16,16 @@ Namespace RemoteFork.Plugins
         Dim PortRemoteFork As String = "8027"
         Dim PLUGIN_PATH As String = "pluginPath"
         Dim PlayList As New PluginApi.Plugins.Playlist
+        Dim next_page_url As String
 
-        Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
-        Dim ProxyPort As Integer = 3128
-        Dim ProxyEnabler As Boolean = False
-
-        Dim TrackerServerNNM As String = "http://nnmclub.to"   '"http://nnm-club.me" 
 
 
 #Region "Настройки"
+
+#Region "Иконки"
         Dim ICO_Folder As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png"
         Dim ICO_Settings As String = "http://s1.iconbird.com/ico/1112/DiagramPreview/w128h1281354120955diagram45.png"
+        Dim ICO_Settings2 As String = "http://s1.iconbird.com/ico/2013/7/395/w128h1281374340707Settings.PNG"
         Dim ICO_SettingsFolder As String = "http://s1.iconbird.com/ico/2013/6/304/w128h1281371731205supermono3dpart267.png"
         Dim ICO_SettingsParam As String = "http://s1.iconbird.com/ico/1212/Smilebyjordanfc/w90h901355053543setting.png"
         Dim ICO_VideoFile As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291videofile.png"
@@ -36,14 +35,42 @@ Namespace RemoteFork.Plugins
         Dim ICO_M3UFile As String = "http://s1.iconbird.com/ico/0912/VannillACreamIconSet/w128h1281348320736M3U.png"
         Dim ICO_NNMClub As String = "http://s1.iconbird.com/ico/0912/MorphoButterfly/w128h1281348669898RhetenorMorpho.png"
         Dim ICO_Search As String = "http://s1.iconbird.com/ico/0612/MustHave/w256h2561339195991Search256x256.png"
+#End Region
+
+#Region "Параметры"
+        Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
+        Dim ProxyPort As Integer = 3128
+
+        Dim ProxyEnablerNNM As Boolean
+        Dim TrackerServerNNM As String '= "http://nnmclub.to"   '"http://nnm-club.me" 
+
+
+#End Region
+
 
         Sub Load_Settings()
-            FunctionsGetTorrentPlayList = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", "GetFileListJSON"))
-            If FunctionsGetTorrentPlayList = "" Then
+
+            Dim TempStr As String = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", ""))
+            If TempStr = "" Then
                 FunctionsGetTorrentPlayList = "GetFileListJSON"
                 Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", "GetFileListJSON")
+            Else
+                FunctionsGetTorrentPlayList = TempStr
             End If
 
+            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ""))
+            If TempStr = "" Then
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", False)
+            Else
+                ProxyEnablerNNM = CBool(TempStr)
+            End If
+
+            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", ""))
+            If TempStr = "" Then
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", "http://nnmclub.to")
+            Else
+                TrackerServerNNM = TempStr
+            End If
 
         End Sub
         Sub Save_Settings()
@@ -53,8 +80,8 @@ Namespace RemoteFork.Plugins
 
 
         Function GetListSettings(context As IPluginContext, Optional ByVal ParametrSettings As String = "") As PluginApi.Plugins.Playlist
+            PlayList.IsIptv = "false"
             Select Case ParametrSettings
-                Case ""
 
                 Case "FunctionsGetTorrentPlayList"
                     Select Case FunctionsGetTorrentPlayList
@@ -63,26 +90,34 @@ Namespace RemoteFork.Plugins
                         Case "GetFileListM3U"
                             FunctionsGetTorrentPlayList = "GetFileListJSON"
                     End Select
+                    ParametrSettings = ""
                 Case "NNM-Club_Settings"
-
+                Case "DeleteSettings"
+                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\RemoteFork\Plugins\AceTorrentPlay\", False)
+                    Load_Settings()
+                    ParametrSettings = ""
             End Select
-
             Save_Settings()
 
             Dim Items As New System.Collections.Generic.List(Of Item)
-            Dim Item_FGPL, Item_NNM As New Item
+            Dim Item_Top, Item_FGPL, Item_NNM, Item_DelSettings As New Item
+            With Item_Top
+                .Name = "- Н А С Т Р О Й К И -"
+                .Link = ""
+                .ImageLink = ICO_Settings
+                .Type = ItemType.FILE
+                Items.Add(Item_Top)
+            End With
 
             With Item_FGPL
                 .Name = "Обработка содержимого torrent файла"
-                If ParametrSettings = "" Then .Link = "FunctionsGetTorrentPlayList;SETTINGS" Else .Link = ";SETTINGS"
+                .Link = "FunctionsGetTorrentPlayList;SETTINGS"
                 .ImageLink = ICO_SettingsParam
-                If FunctionsGetTorrentPlayList = "GetFileListM3U" Then
-                    .Description = "<html>Выбор метода для запроса содержимого торрент файла <p> Текущий метод: <b>" & FunctionsGetTorrentPlayList & "</b></p><p>Метод GetFileListM3U не рекомендован к использованию, в тореннтах с одним файлом не удаётся получить имя файла.</html>"
-                Else
-                    .Description = "<html>Выбор метода для запроса содержимого торрент файла <p> Текущий метод: <b>" & FunctionsGetTorrentPlayList & "</b> (рекомендован)</p></html>"
-                End If
+                .Description = "<html>Выбор метода для запроса содержимого торрент файла <p> Текущий метод: <b>" & FunctionsGetTorrentPlayList & "</b></p><p>Измените параметр если при открытии торрентов содержащих более одного файла происходит ошибка.</html>"
+
+                Items.Add(Item_FGPL)
             End With
-            Items.Add(Item_FGPL)
+
 
             'With Item_NNM
             '    .Name = "Настройка доступа к NNM-Club"
@@ -93,9 +128,16 @@ Namespace RemoteFork.Plugins
             'End With
             'Items.Add(Item_NNM)
 
-            PlayList.IsIptv = "false"
+            With Item_DelSettings
+                .Name = "Настройки по умолчанию"
+                .Link = "DeleteSettings;SETTINGS"
+                .ImageLink = ICO_Settings2
+                Items.Add(Item_DelSettings)
+            End With
 
-            If ParametrSettings = "" Then Else Return GetListSettings(context)
+
+
+
             Return PlayListPlugPar(Items, context)
         End Function
 #End Region
@@ -104,7 +146,7 @@ Namespace RemoteFork.Plugins
         Public Function GetList(context As IPluginContext) As PluginApi.Plugins.Playlist Implements IPlugin.GetList
 
             IPAdress = context.GetRequestParams.Get("host").Split(":")(0)
-            Load_Settings()
+
 
             Dim path = context.GetRequestParams().Get(PLUGIN_PATH)
             path = (If((path Is Nothing), "plugin", "plugin;" & path))
@@ -125,8 +167,6 @@ Namespace RemoteFork.Plugins
                     Return GetTorrentTV(context)
                 Case "plugin;nnmclub"
                     Return GetTopNNMClubList(context)
-                Case "plugin;settings"
-                    Return GetListSettings(context)
             End Select
 
 
@@ -184,13 +224,7 @@ Namespace RemoteFork.Plugins
                 Case ".torrent"
                     Dim Description As String = SearchDescriptions(System.IO.Path.GetFileNameWithoutExtension(PathFiles.Split("(", ".", "[", "|")(0)))
 
-                    Dim PlayListtoTorrent() As TorrentPlayList
-                    Select Case FunctionsGetTorrentPlayList
-                        Case "GetFileListJSON"
-                            PlayListtoTorrent = GetFileListJSON(PathFiles)
-                        Case "GetFileListM3U"
-                            PlayListtoTorrent = GetFileListM3U(PathFiles)
-                    End Select
+                    Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(PathFiles)
 
                     For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                         Dim Item As New Item
@@ -331,6 +365,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTopList(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Load_Settings()
             Dim items As New System.Collections.Generic.List(Of Item)
 
             Dim WC As New System.Net.WebClient
@@ -412,7 +447,7 @@ Namespace RemoteFork.Plugins
                 .Link = ";SETTINGS"
                 .Type = ItemType.DIRECTORY
                 .ImageLink = ICO_Settings
-                .Description = "В скором времени здесь появятся кое-какие настройки, пока же работает лишь один пункт, позволяющий выбрать метод запроса содержимого торрента. Тем у кого неоткрывались многофайловые торренты просьба отписаться на форуме о результатах."
+                .Description = "В скором времени здесь появятся кое-какие настройки. "
             End With
             items.Add(ItemSettings)
 
@@ -442,14 +477,14 @@ Namespace RemoteFork.Plugins
                     Dim FidStr As String = Regex.Matches(Str)(0).Value
                     Str = WC.DownloadString("http://www.kinomania.ru/film/" & FidStr)
 
-                    Dim Title As String
+                    Dim Title As String = Nothing
                     Try
                         Regex = New System.Text.RegularExpressions.Regex("(?<=<title>).*(?=</title>)")
                         Title = Regex.Matches(Str)(0).Value.Replace("| KINOMANIA.RU", "")
                     Catch ex As Exception
                     End Try
 
-                    Dim ImagePath As String
+                    Dim ImagePath As String = Nothing
                     Try
                         Regex = New System.Text.RegularExpressions.Regex("(?<=src="").*?(.jpg)")
                         ImagePath = Regex.Matches(Str)(0).Value
@@ -457,14 +492,14 @@ Namespace RemoteFork.Plugins
                     Catch ex As Exception
                     End Try
 
-                    Dim Opisanie As String
+                    Dim Opisanie As String = Nothing
                     Try
                         Regex = New System.Text.RegularExpressions.Regex("(<div class=""l-col l-col-2"">)(\n|.)*?(</div>)")
                         Opisanie = Regex.Matches(Str)(0).Value
                     Catch ex As Exception
                     End Try
 
-                    Dim InfoFile As String
+                    Dim InfoFile As String = Nothing
                     Try
                         Regex = New System.Text.RegularExpressions.Regex("(<h2 class=""b-switcher"">)(\n|.)*?(</div>)")
                         InfoFile = Regex.Matches(Str)(0).Value
@@ -489,8 +524,8 @@ Namespace RemoteFork.Plugins
 
         Public Function SearchListNNM(context As IPluginContext, ByVal search As String) As PluginApi.Plugins.Playlist
 
-            Dim RequestPost As System.Net.WebRequest = System.Net.WebRequest.Create(TrackerServerNNM & "/forum/tracker.php")
-            If ProxyEnabler = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create(TrackerServerNNM & "/forum/tracker.php")
+            If ProxyEnablerNNM = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=windows-1251"
             RequestPost.Headers.Add("Cookie", CookiesNNM)
@@ -501,7 +536,7 @@ Namespace RemoteFork.Plugins
             myStream.Write(DataByte, 0, DataByte.Length)
             myStream.Close()
 
-            Dim Response As System.Net.WebResponse = RequestPost.GetResponse
+            Dim Response As System.Net.HttpWebResponse = RequestPost.GetResponse
             Dim dataStream As System.IO.Stream = Response.GetResponseStream
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
@@ -537,15 +572,15 @@ Namespace RemoteFork.Plugins
 
         Function GetDescriptionSearhNNM(ByVal HTML As String) As String
 
-            Dim NameFilm As String
+            Dim NameFilm As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=""><b>).*?(?=</b>)")
                 NameFilm = Regex.Matches(HTML)(0).Value
             Catch ex As Exception
             End Try
 
-            Dim SizeFile As String
-            Dim DobavlenFile As String
+            Dim SizeFile As String = Nothing
+            Dim DobavlenFile As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=</u>).*?(?=</td>)")
                 SizeFile = "<p> Размер: <b>" & Regex.Matches(HTML)(0).Value & "</b>"
@@ -553,13 +588,13 @@ Namespace RemoteFork.Plugins
             Catch ex As Exception
             End Try
 
-            Dim Seeders As String
+            Dim Seeders As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=class=""seedmed"">).*?(?=</td>)")
                 Seeders = "<p> Seeders: <b> " & Regex.Matches(HTML)(0).Value & "</b>"
             Catch ex As Exception
             End Try
-            Dim Leechers As String
+            Dim Leechers As String = Nothing
 
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=ass=""leechmed"">).*?(?=</td>)")
@@ -701,17 +736,17 @@ Namespace RemoteFork.Plugins
         Function GetPAGENNM(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
 
             Dim items As New System.Collections.Generic.List(Of Item)()
-            Dim next_page_url As String
+
             Try
-                Dim RequestGet As System.Net.WebRequest = System.Net.WebRequest.Create(URL)
-                If ProxyEnabler = True Then
+                Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create(URL)
+                If ProxyEnablerNNM = True Then
                     RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
                 End If
                 RequestGet.Method = "GET"
                 RequestGet.ContentType = "text/html; charset=windows-1251"
                 RequestGet.Headers.Add("Cookie", CookiesNNM)
 
-                Dim Response2 As System.Net.WebResponse = RequestGet.GetResponse()
+                Dim Response2 As System.Net.HttpWebResponse = RequestGet.GetResponse()
                 Dim dataStream As System.IO.Stream = Response2.GetResponseStream()
                 Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
                 Dim responseFromServer As String = reader.ReadToEnd()
@@ -764,12 +799,12 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTorrentPAGENNM(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             PlayList.IsIptv = "false"
-            Dim RequestGet As System.Net.WebRequest = Net.WebRequest.Create(URL)
-            If ProxyEnabler = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            Dim RequestGet As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(URL)
+            If ProxyEnablerNNM = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "GET"
             RequestGet.Headers.Add("Cookie", CookiesNNM)
 
-            Dim Response As Net.WebResponse = RequestGet.GetResponse
+            Dim Response As Net.HttpWebResponse = RequestGet.GetResponse
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
             Dim responseFromServer As String = reader.ReadToEnd
@@ -784,8 +819,8 @@ Namespace RemoteFork.Plugins
             Dim Title As String = Regex.Matches(responseFromServer)(0).Value
 
 
-            Dim RequestTorrent As System.Net.WebRequest = Net.WebRequest.Create(TorrentPath)
-            If ProxyEnabler = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
+            If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestTorrent.Method = "GET"
             RequestTorrent.Headers.Add("Cookie", CookiesNNM)
 
@@ -802,14 +837,7 @@ Namespace RemoteFork.Plugins
             Try
                 Dim Description As String = FormatDescriptionFileNNM(responseFromServer)
 
-                Dim PlayListtoTorrent() As TorrentPlayList
-                Select Case FunctionsGetTorrentPlayList
-                    Case "GetFileListJSON"
-                        PlayListtoTorrent = GetFileListJSON(System.IO.Path.GetTempPath & "TorrentTemp")
-                    Case "GetFileListM3U"
-                        PlayListtoTorrent = GetFileListM3U(System.IO.Path.GetTempPath & "TorrentTemp", Title)
-                End Select
-
+                Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
 
                 For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                     Dim Item As New Item
@@ -1060,7 +1088,6 @@ Namespace RemoteFork.Plugins
             items.Add(Item)
 
             'Item = New Item
-
             'With Item
             '    .Type = ItemType.DIRECTORY
             '    .Name = "ЭРОТИКА"
@@ -1084,10 +1111,15 @@ Namespace RemoteFork.Plugins
         Function LastModifiedPlayList(ByVal NamePlayList As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
 
             Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath & NamePlayList & ".UpdateTime.tmp"
-            Dim PathFilePlayList As String = System.IO.Path.GetTempPath & NamePlayList & ".PlayList.tmp"
+            Dim PathFilePlayList As String = System.IO.Path.GetTempPath & NamePlayList & ".PlayList.m3u8"
 
-            Dim request As System.Net.WebRequest = Net.WebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
+            Dim request As System.Net.HttpWebRequest = Net.HttpWebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
             request.Method = "HEAD"
+            request.ContentType = "text/html"
+            request.KeepAlive = True
+            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+            request.Host = "super-pomoyka.us.to"
             Dim response As System.Net.HttpWebResponse = CType(request.GetResponse(), System.Net.HttpWebResponse)
             Dim responHeader = response.GetResponseHeader("Last-Modified")
             response.Close()
@@ -1135,7 +1167,7 @@ Namespace RemoteFork.Plugins
             request.Host = "super-pomoyka.us.to"
 
 
-            Dim Response As Net.WebResponse = request.GetResponse
+            Dim Response As Net.HttpWebResponse = request.GetResponse
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.UTF8)
             Dim responseFromServer As String = reader.ReadToEnd
@@ -1146,7 +1178,7 @@ Namespace RemoteFork.Plugins
             System.IO.File.WriteAllText(PathFilePlayList, responseFromServer)
 
 
-            request = Net.WebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php")
+            request = Net.HttpWebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php")
             request.Method = "GET"
             request.ContentType = "text/html"
             request.KeepAlive = True
@@ -1174,7 +1206,6 @@ Namespace RemoteFork.Plugins
 #Region "AceTorrent"
         Dim PortAce As String = "6878"
         Dim AceProxEnabl As Boolean
-
         Structure TorrentPlayList
             Dim IDX As String
             Dim Name As String
@@ -1192,7 +1223,7 @@ Namespace RemoteFork.Plugins
             Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
             FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
 
-            Dim request As System.Net.WebRequest = System.Net.WebRequest.Create("http://api.torrentstream.net/upload/raw")
+            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
             request.Method = "POST"
             request.ContentType = "application/octet-stream\r\n"
             request.ContentLength = FileTorrent.Length
@@ -1200,7 +1231,7 @@ Namespace RemoteFork.Plugins
             dataStream.Write(FileTorrent, 0, FileTorrent.Length)
             dataStream.Close()
 
-            Dim response As System.Net.WebResponse = request.GetResponse()
+            Dim response As System.Net.HttpWebResponse = request.GetResponse()
             dataStream = response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream)
             Dim responseFromServer As String = reader.ReadToEnd()
@@ -1210,93 +1241,93 @@ Namespace RemoteFork.Plugins
             Return ID
         End Function
 
-        Function GetFileListM3U(ByVal PathTorrent As String, Optional ByVal Name As String = "") As TorrentPlayList()
-            Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-            WC.Encoding = System.Text.Encoding.UTF8
+        Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
+            Select Case FunctionsGetTorrentPlayList
+                Case "GetFileListJSON"
+GetFileListJSON:    Dim WC As New System.Net.WebClient
+                    WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+                    WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim ID As String = GetID(PathTorrent)
-            Dim PlayListTorrent() As TorrentPlayList
+                    Dim CodeZnaki() As String = {"\U0430", "\U0431", "\U0432", "\U0433", "\U0434", "\U0435", "\U0451", "\U0436", "\U0437", "\U0438", "\U0439", "\U043A", "\U043B", "\U043C", "\U043D", "\U043E", "\U043F", "\U0440", "\U0441", "\U0442", "\U0443",
+                    "\U0444", "\U0445", "\U0446", "\U0447", "\U0448", "\U0449", "\U044A", "\U044B", "\U044C", "\U044D", "\U044E", "\U044F", "\U0410", "\U0411", "\U0412", "\U0413", "\U0414", "\U0415", "\U0401", "\U0416", "\U0417", "\U0418", "\U0419", "\U041A",
+                    "\U041B", "\U041C", "\U041D", "\U041E", "\U041F", "\U0420", "\U0421", "\U0422", "\U0423", "\U0424", "\U0425", "\U0426", "\U0427", "\U0428", "\U0429", "\U042A", "\U042B", "\U042C", "\U042D", "\U042E", "\U042F", "\U00AB", "\U00BB", "U2116"}
+                    Dim DecodeZnaki() As String = {"а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
+                    "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№"}
+
+                    Dim ContentID As String = GetID(PathTorrent)
+                    Dim ItogStr As String = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&content_id=" & ContentID)
+                    For I As Integer = 0 To 68
+                        ItogStr = Microsoft.VisualBasic.Strings.Replace(ItogStr, Microsoft.VisualBasic.Strings.LCase(CodeZnaki(I)), DecodeZnaki(I))
+                    Next
+                    WC.Dispose()
+
+                    Dim PlayListJson As String = ItogStr
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
+
+                    Dim ListSplit() As String = PlayListJson.Split("""")
+
+                    Dim PlayListTorrent((ListSplit.Length / 2) - 2) As TorrentPlayList
+
+                    Dim N As Integer
+                    For I As Integer = 1 To ListSplit.Length - 2
+                        PlayListTorrent(N).IDX = ListSplit(I)
+                        PlayListTorrent(N).Name = ListSplit(I + 1)
+                        PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ContentID & "&_idx=" & PlayListTorrent(N).IDX
+
+                        I += 1
+                        N += 1
+                    Next
+                    Return PlayListTorrent
+                Case "GetFileListM3U"
+                    Dim WC As New System.Net.WebClient
+                    WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+                    WC.Encoding = System.Text.Encoding.UTF8
+
+                    Dim ID As String = GetID(PathTorrent)
+                    Dim PlayListTorrent() As TorrentPlayList
 
 
-            ''Информация о запущенном файле 
-            Dim AceMadiaInfo As String = WC.DownloadString("http://127.0.0.1:6878/ace/manifest.m3u8?id=" & ID & "&format=json&use_api_events=1&use_stop_notifications=1")
+                    ''Информация о запущенном файле 
+                    Dim AceMadiaInfo As String = WC.DownloadString("http://127.0.0.1:6878/ace/manifest.m3u8?id=" & ID & "&format=json&use_api_events=1&use_stop_notifications=1")
 
-            If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
-                ReDim PlayListTorrent(0)
-                If Name = "" Then PlayListTorrent(0).Name = System.IO.Path.GetFileNameWithoutExtension(PathTorrent) Else PlayListTorrent(0).Name = Name
-                PlayListTorrent(0).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ID
-                Return PlayListTorrent
-            End If
+                    If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
+                        GoTo GetFileListJSON
+                    End If
 
-            'Получение потока в формате HLS
-            AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?id=" & ID)
+                    'Получение потока в формате HLS
+                    AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?id=" & ID)
 
-            Dim Regex As New System.Text.RegularExpressions.Regex("(?<=EXTINF:-1,).*(.*)")
-            Dim Itog As System.Text.RegularExpressions.MatchCollection = Regex.Matches(AceMadiaInfo)
+                    Dim Regex As New System.Text.RegularExpressions.Regex("(?<=EXTINF:-1,).*(.*)")
+                    Dim Itog As System.Text.RegularExpressions.MatchCollection = Regex.Matches(AceMadiaInfo)
 
-            ReDim PlayListTorrent(Itog.Count - 1)
-            Dim N As Integer
-            For Each Match As System.Text.RegularExpressions.Match In Itog
-                PlayListTorrent(N).Name = Match.Value
-                N += 1
-            Next
+                    ReDim PlayListTorrent(Itog.Count - 1)
+                    Dim N As Integer
+                    For Each Match As System.Text.RegularExpressions.Match In Itog
+                        PlayListTorrent(N).Name = Match.Value
+                        N += 1
+                    Next
 
-            N = 0
-            Regex = New System.Text.RegularExpressions.Regex("(http:).*(?=.*?)")
-            Itog = Regex.Matches(AceMadiaInfo)
-            For Each Match As System.Text.RegularExpressions.Match In Itog
-                PlayListTorrent(N).Link = Match.Value
-                N += 1
-            Next
+                    N = 0
+                    Regex = New System.Text.RegularExpressions.Regex("(http:).*(?=.*?)")
+                    Itog = Regex.Matches(AceMadiaInfo)
+                    For Each Match As System.Text.RegularExpressions.Match In Itog
+                        PlayListTorrent(N).Link = Match.Value
+                        N += 1
+                    Next
 
-            Return PlayListTorrent
+                    Return PlayListTorrent
+            End Select
+            Return Nothing
         End Function
 
-        Function GetFileListJSON(ByVal PathTorrent As String) As TorrentPlayList()
-            Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-            WC.Encoding = System.Text.Encoding.UTF8
-
-            Dim CodeZnaki() As String = {"\U0430", "\U0431", "\U0432", "\U0433", "\U0434", "\U0435", "\U0451", "\U0436", "\U0437", "\U0438", "\U0439", "\U043A", "\U043B", "\U043C", "\U043D", "\U043E", "\U043F", "\U0440", "\U0441", "\U0442", "\U0443",
-            "\U0444", "\U0445", "\U0446", "\U0447", "\U0448", "\U0449", "\U044A", "\U044B", "\U044C", "\U044D", "\U044E", "\U044F", "\U0410", "\U0411", "\U0412", "\U0413", "\U0414", "\U0415", "\U0401", "\U0416", "\U0417", "\U0418", "\U0419", "\U041A",
-            "\U041B", "\U041C", "\U041D", "\U041E", "\U041F", "\U0420", "\U0421", "\U0422", "\U0423", "\U0424", "\U0425", "\U0426", "\U0427", "\U0428", "\U0429", "\U042A", "\U042B", "\U042C", "\U042D", "\U042E", "\U042F", "\U00AB", "\U00BB", "U2116"}
-            Dim DecodeZnaki() As String = {"а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
-            "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№"}
-
-            Dim ContentID As String = GetID(PathTorrent)
-            Dim ItogStr As String = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&content_id=" & ContentID)
-            For I As Integer = 0 To 68
-                ItogStr = Microsoft.VisualBasic.Strings.Replace(ItogStr, Microsoft.VisualBasic.Strings.LCase(CodeZnaki(I)), DecodeZnaki(I))
-            Next
-            WC.Dispose()
-
-            Dim PlayListJson As String = ItogStr
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
-
-            Dim ListSplit() As String = PlayListJson.Split("""")
-
-            Dim PlayListTorrent((ListSplit.Length / 2) - 2) As TorrentPlayList
-
-            Dim N As Integer
-            For I As Integer = 1 To ListSplit.Length - 2
-                PlayListTorrent(N).IDX = ListSplit(I)
-                PlayListTorrent(N).Name = ListSplit(I + 1)
-                PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ContentID & "&_idx=" & PlayListTorrent(N).IDX
-
-                I += 1
-                N += 1
-            Next
-            Return PlayListTorrent
-        End Function
 
 #End Region
 
