@@ -8,7 +8,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.33.b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.34.b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -43,8 +43,6 @@ Namespace RemoteFork.Plugins
 
         Dim ProxyEnablerNNM As Boolean
         Dim TrackerServerNNM As String '= "http://nnmclub.to"   '"http://nnm-club.me" 
-
-
 #End Region
 
 
@@ -1125,7 +1123,7 @@ Namespace RemoteFork.Plugins
             response.Close()
 
             Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             WC.Encoding = System.Text.Encoding.UTF8
 
             Dim items As New System.Collections.Generic.List(Of Item)
@@ -1156,49 +1154,13 @@ Namespace RemoteFork.Plugins
         End Function
 
         Sub UpdatePlayList(ByVal NamePlayList As String, ByVal PathFilePlayList As String, ByVal PathFileUpdateTime As String, ByVal LastModified As String)
-
             System.IO.File.WriteAllText(PathFileUpdateTime, LastModified)
-            Dim request As System.Net.HttpWebRequest = Net.HttpWebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
-            request.Method = "GET"
-            request.ContentType = "text/html"
-            request.KeepAlive = True
-            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
-            request.Host = "super-pomoyka.us.to"
-
-
-            Dim Response As Net.HttpWebResponse = request.GetResponse
-            Dim dataStream As System.IO.Stream = Response.GetResponseStream()
-            Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.UTF8)
-            Dim responseFromServer As String = reader.ReadToEnd
-            reader.Close()
-            dataStream.Close()
-            Response.Close()
-
-            System.IO.File.WriteAllText(PathFilePlayList, responseFromServer)
-
-
-            request = Net.HttpWebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php")
-            request.Method = "GET"
-            request.ContentType = "text/html"
-            request.KeepAlive = True
-            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8"
-            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
-            request.Host = "super-pomoyka.us.to"
-
-
-            Response = request.GetResponse
-            dataStream = Response.GetResponseStream()
-            reader = New System.IO.StreamReader(dataStream, Text.Encoding.UTF8)
-            responseFromServer = reader.ReadToEnd
-            reader.Close()
-            dataStream.Close()
-            Response.Close()
-
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "MyTraf.tmp", responseFromServer)
-
-
-
+            Dim WC As New System.Net.WebClient
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+            WC.Encoding = System.Text.Encoding.UTF8
+            WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce, PathFilePlayList)
+            WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
+            WC.Dispose()
         End Sub
 
 #End Region
