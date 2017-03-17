@@ -8,7 +8,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.34.b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplayb", Version:="0.35.b", Author:="ORAMAN", Name:="AceTorrentPlay (beta)", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -806,18 +806,24 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
             Dim responseFromServer As String = reader.ReadToEnd
+            IO.File.WriteAllText("d:\My Desktop\trtr.html", responseFromServer, System.Text.Encoding.GetEncoding(1251)) ''''''''''''''''''"""""""""""""
             reader.Close()
             dataStream.Close()
             Response.Close()
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<span class=""genmed""><b><a href="").*?(?=&amp;)")
-            Dim TorrentPath As String = TrackerServerNNM & "/forum/" & Regex.Matches(responseFromServer)(0).Value
+            Dim TorrentPath As String = Nothing
+            TorrentPath = TrackerServerNNM & "/forum/" & Regex.Matches(responseFromServer)(0).Value
 
+
+            Dim Title As String
             Regex = New System.Text.RegularExpressions.Regex("(?<=<span style=""font-weight: bold"">).*?(?=</span>)")
-            Dim Title As String = Regex.Matches(responseFromServer)(0).Value
+            Title = Regex.Matches(responseFromServer)(0).Value
 
 
-            Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
+
+
+                Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
             If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestTorrent.Method = "GET"
             RequestTorrent.Headers.Add("Cookie", CookiesNNM)
@@ -865,8 +871,15 @@ Namespace RemoteFork.Plugins
 
         Function FormatDescriptionFileNNM(ByVal HTML As String) As String
             HTML = HTML.Replace(Constants.vbLf, "   ")
+
+            Dim Title As String = Nothing
             Dim Regex As New System.Text.RegularExpressions.Regex("(<span style=""text-align:).*?(</span>)")
-            Dim Title As String = Regex.Matches(HTML)(0).Value
+            Try
+                Title = Regex.Matches(HTML)(0).Value
+            Catch ex As Exception
+                Title = ex.Message
+            End Try
+
 
             Dim SidsPirs As String = Nothing
             Try
@@ -907,6 +920,7 @@ Namespace RemoteFork.Plugins
 
             End Try
             Dim Opisanie As String = Nothing
+
             Try
                 Regex = New System.Text.RegularExpressions.Regex("(<span style=""font-weight: bold"">Описание:</span><br />).*?(?=<div)")
                 Opisanie = Regex.Matches(HTML)(0).Value
@@ -926,9 +940,14 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function replacetags(ByVal s As String) As String
-            Dim rgx As New System.Text.RegularExpressions.Regex("<[^b].*?>")
-            s = rgx.Replace(s, "").Replace("<b>", "")
-            Return s
+            Try
+                Dim rgx As New System.Text.RegularExpressions.Regex("<[^b].*?>")
+                s = rgx.Replace(s, "").Replace("<b>", "")
+                Return s
+            Catch ex As Exception
+
+            End Try
+            Return Nothing
         End Function
 
         Function FormatDescriptionNNM(ByVal HTML As String, ByVal ImagePath As String) As String
@@ -1288,6 +1307,9 @@ GetFileListJSON:    Dim WC As New System.Net.WebClient
                     Return PlayListTorrent
             End Select
             Return Nothing
+
+
+
         End Function
 
 
