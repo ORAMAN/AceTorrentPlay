@@ -8,7 +8,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplayb", Version:="0.35.b", Author:="ORAMAN", Name:="AceTorrentPlay (beta)", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplayb", Version:="0.36.b", Author:="ORAMAN", Name:="AceTorrentPlay (beta)", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -115,16 +115,6 @@ Namespace RemoteFork.Plugins
 
                 Items.Add(Item_FGPL)
             End With
-
-
-            'With Item_NNM
-            '    .Name = "Настройка доступа к NNM-Club"
-            '    If ParametrSettings = "" Then .Link = "NNM-Club_Settings;SETTINGS" Else .Link = ";SETTINGS"
-            '    .ImageLink = ICO_SettingsFolder
-            '    .Link = ""
-            '    .Description = "ParametrSettings = " & ParametrSettings
-            'End With
-            'Items.Add(Item_NNM)
 
             With Item_DelSettings
                 .Name = "Настройки по умолчанию"
@@ -449,7 +439,7 @@ Namespace RemoteFork.Plugins
             End With
             items.Add(ItemSettings)
 
-            Return PlayListPlugPar(items, context)
+                   Return PlayListPlugPar(items, context)
         End Function
 
 
@@ -1222,20 +1212,28 @@ Namespace RemoteFork.Plugins
         End Function
 
         Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
+
+            Dim WC As New System.Net.WebClient
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+            WC.Encoding = System.Text.Encoding.UTF8
+
+            Dim ID As String = GetID(PathTorrent)
+            Dim PlayListTorrent() As TorrentPlayList
+
+            ''Информация о запущенном файле 
+            Dim AceMadiaInfo As String = WC.DownloadString("http://127.0.0.1:" & PortAce & "/ace/manifest.m3u8?id=" & ID & "&format=json&use_api_events=1&use_stop_notifications=1")
+            ' IO.File.WriteAllText("d:\My Desktop\AceMadiaInfo.txt", AceMadiaInfo)
+
             Select Case FunctionsGetTorrentPlayList
                 Case "GetFileListJSON"
-GetFileListJSON:    Dim WC As New System.Net.WebClient
-                    WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-                    WC.Encoding = System.Text.Encoding.UTF8
-
-                    Dim CodeZnaki() As String = {"\U0430", "\U0431", "\U0432", "\U0433", "\U0434", "\U0435", "\U0451", "\U0436", "\U0437", "\U0438", "\U0439", "\U043A", "\U043B", "\U043C", "\U043D", "\U043E", "\U043F", "\U0440", "\U0441", "\U0442", "\U0443",
+GetFileListJSON:    Dim CodeZnaki() As String = {"\U0430", "\U0431", "\U0432", "\U0433", "\U0434", "\U0435", "\U0451", "\U0436", "\U0437", "\U0438", "\U0439", "\U043A", "\U043B", "\U043C", "\U043D", "\U043E", "\U043F", "\U0440", "\U0441", "\U0442", "\U0443",
                     "\U0444", "\U0445", "\U0446", "\U0447", "\U0448", "\U0449", "\U044A", "\U044B", "\U044C", "\U044D", "\U044E", "\U044F", "\U0410", "\U0411", "\U0412", "\U0413", "\U0414", "\U0415", "\U0401", "\U0416", "\U0417", "\U0418", "\U0419", "\U041A",
                     "\U041B", "\U041C", "\U041D", "\U041E", "\U041F", "\U0420", "\U0421", "\U0422", "\U0423", "\U0424", "\U0425", "\U0426", "\U0427", "\U0428", "\U0429", "\U042A", "\U042B", "\U042C", "\U042D", "\U042E", "\U042F", "\U00AB", "\U00BB", "U2116"}
                     Dim DecodeZnaki() As String = {"а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
                     "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№"}
 
-                    Dim ContentID As String = GetID(PathTorrent)
-                    Dim ItogStr As String = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&content_id=" & ContentID)
+                    'Dim ContentID As String = GetID(PathTorrent)
+                    Dim ItogStr As String = WC.DownloadString("http://127.0.0.1:" & PortAce & "/server/api?method=get_media_files&content_id=" & ID)
                     For I As Integer = 0 To 68
                         ItogStr = Microsoft.VisualBasic.Strings.Replace(ItogStr, Microsoft.VisualBasic.Strings.LCase(CodeZnaki(I)), DecodeZnaki(I))
                     Next
@@ -1254,30 +1252,18 @@ GetFileListJSON:    Dim WC As New System.Net.WebClient
 
                     Dim ListSplit() As String = PlayListJson.Split("""")
 
-                    Dim PlayListTorrent((ListSplit.Length / 2) - 2) As TorrentPlayList
+                    ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
 
                     Dim N As Integer
                     For I As Integer = 1 To ListSplit.Length - 2
                         PlayListTorrent(N).IDX = ListSplit(I)
                         PlayListTorrent(N).Name = ListSplit(I + 1)
-                        PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ContentID & "&_idx=" & PlayListTorrent(N).IDX
-
+                        PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ID & "&_idx=" & PlayListTorrent(N).IDX
                         I += 1
                         N += 1
                     Next
                     Return PlayListTorrent
                 Case "GetFileListM3U"
-                    Dim WC As New System.Net.WebClient
-                    WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
-                    WC.Encoding = System.Text.Encoding.UTF8
-
-                    Dim ID As String = GetID(PathTorrent)
-                    Dim PlayListTorrent() As TorrentPlayList
-
-
-                    ''Информация о запущенном файле 
-                    Dim AceMadiaInfo As String = WC.DownloadString("http://127.0.0.1:6878/ace/manifest.m3u8?id=" & ID & "&format=json&use_api_events=1&use_stop_notifications=1")
-
                     If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
                         GoTo GetFileListJSON
                     End If
@@ -1306,8 +1292,6 @@ GetFileListJSON:    Dim WC As New System.Net.WebClient
                     Return PlayListTorrent
             End Select
             Return Nothing
-
-
 
         End Function
 
