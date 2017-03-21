@@ -89,10 +89,13 @@ namespace RemoteFork.Plugins
             }
 
         }
-        public void Save_Settings()
-        {
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
-        }
+       
+       public void Save_Settings()
+	{
+			Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
+			Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "ProxyEnablerNNM", ProxyEnablerNNM);
+			Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "TrackerServerNNM", TrackerServerNNM);
+		}
 
 
         public PluginApi.Plugins.Playlist GetListSettingsNNM(IPluginContext context)
