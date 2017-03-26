@@ -912,7 +912,7 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End With
          
-Item = New Item
+            Item = New Item
             With Item
                 .Name = "Спорт и Здоровье"
                 .Link = TrackerServerRuTor & "/browse/0/13/0/0/;PAGERUTOR"
@@ -920,7 +920,6 @@ Item = New Item
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & TrackerServerRuTor & LOGO_Tracker & """ />"
                 items.Add(Item)
             End With
-
             PlayList.IsIptv = False
             Return PlayListPlugPar(items, context)
         End Function
