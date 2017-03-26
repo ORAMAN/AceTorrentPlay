@@ -912,19 +912,20 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End With
          
+           
             Item = New Item
             With Item
                 .Name = "Спорт и Здоровье"
                 .Link = TrackerServerRuTor & "/browse/0/13/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
-                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & TrackerServerRuTor & LOGO_Tracker & """ />"
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & TrackerServerRuTor & LOGO_TrackerRutor & """ />"
                 items.Add(Item)
             End With
             PlayList.IsIptv = False
             Return PlayListPlugPar(items, context)
         End Function
 
-#End Region
+#End Regi
 
 #Region "NNM Club"
         Dim CookiesNNM As String = "phpbb2mysql_4_data=a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A32%3A%2296229c9a3405ae99cce1f3bc0cefce2e%22%3Bs%3A6%3A%22userid%22%3Bs%3A8%3A%2213287549%22%3B%7D"
