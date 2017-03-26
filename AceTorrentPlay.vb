@@ -37,6 +37,7 @@ Namespace RemoteFork.Plugins
         Dim ICO_M3UFile As String = "http://s1.iconbird.com/ico/0912/VannillACreamIconSet/w128h1281348320736M3U.png"
         Dim ICO_NNMClub As String = "http://s1.iconbird.com/ico/0912/MorphoButterfly/w128h1281348669898RhetenorMorpho.png"
         Dim ICO_Search As String = "http://s1.iconbird.com/ico/0612/MustHave/w256h2561339195991Search256x256.png"
+        Dim ICO_Search2 As String = "http://s1.iconbird.com/ico/0912/MetroUIDock/w512h5121347464996Search.png"
         Dim ICO_Error As String = "http://s1.iconbird.com/ico/0912/ToolbarIcons/w256h2561346685474SymbolError.png"
         Dim ICO_Error2 As String = "http://errorfix48.ru/uploads/posts/2014-09/1409846068_400px-warning_icon.png"
         Dim ICO_Save As String = "http://s1.iconbird.com/ico/2013/6/355/w128h1281372334742check.png"
@@ -610,6 +611,7 @@ Namespace RemoteFork.Plugins
 
 #Region "RuTor"
         Dim TrackerServerRuTor As String = "http://mega-tor.org"
+
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Dim items As New System.Collections.Generic.List(Of Item)()
             Dim WC As New System.Net.WebClient
@@ -648,9 +650,19 @@ Namespace RemoteFork.Plugins
                 End With
                 items.Add(Item)
 
+                Regex = New System.Text.RegularExpressions.Regex("(?<=<a href="").*?(?="")")
+                Dim MatchesSearchNext As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Matches(0).Value)
+                Dim ItemSearchNext As New Item
+                With ItemSearchNext
+                    .ImageLink = ICO_Search2
+                    .Name = "Искать ещё похожие раздачи"
+                    .Link = TrackerServerRuTor & MatchesSearchNext(MatchesSearchNext.Count - 1).Value & ";PAGERUTOR"
+                End With
+
 
 
                 Regex = New System.Text.RegularExpressions.Regex("(<a href=""magnet:).*?(</span></td></tr>)")
+
                 Matches = Regex.Matches(Matches(0).Value)
 
                 For Each Macth As System.Text.RegularExpressions.Match In Matches
@@ -681,6 +693,8 @@ Namespace RemoteFork.Plugins
                     End With
                     items.Add(Item)
                 Next
+                items.Add(ItemSearchNext)
+
             End If
 
 
