@@ -911,11 +911,20 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & TrackerServerRuTor & LOGO_TrackerRutor & """ />"
                 items.Add(Item)
             End With
-
+         
+Item = New Item
+            With Item
+                .Name = "Спорт и Здоровье"
+                .Link = TrackerServerRuTor & "/browse/0/13/0/0/;PAGERUTOR"
+                .ImageLink = ICO_Folder
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & TrackerServerRuTor & LOGO_Tracker & """ />"
+                items.Add(Item)
+            End With
 
             PlayList.IsIptv = False
             Return PlayListPlugPar(items, context)
         End Function
+
 #End Region
 
 #Region "NNM Club"
