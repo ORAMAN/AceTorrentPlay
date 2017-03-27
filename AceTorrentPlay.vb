@@ -8,7 +8,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplaybvb", Version:="0.4.b", Author:="ORAMAN", Name:="AceTorrentPlay (beta) VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplayvb", Version:="0.45", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlayVB
         Implements IPlugin
 
@@ -18,7 +18,6 @@ Namespace RemoteFork.Plugins
         Dim PlayList As New PluginApi.Plugins.Playlist
         Dim next_page_url As String
 
-    
 
 
 #Region "Настройки"
@@ -34,6 +33,7 @@ Namespace RemoteFork.Plugins
         Dim ICO_VideoFile As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291videofile.png"
         Dim ICO_MusicFile As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597240aimp.png"
         Dim ICO_TorrentFile As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png"
+        Dim ICO_TorrentFile2 As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent.png"
         Dim ICO_ImageFile As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597278imagefile.png"
         Dim ICO_M3UFile As String = "http://s1.iconbird.com/ico/0912/VannillACreamIconSet/w128h1281348320736M3U.png"
         Dim ICO_NNMClub As String = "http://s1.iconbird.com/ico/0912/MorphoButterfly/w128h1281348669898RhetenorMorpho.png"
@@ -527,21 +527,6 @@ Namespace RemoteFork.Plugins
             End With
             items.Add(ItemSettings)
 
-            'Dim ItmeTest1, ItmeTest2 As New Item
-            'With ItmeTest1
-            '    .Name = "Тест"
-            '    .Link = "http://192.168.1.40:5555/getinfo http://192.168.1.40:8027/?file:/d:/My Video/Мультфильмы/Пингвины Мадагаскара.mkv"
-            '    .Type = ItemType.FILE
-            '    items.Add(ItmeTest1)
-            'End With
-            'With ItmeTest2
-            '    .Name = "Тест"
-            '    .Link = "complete_percent: 100.00 download_speed_kbs: 7.9 upload_speed_kbs: 261.4 peers: 11 status: seeding http://192.168.1.40:8027/?file:/d:/My Video/Мультфильмы/Пингвины Мадагаскара.mkv "
-            '    .Type = ItemType.FILE
-            '    items.Add(ItmeTest2)
-            'End With
-
-
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -620,6 +605,7 @@ Namespace RemoteFork.Plugins
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             Dim ResponseFromServer As String = WC.DownloadString(URL).Replace(vbLf, " ")
 
+
             Dim Regex As New System.Text.RegularExpressions.Regex("(/download/).*?(?="">)")
             Dim TorrentPath As String = TrackerServerRuTor & Regex.Matches(ResponseFromServer)(0).Value
             Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
@@ -670,7 +656,7 @@ Namespace RemoteFork.Plugins
                     Item = New Item
 
                     With Item
-                        .ImageLink = ICO_TorrentFile
+                        .ImageLink = ICO_TorrentFile2
                         Regex = New System.Text.RegularExpressions.Regex("(?<=<a href="").*?(?="">)")
                         .Link = TrackerServerRuTor & Regex.Matches(Macth.Value)(1).Value & ";PAGEFILMRUTOR"
 
@@ -718,37 +704,38 @@ Namespace RemoteFork.Plugins
             End Try
 
 
+
+
+            Try
+                Dim Regex As New System.Text.RegularExpressions.Regex("(<table id=""details"">).*?(</table>)")
+                HTML = Regex.Matches(HTML)(0).Value
+            Catch ex As Exception
+
+            End Try
+
+
             Dim SidsPirs As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(<td class=""header"">Раздают).*?(?=<td class=""header"" nowrap=""nowrap"">Добавить)")
-                SidsPirs = Regex.Matches(HTML)(0).Value
+                SidsPirs = Regex.Matches(HTML)(0).Value.Replace("</td><td>", ":(</td><td>").Replace("</td></tr>", "</td></tr>) ")
             Catch ex As Exception
                 SidsPirs = ex.Message
             End Try
 
-
             Dim ImagePath As String = Nothing
             Try
-                Dim Regex As New System.Text.RegularExpressions.Regex("(?<=""></a><br /><img src="").*?(?="")")
-                ImagePath = Regex.Matches(HTML)(0).Value
+                Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
+                ImagePath = Regex.Matches(HTML)(1).Value
             Catch ex As Exception
             End Try
 
 
-            Dim InfoFile As String = Nothing
-            Try
-                Dim Regex As New System.Text.RegularExpressions.Regex("(<u|<span style=""font-family:Georgia;"">).*?(?=<div)")
-                InfoFile = Regex.Matches(HTML)(0).Value
-            Catch ex As Exception
-                InfoFile = ex.Message
-            End Try
+            Dim InfoFile As String = HTML
 
-            SidsPirs = replacetags(SidsPirs)
-            InfoFile = replacetags(InfoFile)
+            InfoFile = replacetags(InfoFile).Replace("<br /><br />", "")
             Title = replacetags(Title)
 
-
-            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:180px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4"">" & SidsPirs & "</font><br>" & InfoFile
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:180px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#868668"">" & SidsPirs & "</span>" & InfoFile & "</font>"
 
         End Function
 
