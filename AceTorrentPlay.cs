@@ -7,8 +7,8 @@ using System;
 
 namespace RemoteFork.Plugins
 {
-    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.45", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
-    public class AceTorrentPlayCS : IPlugin
+    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.46", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
+    public class acetorrentplaycs : IPlugin
     {
 
 
@@ -17,8 +17,6 @@ namespace RemoteFork.Plugins
         private string PLUGIN_PATH = "pluginPath";
         private PluginApi.Plugins.Playlist PlayList = new PluginApi.Plugins.Playlist();
         private string next_page_url;
-
-
 
         #region Настройки
 
@@ -64,33 +62,33 @@ namespace RemoteFork.Plugins
         public void Load_Settings()
         {
 
-            string TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "FunctionsGetTorrentPlayList", ""));
+            string TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", ""));
             if (TempStr == "")
             {
                 FunctionsGetTorrentPlayList = "GetFileListM3U";
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
             }
             else
             {
                 FunctionsGetTorrentPlayList = TempStr;
             }
 
-            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "ProxyEnablerNNM", ""));
+            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ""));
             if (TempStr == "")
             {
                 ProxyEnablerNNM = true;
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "ProxyEnablerNNM", ProxyEnablerNNM);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ProxyEnablerNNM);
             }
             else
             {
                 ProxyEnablerNNM = System.Convert.ToBoolean(TempStr);
             }
 
-            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "TrackerServerNNM", ""));
+            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", ""));
             if (TempStr == "")
             {
                 TrackerServerNNM = "http://nnmclub.to";
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "TrackerServerNNM", TrackerServerNNM);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", TrackerServerNNM);
             }
             else
             {
@@ -100,9 +98,9 @@ namespace RemoteFork.Plugins
         }
         public void Save_Settings()
         {
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "ProxyEnablerNNM", ProxyEnablerNNM);
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", "TrackerServerNNM", TrackerServerNNM);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ProxyEnablerNNM);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", TrackerServerNNM);
         }
 
 
@@ -197,7 +195,7 @@ namespace RemoteFork.Plugins
                 case "NNM-Club_Settings":
                     break;
                 case "DeleteSettings":
-                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\\RemoteFork\\Plugins\\AceTorrentPlay\\", false);
+                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", false);
                     Load_Settings();
                     ParametrSettings = "";
                     break;
@@ -243,7 +241,7 @@ namespace RemoteFork.Plugins
         public PluginApi.Plugins.Playlist GetList(IPluginContext context)
         {
 
-           
+
             IPAdress = context.GetRequestParams()["host"].Split(':')[0];
 
 
@@ -366,7 +364,7 @@ namespace RemoteFork.Plugins
                         WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
                         WC.Encoding = System.Text.Encoding.UTF8;
                         Item.Type = ItemType.DIRECTORY;
-                        Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFiles);
+                        Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFiles);
                         items.Add(Item);
                         return PlayListPlugPar(items, context);
                     }
@@ -512,7 +510,7 @@ namespace RemoteFork.Plugins
 
 
                 ItemTop.ImageLink = "http://static.acestream.net/sites/acestream/img/ACE-logo.png";
-                ItemTop.Name = " - AceTorrentPlay - ";
+                ItemTop.Name = " - acetorrentplaycsvb - ";
                 ItemTop.Link = "";
                 ItemTop.Type = ItemType.FILE;
                 ItemTop.Description = AceMadiaGet + "<html><p><p><img src=\" http://static.acestream.net/sites/acestream/img/ACE-logo.png\"></html>";
@@ -553,7 +551,7 @@ namespace RemoteFork.Plugins
             {
                 AceProxEnabl = false;
                 ItemTop.ImageLink = ICO_Error2;
-                ItemTop.Name = "        - AceTorrentPlay -        ";
+                ItemTop.Name = "        - acetorrentplaycsvb -        ";
                 ItemTop.Link = "";
                 ItemTop.Type = ItemType.FILE;
                 ItemTop.Description = "Ответ от движка Ace Media не получен!" + "<p>" + ex.Message + "</p>";
@@ -581,7 +579,6 @@ namespace RemoteFork.Plugins
             ItemSettings.Link = ";SETTINGS";
             ItemSettings.Type = ItemType.DIRECTORY;
             ItemSettings.ImageLink = ICO_Settings;
-            ItemSettings.Description = "В скором времени здесь появятся кое-какие настройки. ";
             items.Add(ItemSettings);
 
             return PlayListPlugPar(items, context);
@@ -808,7 +805,7 @@ namespace RemoteFork.Plugins
             try
             {
                 System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<img src=\").*?(?=\")");
-                ImagePath = Regex.Matches(HTML)[1].Value;
+                ImagePath = "http://" + IPAdress + ":8027/proxym3u8B" + Base64Encode(Regex.Matches(HTML)[1].Value + "OPT:ContentType--image/jpegOPEND:/") + "/";
             }
             catch (Exception ex)
             {
@@ -989,7 +986,7 @@ namespace RemoteFork.Plugins
         public PluginApi.Plugins.Playlist SearchListNNM(IPluginContext context, string search)
         {
 
-            System.Net.WebRequest RequestPost = System.Net.HttpWebRequest.Create(TrackerServerNNM + "/forum/tracker.php");
+            System.Net.HttpWebRequest RequestPost = System.Net.HttpWebRequest.CreateHttp(TrackerServerNNM + "/forum/tracker.php");
             if (ProxyEnablerNNM == true)
             {
                 RequestPost.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
@@ -1202,7 +1199,7 @@ namespace RemoteFork.Plugins
 
             try
             {
-                System.Net.WebRequest RequestGet = System.Net.WebRequest.Create(URL);
+                System.Net.HttpWebRequest RequestGet = System.Net.HttpWebRequest.CreateHttp(URL);
                 if (ProxyEnablerNNM == true)
                 {
                     RequestGet.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
@@ -1269,7 +1266,7 @@ namespace RemoteFork.Plugins
 
         public PluginApi.Plugins.Playlist GetTorrentPAGENNM(IPluginContext context, string URL)
         {
-            System.Net.WebRequest RequestGet = System.Net.WebRequest.Create(URL);
+            System.Net.HttpWebRequest RequestGet = System.Net.HttpWebRequest.CreateHttp(URL);
             if (ProxyEnablerNNM == true)
             {
                 RequestGet.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
@@ -1309,33 +1306,27 @@ namespace RemoteFork.Plugins
                 Title = ex.Message;
             }
 
+            //Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
+            //If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            //RequestTorrent.Method = "GET"
+            //RequestTorrent.Headers.Add("Cookie", CookiesNNM)
 
-
-
-
-            System.Net.WebRequest RequestTorrent = System.Net.WebRequest.Create(TorrentPath);
-            if (ProxyEnablerNNM == true)
-            {
-                RequestTorrent.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
-            }
-            RequestTorrent.Method = "GET";
-            RequestTorrent.Headers.Add("Cookie", CookiesNNM);
-
-            Response = RequestTorrent.GetResponse();
-            dataStream = Response.GetResponseStream();
-            reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
-            string FileTorrent = reader.ReadToEnd();
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath() + "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251));
-            reader.Close();
-            dataStream.Close();
-            Response.Close();
+            //Response = RequestTorrent.GetResponse
+            //dataStream = Response.GetResponseStream()
+            //reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
+            //Dim FileTorrent As String = reader.ReadToEnd
+            //System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251))
+            //reader.Close()
+            //dataStream.Close()
+            //Response.Close()
 
             System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
             try
             {
                 string Description = FormatDescriptionFileNNM(responseFromServer);
 
-                TorrentPlayList[] PlayListtoTorrent = GetFileList(System.IO.Path.GetTempPath() + "TorrentTemp");
+                //  Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
+                TorrentPlayList[] PlayListtoTorrent = GetFileList(TorrentPath);
 
                 foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
                 {
@@ -1637,12 +1628,13 @@ namespace RemoteFork.Plugins
             string PathFileUpdateTime = System.IO.Path.GetTempPath() + NamePlayList + ".UpdateTime.tmp";
             string PathFilePlayList = System.IO.Path.GetTempPath() + NamePlayList + ".PlayList.m3u8";
 
-            System.Net.WebRequest request = System.Net.WebRequest.Create("http://super-pomoyka.us.to/trash/ttv-list/ttv." + NamePlayList + ".iproxy.m3u?ip=" + IPAdress + ":" + PortAce);
+            System.Net.HttpWebRequest request = System.Net.HttpWebRequest.CreateHttp("http://super-pomoyka.us.to/trash/ttv-list/ttv." + NamePlayList + ".iproxy.m3u?ip=" + IPAdress + ":" + PortAce);
             request.Method = "HEAD";
             request.ContentType = "text/html";
-            request.Headers.Add("Accept" , "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8");
-            request.Headers.Add("UserAgent", "Mozilla /5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
-      
+            request.KeepAlive = true;
+            request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8";
+            request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+            request.Host = "super-pomoyka.us.to";
             System.Net.HttpWebResponse response = (System.Net.HttpWebResponse)(request.GetResponse());
             var responHeader = response.GetResponseHeader("Last-Modified");
             response.Close();
@@ -1658,7 +1650,7 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
@@ -1667,13 +1659,13 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
 
             Item.Type = ItemType.DIRECTORY;
-            Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplay%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+            Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
             items.Add(Item);
             PlayList.IsIptv = "true";
             return PlayListPlugPar(items, context);
@@ -1718,7 +1710,7 @@ namespace RemoteFork.Plugins
             string FileTorrentString = System.Convert.ToBase64String(FileTorrent);
             FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString);
 
-            System.Net.WebRequest request = System.Net.WebRequest.Create("http://api.torrentstream.net/upload/raw");
+            System.Net.HttpWebRequest request = System.Net.HttpWebRequest.CreateHttp("http://api.torrentstream.net/upload/raw");
             request.Method = "POST";
             request.ContentType = "application/octet-stream\\r\\n";
             request.ContentLength = FileTorrent.Length;
@@ -1740,7 +1732,7 @@ namespace RemoteFork.Plugins
         {
 
             System.Net.WebClient WC = new System.Net.WebClient();
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
             WC.Encoding = System.Text.Encoding.UTF8;
 
             string ID = GetID(PathTorrent);
@@ -1751,7 +1743,7 @@ namespace RemoteFork.Plugins
             {
                 case "GetFileListJSON":
                     {
-                       
+                        GetFileListJSON:
                         string[] CodeZnaki = { "\\U0430", "\\U0431", "\\U0432", "\\U0433", "\\U0434", "\\U0435", "\\U0451", "\\U0436", "\\U0437", "\\U0438", "\\U0439", "\\U043A", "\\U043B", "\\U043C", "\\U043D", "\\U043E", "\\U043F", "\\U0440", "\\U0441", "\\U0442", "\\U0443", "\\U0444", "\\U0445", "\\U0446", "\\U0447", "\\U0448", "\\U0449", "\\U044A", "\\U044B", "\\U044C", "\\U044D", "\\U044E", "\\U044F", "\\U0410", "\\U0411", "\\U0412", "\\U0413", "\\U0414", "\\U0415", "\\U0401", "\\U0416", "\\U0417", "\\U0418", "\\U0419", "\\U041A", "\\U041B", "\\U041C", "\\U041D", "\\U041E", "\\U041F", "\\U0420", "\\U0421", "\\U0422", "\\U0423", "\\U0424", "\\U0425", "\\U0426", "\\U0427", "\\U0428", "\\U0429", "\\U042A", "\\U042B", "\\U042C", "\\U042D", "\\U042E", "\\U042F", "\\U00AB", "\\U00BB", "U2116" };
                         string[] DecodeZnaki = { "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№" };
 
