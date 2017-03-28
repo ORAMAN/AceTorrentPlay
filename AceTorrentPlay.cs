@@ -1306,27 +1306,29 @@ namespace RemoteFork.Plugins
                 Title = ex.Message;
             }
 
-            //Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
-            //If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-            //RequestTorrent.Method = "GET"
-            //RequestTorrent.Headers.Add("Cookie", CookiesNNM)
+            System.Net.HttpWebRequest RequestTorrent = System.Net.HttpWebRequest.CreateHttp(TorrentPath);
+            if (ProxyEnablerNNM == true)
+            {
+                RequestTorrent.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestTorrent.Method = "GET";
+            RequestTorrent.Headers.Add("Cookie", CookiesNNM);
 
-            //Response = RequestTorrent.GetResponse
-            //dataStream = Response.GetResponseStream()
-            //reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            //Dim FileTorrent As String = reader.ReadToEnd
-            //System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251))
-            //reader.Close()
-            //dataStream.Close()
-            //Response.Close()
+            Response = RequestTorrent.GetResponse();
+            dataStream = Response.GetResponseStream();
+            reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string FileTorrent = reader.ReadToEnd();
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath() + "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251));
+            reader.Close();
+            dataStream.Close();
+            Response.Close();
 
             System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
             try
             {
                 string Description = FormatDescriptionFileNNM(responseFromServer);
-
-                //  Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
-                TorrentPlayList[] PlayListtoTorrent = GetFileList(TorrentPath);
+                TorrentPlayList[] PlayListtoTorrent = GetFileList(System.IO.Path.GetTempPath() + "TorrentTemp.torrent");
+                // Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
 
                 foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
                 {
@@ -1353,6 +1355,7 @@ namespace RemoteFork.Plugins
             PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
+
 
         public string FormatDescriptionFileNNM(string HTML)
         {
