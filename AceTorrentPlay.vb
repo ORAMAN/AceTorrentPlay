@@ -8,8 +8,8 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplayvb", Version:="0.45", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
-    Public Class AceTorrentPlayVB
+    <PluginAttribute(Id:="acetorrentplayvb", Version:="0.46", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    Public Class acetorrentplayvb
         Implements IPlugin
 
         Dim IPAdress As String
@@ -63,35 +63,35 @@ Namespace RemoteFork.Plugins
 
         Sub Load_Settings()
 
-            Dim TempStr As String = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", ""))
+            Dim TempStr As String = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "FunctionsGetTorrentPlayList", ""))
             If TempStr = "" Then
                 FunctionsGetTorrentPlayList = "GetFileListM3U"
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList)
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList)
             Else
                 FunctionsGetTorrentPlayList = TempStr
             End If
 
-            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ""))
+            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "ProxyEnablerNNM", ""))
             If TempStr = "" Then
                 ProxyEnablerNNM = True
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ProxyEnablerNNM)
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "ProxyEnablerNNM", ProxyEnablerNNM)
             Else
                 ProxyEnablerNNM = CBool(TempStr)
             End If
 
-            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", ""))
+            TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "TrackerServerNNM", ""))
             If TempStr = "" Then
                 TrackerServerNNM = "http://nnmclub.to"
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", TrackerServerNNM)
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "TrackerServerNNM", TrackerServerNNM)
             Else
                 TrackerServerNNM = TempStr
             End If
 
         End Sub
         Sub Save_Settings()
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList)
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ProxyEnablerNNM)
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", TrackerServerNNM)
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList)
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "ProxyEnablerNNM", ProxyEnablerNNM)
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\acetorrentplayvb\", "TrackerServerNNM", TrackerServerNNM)
         End Sub
 
         Function GetListSettingsNNM(context As IPluginContext, Optional ByVal ParametrSettings As String = "") As PluginApi.Plugins.Playlist
@@ -149,7 +149,7 @@ Namespace RemoteFork.Plugins
                     ParametrSettings = ""
                 Case "NNM-Club_Settings"
                 Case "DeleteSettings"
-                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\RemoteFork\Plugins\AceTorrentPlay\", False)
+                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\RemoteFork\Plugins\acetorrentplayvb\", False)
                     Load_Settings()
                     ParametrSettings = ""
             End Select
@@ -313,7 +313,7 @@ Namespace RemoteFork.Plugins
                     WC.Encoding = System.Text.Encoding.UTF8
                     With Item
                         .Type = ItemType.DIRECTORY
-                        .GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFiles)
+                        .GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplayvb%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFiles)
                     End With
                     items.Add(Item)
                     Return PlayListPlugPar(items, context)
@@ -447,7 +447,7 @@ Namespace RemoteFork.Plugins
 
                 With ItemTop
                     .ImageLink = "http://static.acestream.net/sites/acestream/img/ACE-logo.png"
-                    .Name = " - AceTorrentPlay - "
+                    .Name = " - acetorrentplayvb - "
                     .Link = ""
                     .Type = ItemType.FILE
                     .Description = AceMadiaGet & "<html><p><p><img src="" http://static.acestream.net/sites/acestream/img/ACE-logo.png""></html>"
@@ -493,7 +493,7 @@ Namespace RemoteFork.Plugins
                 AceProxEnabl = False
                 With ItemTop
                     .ImageLink = ICO_Error2
-                    .Name = "        - AceTorrentPlay -        "
+                    .Name = "        - acetorrentplayvb -        "
                     .Link = ""
                     .Type = ItemType.FILE
                     .Description = "Ответ от движка Ace Media не получен!" & "<p>" & ex.Message & "</p>"
@@ -523,7 +523,6 @@ Namespace RemoteFork.Plugins
                 .Link = ";SETTINGS"
                 .Type = ItemType.DIRECTORY
                 .ImageLink = ICO_Settings
-                .Description = "В скором времени здесь появятся кое-какие настройки. "
             End With
             items.Add(ItemSettings)
 
@@ -725,7 +724,7 @@ Namespace RemoteFork.Plugins
             Dim ImagePath As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
-                ImagePath = Regex.Matches(HTML)(1).Value
+                ImagePath = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(Regex.Matches(HTML)(1).Value & "OPT:ContentType--image/jpegOPEND:/") & "/"
             Catch ex As Exception
             End Try
 
@@ -1229,29 +1228,26 @@ Namespace RemoteFork.Plugins
                 Title = ex.Message
             End Try
 
+            'Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
+            'If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            'RequestTorrent.Method = "GET"
+            'RequestTorrent.Headers.Add("Cookie", CookiesNNM)
 
-
-
-
-            Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
-            If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-            RequestTorrent.Method = "GET"
-            RequestTorrent.Headers.Add("Cookie", CookiesNNM)
-
-            Response = RequestTorrent.GetResponse
-            dataStream = Response.GetResponseStream()
-            reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            Dim FileTorrent As String = reader.ReadToEnd
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251))
-            reader.Close()
-            dataStream.Close()
-            Response.Close()
+            'Response = RequestTorrent.GetResponse
+            'dataStream = Response.GetResponseStream()
+            'reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
+            'Dim FileTorrent As String = reader.ReadToEnd
+            'System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251))
+            'reader.Close()
+            'dataStream.Close()
+            'Response.Close()
 
             Dim items As New System.Collections.Generic.List(Of Item)
             Try
                 Dim Description As String = FormatDescriptionFileNNM(responseFromServer)
 
-                Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
+                '  Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
+                Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
 
                 For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                     Dim Item As New Item
@@ -1562,7 +1558,7 @@ Namespace RemoteFork.Plugins
             If (System.IO.File.Exists(PathFileUpdateTime) AndAlso System.IO.File.Exists(PathFilePlayList)) = False Then
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader)
                 Item.Type = ItemType.DIRECTORY
-                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplayvb%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
                 items.Add(Item)
                 Return PlayListPlugPar(items, context)
             End If
@@ -1570,13 +1566,13 @@ Namespace RemoteFork.Plugins
             If responHeader <> System.IO.File.ReadAllText(PathFileUpdateTime) Then
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader)
                 Item.Type = ItemType.DIRECTORY
-                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplayvb%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
                 items.Add(Item)
                 Return PlayListPlugPar(items, context)
             End If
 
             Item.Type = ItemType.DIRECTORY
-            Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+            Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplayvb%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
             items.Add(Item)
             PlayList.IsIptv = "true"
             Return PlayListPlugPar(items, context)
@@ -1639,7 +1635,7 @@ Namespace RemoteFork.Plugins
         Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
 
             Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             WC.Encoding = System.Text.Encoding.UTF8
 
             Dim ID As String = GetID(PathTorrent)
