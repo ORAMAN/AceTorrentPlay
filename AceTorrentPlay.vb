@@ -1220,7 +1220,7 @@ Namespace RemoteFork.Plugins
 
 
 
-            Dim Title As String
+             Dim Title As String
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<span style=""font-weight: bold"">).*?(?=</span>)")
                 Title = Regex.Matches(responseFromServer)(0).Value
@@ -1228,26 +1228,25 @@ Namespace RemoteFork.Plugins
                 Title = ex.Message
             End Try
 
-            'Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
-            'If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-            'RequestTorrent.Method = "GET"
-            'RequestTorrent.Headers.Add("Cookie", CookiesNNM)
+            Dim RequestTorrent As System.Net.HttpWebRequest = Net.HttpWebRequest.Create(TorrentPath)
+            If ProxyEnablerNNM = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            RequestTorrent.Method = "GET"
+            RequestTorrent.Headers.Add("Cookie", CookiesNNM)
 
-            'Response = RequestTorrent.GetResponse
-            'dataStream = Response.GetResponseStream()
-            'reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            'Dim FileTorrent As String = reader.ReadToEnd
-            'System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp", FileTorrent, System.Text.Encoding.GetEncoding(1251))
-            'reader.Close()
-            'dataStream.Close()
-            'Response.Close()
+            Response = RequestTorrent.GetResponse
+            dataStream = Response.GetResponseStream()
+            reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
+            Dim FileTorrent As String = reader.ReadToEnd
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
+            reader.Close()
+            dataStream.Close()
+            Response.Close()
 
             Dim items As New System.Collections.Generic.List(Of Item)
             Try
                 Dim Description As String = FormatDescriptionFileNNM(responseFromServer)
-
-                '  Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp")
-                Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
+                Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp.torrent")
+                ' Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
 
                 For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                     Dim Item As New Item
