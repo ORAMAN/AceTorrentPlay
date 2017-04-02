@@ -11,12 +11,13 @@ Namespace RemoteFork.Plugins
     <PluginAttribute(Id:="acetorrentplay", Version:="0.5", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream, поиск по трекерам", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class acetorrentplay
         Implements IPlugin
-
-           Dim IPAdress As String
-        Dim PortRemoteFork As String = "8027"
-        Dim PLUGIN_PATH As String = "pluginPath"
-        Dim PlayList As New PluginApi.Plugins.Playlist
-        Dim next_page_url As String
+    
+    
+    Dim IPAdress As String
+    Dim PortRemoteFork As String = "8027"
+    Dim PLUGIN_PATH As String = "pluginPath"
+    Dim PlayList As New PluginApi.Plugins.Playlist
+    Dim next_page_url As String
 
 
 
@@ -987,8 +988,6 @@ Namespace RemoteFork.Plugins
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, " ")
 
-            IO.File.WriteAllText("d:\My Desktop\html.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
-
 
             Dim Index, Title As String 
 
@@ -1852,12 +1851,13 @@ Namespace RemoteFork.Plugins
             RequestGet.Headers.Add("Cookie", CookiesNNM)
 
             Dim Response As Net.HttpWebResponse = RequestGet.GetResponse
-            Dim dataStream As System.IO.Stream = Response.GetResponseStream()
-            Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
-            Dim responseFromServer As String = reader.ReadToEnd
+            Dim DataStream As System.IO.Stream = Response.GetResponseStream()
+            Dim Reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
+            Dim ResponseFromServer As String = reader.ReadToEnd
             reader.Close()
             dataStream.Close()
             Response.Close()
+
 
             Dim TorrentPath As String = Nothing
             Try
@@ -1883,19 +1883,22 @@ Namespace RemoteFork.Plugins
             RequestTorrent.Headers.Add("Cookie", CookiesNNM)
 
             Response = RequestTorrent.GetResponse
-            dataStream = Response.GetResponseStream()
-            reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            Dim FileTorrent As String = reader.ReadToEnd
+            DataStream = Response.GetResponseStream()
+            Reader = New System.IO.StreamReader(DataStream, System.Text.Encoding.GetEncoding(1251))
+            Dim FileTorrent As String = Reader.ReadToEnd
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
-            reader.Close()
-            dataStream.Close()
+            Reader.Close()
+            DataStream.Close()
             Response.Close()
 
+
             Dim items As New System.Collections.Generic.List(Of Item)
+
+
+
             Try
                 Dim Description As String = FormatDescriptionFileNNM(responseFromServer)
                 Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp.torrent")
-                ' Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
 
                 For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                     Dim Item As New Item
