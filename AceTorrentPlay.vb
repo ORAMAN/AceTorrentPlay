@@ -8,16 +8,14 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.5", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream, поиск по трекерам", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.6", Author:="ORAMAN", Name:="AceTorrentPlay VB", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream, поиск по трекерам", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class acetorrentplay
         Implements IPlugin
-    
-    
-    Dim IPAdress As String
-    Dim PortRemoteFork As String = "8027"
-    Dim PLUGIN_PATH As String = "pluginPath"
-    Dim PlayList As New PluginApi.Plugins.Playlist
-    Dim next_page_url As String
+  Dim IPAdress As String
+        Dim PortRemoteFork As String = "8027"
+        Dim PLUGIN_PATH As String = "pluginPath"
+        Dim PlayList As New PluginApi.Plugins.Playlist
+        Dim next_page_url As String
 
 
 
@@ -258,6 +256,12 @@ Namespace RemoteFork.Plugins
                 Case "PAGEFILMRUTOR"
                     Return GetTorrentPageRuTor(context, PathSpliter(PathSpliter.Length - 2))
                     'Трекер RuTracker
+                Case "RuTrSubGroop"
+                    Return GetListRuTrCategory(context, PathSpliter(PathSpliter.Length - 3), PathSpliter(PathSpliter.Length - 2))
+                Case "RuTrGroop"
+                    Return GetListRuTrCategory(context, PathSpliter(PathSpliter.Length - 2))
+                Case "Search_Groop_RuTr"
+                    Return SearchListRuTr(context, context.GetRequestParams("search"), PathSpliter(PathSpliter.Length - 2))
                 Case "PAGERUTR"
                     Return GetPageRuTr(context, PathSpliter(PathSpliter.Length - 2))
                 Case "PAGEFILMRUTR"
@@ -837,6 +841,111 @@ Namespace RemoteFork.Plugins
             Return PlayListPlugPar(items, context)
         End Function
 #End Region
+
+        Dim KategoriRuTracker As String
+        Public Function GetListRuTrCategory(context As IPluginContext, ByVal Groop As String, Optional ByVal SubGroop As String = Nothing) As PluginApi.Plugins.Playlist
+
+            Dim items As New List(Of Item)
+
+
+            Dim Regex As New System.Text.RegularExpressions.Regex("(<optgroup label=""&nbsp;" & Groop & ").*?(optgroup>)")
+            Dim GroopText As String = Regex.Matches(KategoriRuTracker)(0).Value.Replace(" |- ", "::").Replace("(", " ").Replace(")", " ")
+
+
+
+            Select Case SubGroop
+                Case Nothing
+
+                    Regex = New System.Text.RegularExpressions.Regex("(<option).*?(option>)")
+                    Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(GroopText)
+                    Dim RegexOptionsID As New System.Text.RegularExpressions.Regex("(?<=value="").*?(?="")")
+                    Dim IDSubGroops As String = Nothing
+                    For Each SSGroop As System.Text.RegularExpressions.Match In Matches
+                        IDSubGroops = IDSubGroops & RegexOptionsID.Match(SSGroop.Value).Value & ","
+                    Next
+                    Dim ItemSearch As New Item
+                    With ItemSearch
+                        .Name = "Поиск"
+                        .Link = IDSubGroops.Remove(IDSubGroops.Count - 1) & ";Search_Groop_RuTr"
+                        .Type = ItemType.DIRECTORY
+                        .SearchOn = "Поик в категории"
+                        .ImageLink = ICO_Search
+                        .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
+                    End With
+                    items.Add(ItemSearch)
+
+
+                    Regex = New System.Text.RegularExpressions.Regex("(?<=class=""root_forum has_sf"">).*?(?=&nbsp;)")
+                    For Each SGroop As System.Text.RegularExpressions.Match In Regex.Matches(GroopText)
+                        Dim Item As New Item
+                        Item.Name = SGroop.Value
+                        Select Case Item.Name
+                            Case "F.A.Q."
+                            Case Else
+                                With Item
+                                    .Type = ItemType.DIRECTORY
+                                    .ImageLink = ICO_Folder
+                                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
+                                    .Link = Groop & ";" & .Name & ";RuTrSubGroop"
+                                    items.Add(Item)
+                                End With
+                        End Select
+                    Next
+                Case Else
+
+
+
+
+                    Regex = New System.Text.RegularExpressions.Regex("(<option).*?(class=""root_forum has_sf"">" & SubGroop & ")")
+                    Dim SubSubGroopStart As String = Regex.Match(GroopText.Replace("^", vbLf)).Value
+
+
+                    Regex = New System.Text.RegularExpressions.Regex("(" & SubSubGroopStart & ").*?(?=class=""root_forum has_sf"">|optgroup>)")
+                    Dim Options As String = Regex.Match(GroopText).Value
+
+                    Regex = New System.Text.RegularExpressions.Regex("(<option).*?(option>)")
+                    Dim RegexOptionsName As New System.Text.RegularExpressions.Regex("(?<=""root_forum has_sf"">|""root_forum"">|::).*?(?=&nbsp;)")
+                    Dim RegexOptionsID As New System.Text.RegularExpressions.Regex("(?<=value="").*?(?="")")
+
+
+                    Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Options)
+
+                    Dim IDSubGroops As String = Nothing
+                    For Each SSGroop As System.Text.RegularExpressions.Match In Matches
+                        IDSubGroops = IDSubGroops & RegexOptionsID.Match(SSGroop.Value).Value & ","
+                    Next
+                    Dim ItemSearch As New Item
+                    With ItemSearch
+                        .Name = "Поиск"
+                        .Link = IDSubGroops.Remove(IDSubGroops.Count - 1) & ";Search_Groop_RuTr"
+                        .Type = ItemType.DIRECTORY
+                        .SearchOn = "Поик в подкатегории"
+                        .ImageLink = ICO_Search
+                        .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
+                    End With
+                    items.Add(ItemSearch)
+
+                    For Each SSGroop As System.Text.RegularExpressions.Match In Matches
+                        Dim Item As New Item
+                        With Item
+                            .Name = RegexOptionsName.Match(SSGroop.Value).Value
+                            .Type = ItemType.DIRECTORY
+                            .ImageLink = ICO_FolderVideo
+                            .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
+                            .Link = TrackerServer & "/forum/tracker.php?f=" & RegexOptionsID.Match(SSGroop.Value).Value & ";PAGERUTR"
+                            items.Add(Item)
+                        End With
+                    Next
+
+
+
+            End Select
+
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+
         Public Function GetPageRuTr(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Dim RequestPost As System.Net.WebRequest = System.Net.WebRequest.Create(URL)
 
@@ -855,11 +964,25 @@ Namespace RemoteFork.Plugins
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
 
-
             Dim items As New System.Collections.Generic.List(Of Item)
-            Dim Regex As New System.Text.RegularExpressions.Regex("(<tr class=""tCenter hl-tr"">).*?(</tr>)")
-            Dim Result As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer.Replace(Microsoft.VisualBasic.vbLf, " "))
 
+            Dim Regex As New System.Text.RegularExpressions.Regex("start|f-1")
+            If Regex.IsMatch(URL) = False Then
+                Regex = New System.Text.RegularExpressions.Regex("(?<=f=).*?(?=&|$)")
+                Dim ItemSearch As New Item
+                With ItemSearch
+                    .Name = "Поиск"
+                    .Link = Regex.Match(URL).Value & ";Search_Groop_RuTr"
+                    .Type = ItemType.DIRECTORY
+                    .SearchOn = "Поик в категории"
+                    .ImageLink = ICO_Search
+                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
+                    items.Add(ItemSearch)
+                End With
+            End If
+
+            Regex = New System.Text.RegularExpressions.Regex("(<tr class=""tCenter hl-tr"">).*?(</tr>)")
+            Dim Result As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer.Replace(Microsoft.VisualBasic.vbLf, " "))
             If Result.Count > 0 Then
                 For Each Match As System.Text.RegularExpressions.Match In Result
                     Dim Item As New Item
@@ -872,6 +995,8 @@ Namespace RemoteFork.Plugins
                     Item.Description = GetDescriptionRuTr(Match.Value)
                     items.Add(Item)
                 Next
+            Else
+                Return NonSearch(context, True)
             End If
 
 
@@ -945,6 +1070,7 @@ Namespace RemoteFork.Plugins
 
             Return "<span style=""color:#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
         End Function
+
         Public Function GetTopListRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
             If AuthorizationTest() = False Then Return SetLogin(context)
 
@@ -986,73 +1112,29 @@ Namespace RemoteFork.Plugins
             Dim Response As System.Net.WebResponse = RequestPost.GetResponse
             Dim dataStream As System.IO.Stream = Response.GetResponseStream
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, " ")
+            Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, "^")
+
+            Dim Regex As New System.Text.RegularExpressions.Regex("(<p class=""select"">).*?(</select>)")
+            KategoriRuTracker = Regex.Matches(ResponseFromServer)(0).Value
 
 
-            Dim Index, Title As String 
+            Regex = New System.Text.RegularExpressions.Regex("(<optgroup).*?(</optgroup>)")
+            For Each Groop As System.Text.RegularExpressions.Match In Regex.Matches(KategoriRuTracker)
 
-            Dim RegexTop As New System.Text.RegularExpressions.Regex("(<optgroup).*?(</optgroup>)")
-            For Each Groop As System.Text.RegularExpressions.Match In RegexTop.Matches(ResponseFromServer)
-                Dim Regex As New System.Text.RegularExpressions.Regex("(?<=label="").*?(?="")")
+                Regex = New System.Text.RegularExpressions.Regex("(?<=label=""&nbsp;).*?(?="")")
 
                 Select Case Regex.Matches(Groop.Value)(0).Value
-                    Case "&nbsp;Новости", "&nbsp;Книги и журналы", "&nbsp;Игры", "&nbsp;Программы и Дизайн", "&nbsp;Разное", "&nbsp;Обсуждения, встречи, общение"
+                    Case "Новости", "Книги и журналы", "Игры", "Программы и Дизайн", "Обсуждения, встречи, общение"
                     Case Else
-
-                        If Title <> Nothing Then
-                            Item = New Item
-                            With Item
-                                .Name = Title
-                                .ImageLink = ICO_Folder
-                                Index = Index.Remove(Index.Count - 2)
-                                .Link = TrackerServer & "/forum/tracker.php?f=" & Index & ";PAGERUTR"
-                                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
-                                items.Add(Item)
-                            End With
-                            Index = Nothing
-                            Title = Nothing
-                        End If
-
                         Item = New Item
                         With Item
-                            .Name = " - " & Regex.Matches(Groop.Value)(0).Value & " - "
-                            .ImageLink = ICO_Pusto
+                            .Name = Regex.Matches(Groop.Value)(0).Value
+                            .Link = .Name & ";RuTrGroop"
+                            .Type = ItemType.DIRECTORY
+                            .ImageLink = ICO_Folder
                             .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
                             items.Add(Item)
                         End With
-
-
-                        Regex = New System.Text.RegularExpressions.Regex("(<option).*?(</option>)")
-                        Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Groop.Value)
-
-
-                        For Each Optione As System.Text.RegularExpressions.Match In Matches
-
-                            Regex = New System.Text.RegularExpressions.Regex("(?<=class=""root_forum has_sf"">).*?(?=&nbsp;<)")
-                            Matches = Regex.Matches(Optione.Value)
-                            If Matches.Count > 0 Then
-                                If Title <> Nothing Then
-                                    Item = New Item
-                                    With Item
-                                        .Name = Title
-                                        .ImageLink = ICO_Folder
-                                        Index = Index.Remove(Index.Count - 2)
-                                        .Link = TrackerServer & "/forum/tracker.php?f=" & Index & ";PAGERUTR"
-                                        .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" & UserAuthorization
-                                        items.Add(Item)
-                                    End With
-                                End If
-                                Index = Nothing
-                                Title = Matches(0).Value
-                            End If
-
-
-                            Regex = New System.Text.RegularExpressions.Regex("(?<=value="").*?(?="")")
-                            Index = Index & Regex.Matches(Optione.Value)(0).Value & ","
-
-
-                        Next
-
                 End Select
             Next
 
@@ -1079,6 +1161,7 @@ Namespace RemoteFork.Plugins
             PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
+
         Public Function GetTorrentPageRuTr(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
 
             Dim RequestGet As System.Net.WebRequest = Net.WebRequest.Create(URL)
@@ -1138,6 +1221,7 @@ Namespace RemoteFork.Plugins
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
         End Function
+
         Function FormatDescriptionFileRuTr(ByVal HTML As String) As String
 
             HTML = HTML.Replace(Microsoft.VisualBasic.vbLf, "")
@@ -1178,8 +1262,15 @@ Namespace RemoteFork.Plugins
             Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:180px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
 
         End Function
-        Public Function SearchListRuTr(context As IPluginContext, ByVal search As String) As PluginApi.Plugins.Playlist
-            Dim RequestPost As System.Net.WebRequest = System.Net.WebRequest.Create(TrackerServer & "/forum/tracker.php?nm=" & search)
+        Public Function SearchListRuTr(context As IPluginContext, ByVal search As String, Optional ByVal Category As String = Nothing) As PluginApi.Plugins.Playlist
+            Dim RequestPost As System.Net.WebRequest
+            If Category = Nothing Then
+                RequestPost = System.Net.WebRequest.Create(TrackerServer & "/forum/tracker.php?nm=" & search)
+            Else
+                RequestPost = System.Net.WebRequest.Create(TrackerServer & "/forum/tracker.php?f=" & Category & "&nm=" & search)
+            End If
+
+
 
             If ProxyEnablerRuTr = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
@@ -1598,13 +1689,19 @@ Namespace RemoteFork.Plugins
             Return PlayListPlugPar(items, context)
         End Function
 
-        Function NonSearch(context As IPluginContext) As PluginApi.Plugins.Playlist
+        Function NonSearch(context As IPluginContext, Optional ByVal Categor As Boolean = False) As PluginApi.Plugins.Playlist
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
-            Item.Name = "<span style=""color:#F68648"">" & " - Ничего не найдено - " & "</span>"
             Item.Link = ""
             Item.ImageLink = ICO_Pusto
-            Item.Description = "Поиск не дал результатов"
+            If Categor = True Then
+                Item.Name = "<span style=""color#F68648"">" & " - Здесь ничего нет - " & "</span>"
+                Item.Description = "Нет информации для отображения"
+            Else
+                Item.Name = "<span style=""color#F68648"">" & " - Ничего не найдено - " & "</span>"
+                Item.Description = "Поиск не дал результатов"
+            End If
+
 
             items.Add(Item)
 
