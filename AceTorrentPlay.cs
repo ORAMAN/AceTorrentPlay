@@ -7,20 +7,23 @@ using System;
 
 namespace RemoteFork.Plugins
 {
-    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.46", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
+    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.6", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
     public class acetorrentplaycs : IPlugin
     {
-
-
         private string IPAdress;
         private string PortRemoteFork = "8027";
         private string PLUGIN_PATH = "pluginPath";
         private PluginApi.Plugins.Playlist PlayList = new PluginApi.Plugins.Playlist();
         private string next_page_url;
 
+
+
         #region Настройки
 
         #region Иконки
+        private string ICO_FolderVideo = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246foldervideos.png";
+        private string ICO_FolderVideo2 = "http://s1.iconbird.com/ico/1112/Concave/w256h2561352644144Videos.png";
+        private string LOGO_RuTr = "https://rutrk.org/logo/logo.gif";
         private string ICO_Folder = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246folder.png";
 
         private string ICO_Settings = "http://s1.iconbird.com/ico/2013/11/504/w128h1281385326483gear.png";
@@ -55,40 +58,40 @@ namespace RemoteFork.Plugins
 
         private string FunctionsGetTorrentPlayList;
         private bool ProxyEnablerNNM;
-        private string TrackerServerNNM; //= "http://nnmclub.to" '"http://nnm-club.me"
+        private string TrackerServerNNM;
         #endregion
 
 
         public void Load_Settings()
         {
 
-            string TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", ""));
+            string TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "FunctionsGetTorrentPlayList", ""));
             if (TempStr == "")
             {
                 FunctionsGetTorrentPlayList = "GetFileListM3U";
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
             }
             else
             {
                 FunctionsGetTorrentPlayList = TempStr;
             }
 
-            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ""));
+            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "ProxyEnablerNNM", ""));
             if (TempStr == "")
             {
                 ProxyEnablerNNM = true;
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ProxyEnablerNNM);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "ProxyEnablerNNM", ProxyEnablerNNM);
             }
             else
             {
                 ProxyEnablerNNM = System.Convert.ToBoolean(TempStr);
             }
 
-            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", ""));
+            TempStr = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "TrackerServerNNM", ""));
             if (TempStr == "")
             {
                 TrackerServerNNM = "http://nnmclub.to";
-                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", TrackerServerNNM);
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "TrackerServerNNM", TrackerServerNNM);
             }
             else
             {
@@ -98,9 +101,9 @@ namespace RemoteFork.Plugins
         }
         public void Save_Settings()
         {
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "ProxyEnablerNNM", ProxyEnablerNNM);
-            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", "TrackerServerNNM", TrackerServerNNM);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "FunctionsGetTorrentPlayList", FunctionsGetTorrentPlayList);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "ProxyEnablerNNM", ProxyEnablerNNM);
+            Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", "TrackerServerNNM", TrackerServerNNM);
         }
 
 
@@ -162,7 +165,7 @@ namespace RemoteFork.Plugins
             Item_TrackerServerNNM.Description = "Доступ к ресурсу осуществляется через " + TrackerServerNNM;
             Items.Add(Item_TrackerServerNNM);
 
-            PlayList.IsIptv = "False";
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(Items, context);
         }
 
@@ -195,7 +198,7 @@ namespace RemoteFork.Plugins
                 case "NNM-Club_Settings":
                     break;
                 case "DeleteSettings":
-                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\\RemoteFork\\Plugins\\acetorrentplaycsvb\\", false);
+                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\\RemoteFork\\Plugins\\acetorrentplaycs\\", false);
                     Load_Settings();
                     ParametrSettings = "";
                     break;
@@ -241,23 +244,32 @@ namespace RemoteFork.Plugins
         public PluginApi.Plugins.Playlist GetList(IPluginContext context)
         {
 
-
+          
             IPAdress = context.GetRequestParams()["host"].Split(':')[0];
-
 
             var path = context.GetRequestParams().Get(PLUGIN_PATH);
             path = ((((path == null)) ? "plugin" : "plugin;" + path));
 
-            if (context.GetRequestParams().Get("search") != null)
-            {
+           
+                if (context.GetRequestParams().Get("search") != null)
+                {
                 switch (path)
                 {
                     case "plugin;Search_NNM":
                         return SearchListNNM(context, context.GetRequestParams()["search"]);
-                    case "plugin;Search_rutracker":
-                        break;
                     case "plugin;Search_RuTor":
                         return GetPAGERUTOR(context, TrackerServerRuTor + "/search/0/0/100/2/" + context.GetRequestParams()["search"]);
+                    case "plugin;Search_rutracker":
+                        return SearchListRuTr(context, context.GetRequestParams()["search"]);
+                    case "plugin;RuTr_Login":
+                        Login = context.GetRequestParams().Get("search");
+                        return SetPassword(context);
+                    case "plugin;RuTr_Password":
+                        Password = context.GetRequestParams().Get("search");
+                        return AuthorizationRuTr(context);
+                    case "plugin;RuTr_Capcha_Key":
+                        Capcha = context.GetRequestParams().Get("search");
+                        return AuthorizationRuTr(context);
                 }
             }
 
@@ -272,6 +284,8 @@ namespace RemoteFork.Plugins
                     return GetTopNNMClubList(context);
                 case "plugin;rutor":
                     return GetTopListRuTor(context);
+                case "plugin;rutr":
+                    return GetTopListRuTr(context);
             }
 
 
@@ -290,6 +304,20 @@ namespace RemoteFork.Plugins
                     return GetPAGERUTOR(context, PathSpliter[PathSpliter.Length - 2]);
                 case "PAGEFILMRUTOR":
                     return GetTorrentPageRuTor(context, PathSpliter[PathSpliter.Length - 2]);
+                //Трекер RuTracker
+                case "RuTrSubGroop":
+                    return GetListRuTrCategory(context, PathSpliter[PathSpliter.Length - 3], PathSpliter[PathSpliter.Length - 2]);
+                case "RuTrGroop":
+                    return GetListRuTrCategory(context, PathSpliter[PathSpliter.Length - 2]);
+                case "Search_Groop_RuTr":
+                    return SearchListRuTr(context, context.GetRequestParams().Get("search"), PathSpliter[PathSpliter.Length - 2]);
+                case "PAGERUTR":
+                    return GetPageRuTr(context, PathSpliter[PathSpliter.Length - 2]);
+                case "PAGEFILMRUTR":
+                    return GetTorrentPageRuTr(context, PathSpliter[PathSpliter.Length - 2]);
+                case "RuTrNonAuthorization":
+                    Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\\RemoteFork\\Plugins\\RuTracker\\", false);
+                    return GetTopListRuTr(context);
 
                 //Торрент тв
                 case "ent":
@@ -357,6 +385,7 @@ namespace RemoteFork.Plugins
                         return PlayListPlugPar(items, context);
 
                     }
+                case ".m3u8":
                 case ".m3u":
                     {
                         Item Item = new Item();
@@ -364,8 +393,10 @@ namespace RemoteFork.Plugins
                         WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0");
                         WC.Encoding = System.Text.Encoding.UTF8;
                         Item.Type = ItemType.DIRECTORY;
-                        Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFiles);
+                        Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycs%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFiles);
+                        // .GetInfo = WC.DownloadString(PathFiles)
                         items.Add(Item);
+                        PlayList.IsIptv = "true";
                         return PlayListPlugPar(items, context);
                     }
             }
@@ -428,7 +459,7 @@ namespace RemoteFork.Plugins
                 items.Add(Item);
             }
 
-            foreach (string File in System.IO.Directory.EnumerateFiles(PathFiles, "*.*", System.IO.SearchOption.TopDirectoryOnly).Where((s) => s.EndsWith(".m3u")))
+            foreach (string File in System.IO.Directory.EnumerateFiles(PathFiles, "*.*", System.IO.SearchOption.TopDirectoryOnly).Where((s) => s.EndsWith(".m3u") || s.EndsWith(".m3u8")))
             {
                 Item Item = new Item();
                 Item.ImageLink = ICO_M3UFile;
@@ -439,6 +470,7 @@ namespace RemoteFork.Plugins
                 items.Add(Item);
             }
 
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
 
         }
@@ -473,6 +505,10 @@ namespace RemoteFork.Plugins
                 pluginParams[PLUGIN_PATH] = next_page_url;
                 PlayList.NextPageUrl = context.CreatePluginUrl(pluginParams);
             }
+            else
+            {
+                PlayList.NextPageUrl = null;
+            }
             PlayList.Timeout = "60"; //sec
 
             PlayList.Items = items.ToArray();
@@ -501,6 +537,7 @@ namespace RemoteFork.Plugins
             Item ItemTorrentTV = new Item();
             Item ItemNNMClub = new Item();
             Item ItemRuTor = new Item();
+            Item ItemRuTracker = new Item();
             try
             {
                 AceProxEnabl = true;
@@ -509,11 +546,12 @@ namespace RemoteFork.Plugins
                 AceMadiaGet = "<html> Ответ от движка Ace Media получен: " + "<div>" + AceMadiaGet + "</div></html>";
 
 
-                ItemTop.ImageLink = "http://static.acestream.net/sites/acestream/img/ACE-logo.png";
-                ItemTop.Name = " - acetorrentplaycsvb - ";
+                ItemTop.ImageLink = "http://cs5-2.4pda.to/8001667.png";
+                ItemTop.Name = "<span style=\"color:#9DB1CC\"> - AceTorrentPlay - </span>";
                 ItemTop.Link = "";
                 ItemTop.Type = ItemType.FILE;
                 ItemTop.Description = AceMadiaGet + "<html><p><p><img src=\" http://static.acestream.net/sites/acestream/img/ACE-logo.png\"></html>";
+
 
                 ItemTorrentTV.Name = "Torrent TV";
                 ItemTorrentTV.Type = ItemType.DIRECTORY;
@@ -527,14 +565,13 @@ namespace RemoteFork.Plugins
                 ItemTorrentTV.Description = "<html><img src=\" http://torrent-tv.ru/images/logo.png\"></html><p>" + WC.DownloadString(System.IO.Path.GetTempPath() + "MyTraf.tmp");
 
                 ItemNNMClub.ImageLink = ICO_NNMClub;
-                ItemNNMClub.Name = "NoNaMe - Club";
+                ItemNNMClub.Name = "Tracker NoNaMe-Club";
                 ItemNNMClub.Link = "nnmclub";
                 ItemNNMClub.Type = ItemType.DIRECTORY;
 
                 string Description_NNMC = "Добро пожаловать на интеллигентный битторрент. Наш торрент-трекер - это место, где можно не только скачать фильмы, музыку и программы, но и найти друзей или просто пообщаться на интересующие Вас темы. Для того, чтобы скачать с помощью торрента не нужно платить. Главное правило торрент-трекера: скачал сам, останься на раздаче. Для этого просто не надо удалять торрент из клиента.";
                 ItemNNMClub.Description = "<html><font face=\" Arial\" size=\" 5\"><b>Трекер " + ItemNNMClub.Name + "</font></b><p><img src=\" http://assets.nnm-club.ws/forum/images/logos/10let8.png\" /> <p>" + Description_NNMC + "</html>";
 
-                //.ImageLink = TrackerServerRuTor & "/favicon.ico"
                 ItemRuTor.ImageLink = "http://s1.iconbird.com/ico/2013/12/566/w128h1281387223970serpmolot128x128.png";
                 ItemRuTor.Name = "Tracker Rutor";
                 ItemRuTor.Link = "rutor";
@@ -542,16 +579,25 @@ namespace RemoteFork.Plugins
                 string Description_RuTor = "Файлы для обмена предоставлены пользователями сайта. Администрация не несёт ответственности за их содержание. На сервере хранятся только торрент-файлы. Это значит, что мы не храним никаких нелегальных материалов.";
                 ItemRuTor.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + ItemRuTor.Name + "</font></b><p><img src=\"" + TrackerServerRuTor + LOGO_TrackerRutor + "\" /><p>" + Description_RuTor + "</html>";
 
+                ItemRuTracker.ImageLink = "http://s1.iconbird.com/ico/0612/Inside/w256h2561339745864icontextoinsidefavorites.png";
+                ItemRuTracker.Name = "Tracker RuTracker";
+                ItemRuTracker.Link = "rutr";
+                ItemRuTracker.Type = ItemType.DIRECTORY;
+                string Description_RuTr = "RuTracker.org (ранее — Torrents.ru) — крупнейший русскоязычный BitTorrent-трекер, насчитывающий более 15,3 миллиона зарегистрированных учётных записей. На трекере зарегистрировано 1,728 миллиона раздач (из которых более 1,60 миллиона — «живых»), суммарный размер которых составляет 3.20 петабайта";
+                ItemRuTracker.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + ItemRuTracker.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /><p>" + Description_RuTr + "</html>";
+
                 items.Add(ItemTop);
                 items.Add(ItemTorrentTV);
-                items.Add(ItemNNMClub);
                 items.Add(ItemRuTor);
+                items.Add(ItemRuTracker);
+                items.Add(ItemNNMClub);
+
             }
             catch (Exception ex)
             {
                 AceProxEnabl = false;
                 ItemTop.ImageLink = ICO_Error2;
-                ItemTop.Name = "        - acetorrentplaycsvb -        ";
+                ItemTop.Name = "<span style=\"color:#FF380A\"> - AceTorrentPlay - </span>";
                 ItemTop.Link = "";
                 ItemTop.Type = ItemType.FILE;
                 ItemTop.Description = "Ответ от движка Ace Media не получен!" + "<p>" + ex.Message + "</p>";
@@ -581,6 +627,7 @@ namespace RemoteFork.Plugins
             ItemSettings.ImageLink = ICO_Settings;
             items.Add(ItemSettings);
 
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
 
@@ -667,6 +714,799 @@ namespace RemoteFork.Plugins
             return HtmlFile;
 
         }
+        #region Rutracker
+        private bool ProxyEnablerRuTr = true;
+        private string TrackerServer = "https://rutracker.org";
+        #region Авторизация
+        private string Login;
+        private string Password;
+        private string Cap_Sid;
+        private string Cap_Code;
+        private string Capcha;
+        private string Cookies;
+
+        private string UserAuthorization;
+        public bool AuthorizationTest()
+        {
+            Cookies = System.Convert.ToString(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\RuTracker\\", "Cookies", ""));
+            if (Cookies == "")
+            {
+                Cookies = "bb_ssl=1";
+            }
+            System.Net.HttpWebRequest Request = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php");
+            Request.Method = "GET";
+            Request.Headers.Add("Cookie", Cookies);
+            Request.Host = "rutracker.org";
+            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+            Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3");
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7");
+            Request.KeepAlive = true;
+            Request.Referer = "https://rutracker.org/forum/index.php";
+
+            Request.ContentType = "application/x-www-form-urlencoded";
+            Request.AllowAutoRedirect = false;
+            Request.AutomaticDecompression = System.Net.DecompressionMethods.GZip;
+            if (ProxyEnablerRuTr == true)
+            {
+                Request.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+
+
+            System.Net.WebResponse Response = Request.GetResponse();
+            System.IO.Stream Stream = Response.GetResponseStream();
+            Stream = Response.GetResponseStream();
+            System.IO.StreamReader Reader = new System.IO.StreamReader(Stream, System.Text.Encoding.GetEncoding(1251));
+            string OtvetServera = Reader.ReadToEnd().Replace("\n", " ");
+            Reader.Close();
+            Stream.Close();
+
+            System.Text.RegularExpressions.Regex Reg = new System.Text.RegularExpressions.Regex("(>Вход</span>).*?(</span>)");
+            System.Text.RegularExpressions.MatchCollection Matchs = Reg.Matches(OtvetServera);
+
+            if (Matchs.Count > 0)
+            {
+                Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\RuTracker\\", "Cookies", "bb_ssl=1");
+                return false;
+            }
+            else
+            {
+                Reg = new System.Text.RegularExpressions.Regex("(<span class=\"logged-in-as-cap\">).*?(</div>)");
+                Matchs = Reg.Matches(OtvetServera);
+                if (Matchs.Count > 0)
+                {
+                    Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\RuTracker\\", "Cookies", Cookies);
+                    UserAuthorization = Matchs[0].Value;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public PluginApi.Plugins.Playlist AuthorizationRuTr(IPluginContext context)
+        {
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            Cookies = "bb_ssl=1";
+            System.Net.HttpWebRequest Request = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/login.php?redirect=tracker.php");
+            Request.Method = "POST";
+            Request.Headers.Add("Cookie", Cookies);
+            Request.Host = "rutracker.org";
+            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+            Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3");
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+            Request.Headers.Add(System.Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7");
+            Request.KeepAlive = true;
+            Request.Referer = "https://rutracker.org/forum/index.php";
+            Request.ContentType = "application/x-www-form-urlencoded";
+            Request.AllowAutoRedirect = false;
+            Request.AutomaticDecompression = System.Net.DecompressionMethods.GZip;
+            if (ProxyEnablerRuTr == true)
+            {
+                Request.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+
+            string StringData = null;
+            if (Capcha == "")
+            {
+                StringData = "redirect=tracker.php&login_username=" + Login + "&login_password=" + Password + "&login=Вход";
+            }
+            else
+            {
+                StringData = "redirect=tracker.php&login_username=" + Login + "&login_password=" + Password + "&cap_sid=" + Cap_Sid + "&" + Cap_Code + "=" + Capcha + "&login=%C2%F5%EE%E4";
+            }
+            Capcha = "";
+            System.IO.Stream Stream = Request.GetRequestStream();
+            byte[] ByteData = System.Text.Encoding.GetEncoding(1251).GetBytes(StringData);
+            Stream.Write(ByteData, 0, ByteData.Length);
+            Stream.Close();
+
+
+            System.Net.WebResponse Response = Request.GetResponse();
+            Stream = Response.GetResponseStream();
+            System.IO.StreamReader Reader = new System.IO.StreamReader(Stream, System.Text.Encoding.GetEncoding(1251));
+            string OtvetServera = Reader.ReadToEnd().Replace("\n", " ");
+
+            if (!(string.IsNullOrEmpty(Response.Headers["Set-Cookie"])))
+            {
+
+                Cookies = Response.Headers["Set-Cookie"];
+                Request = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php");
+                Request.Method = "GET";
+                Request.Headers.Add("Cookie", Cookies);
+                Request.Host = "rutracker.org";
+                Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36";
+                Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+                Request.Headers.Add(System.Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3");
+                Request.Headers.Add(System.Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate");
+                Request.Headers.Add(System.Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7");
+                Request.KeepAlive = true;
+                Request.Referer = "https://rutracker.org/forum/login.php?redirect=tracker.php";
+                Request.Headers.Add(System.Net.HttpRequestHeader.Cookie, "spylog_test=1");
+                Request.ContentType = "application/x-www-form-urlencoded";
+                Request.AllowAutoRedirect = false;
+                Request.AutomaticDecompression = System.Net.DecompressionMethods.GZip;
+                if (ProxyEnablerRuTr == true)
+                {
+                    Request.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+                }
+
+                Response = Request.GetResponse();
+                Stream = Response.GetResponseStream();
+                Reader = new System.IO.StreamReader(Stream, System.Text.Encoding.GetEncoding(1251));
+                OtvetServera = Reader.ReadToEnd().Replace("\n", " ");
+                Reader.Close();
+                Stream.Close();
+
+                System.Text.RegularExpressions.Regex Reg = new System.Text.RegularExpressions.Regex("(<a href=\"profile.php?mode=register\"><b>).*?(</span>)");
+                System.Text.RegularExpressions.MatchCollection Matchs = Reg.Matches(OtvetServera);
+
+                if (Matchs.Count > 0)
+                {
+                    Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\RuTracker\\", "Cookies", "bb_ssl=1");
+                    return SetLogin(context);
+                }
+                else
+                {
+                    Reg = new System.Text.RegularExpressions.Regex("(<span class=\"logged-in-as-cap\">).*?(</div>)");
+                    Matchs = Reg.Matches(OtvetServera);
+                    if (Matchs.Count > 0)
+                    {
+                        Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\\Software\\RemoteFork\\Plugins\\RuTracker\\", "Cookies", Cookies);
+                        return GetTopListRuTr(context);
+                    }
+                }
+            }
+
+            string AdressCapha = null;
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<td class=\"tRight nowrap\">Код:</td> 					<td> 			<div><img src=\"//).*?(.jpg)");
+            System.Text.RegularExpressions.MatchCollection Matches = Regex.Matches(OtvetServera);
+            if (Matches.Count > 0)
+            {
+                AdressCapha = "http://" + Regex.Matches(OtvetServera)[0].Value;
+                Regex = new System.Text.RegularExpressions.Regex("(?<=name=\"cap_sid\" value=\").*?(?=\">)");
+                Cap_Sid = Regex.Matches(OtvetServera)[0].Value;
+                Regex = new System.Text.RegularExpressions.Regex("(cap_code_).*?(?=\")");
+                Cap_Code = Regex.Matches(OtvetServera)[0].Value;
+
+
+                Regex = new System.Text.RegularExpressions.Regex("(<h4 class=\"warnColor1 tCenter mrg_16\">).*?(</h4>)");
+                Matches = Regex.Matches(OtvetServera);
+
+                Item ItemCap = new Item();
+                ItemCap.Name = "Capcha";
+                ItemCap.SearchOn = "Введите код";
+                ItemCap.Link = "RuTr_Capcha_Key";
+                ItemCap.Description = Matches[0].Value + "<img src=\"" + AdressCapha + "\" width=\"120\" height=\"72\">";
+                ItemCap.ImageLink = AdressCapha;
+                items.Add(ItemCap);
+
+            }
+
+
+
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+
+        public PluginApi.Plugins.Playlist SetLogin(IPluginContext context)
+        {
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            Item Item = new Item();
+
+            Item.Name = "Login";
+            Item.Link = "RuTr_Login";
+            Item.Type = ItemType.DIRECTORY;
+            Item.SearchOn = "Login";
+            Item.ImageLink = ICO_Login;
+            items.Add(Item);
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+
+
+        public PluginApi.Plugins.Playlist SetPassword(IPluginContext context)
+        {
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            Item Item = new Item();
+
+            Item = new Item();
+            Item.Name = "Password";
+            Item.Link = "RuTr_Password";
+            Item.Type = ItemType.DIRECTORY;
+            Item.SearchOn = "Password";
+            Item.ImageLink = ICO_Password;
+            items.Add(Item);
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+        #endregion
+
+        private string KategoriRuTracker;
+
+        public PluginApi.Plugins.Playlist GetListRuTrCategory(IPluginContext context, string Groop)
+        {
+            return GetListRuTrCategory(context, Groop, null);
+        }
+
+        //INSTANT C# NOTE: Overloaded method(s) are created above to convert the following method having optional parameters:
+        //ORIGINAL LINE: Public Function GetListRuTrCategory(context As IPluginContext, ByVal Groop As String, Optional ByVal SubGroop As String = null) As PluginApi.Plugins.Playlist
+        public PluginApi.Plugins.Playlist GetListRuTrCategory(IPluginContext context, string Groop, string SubGroop)
+        {
+
+            List<Item> items = new List<Item>();
+
+
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<optgroup label=\"&nbsp;" + Groop + ").*?(optgroup>)");
+            string GroopText = Regex.Matches(KategoriRuTracker)[0].Value.Replace(" |- ", "::").Replace("(", " ").Replace(")", " ");
+
+
+
+            switch (SubGroop)
+            {
+                case null:
+                    {
+
+                        Regex = new System.Text.RegularExpressions.Regex("(<option).*?(option>)");
+                        System.Text.RegularExpressions.MatchCollection Matches = Regex.Matches(GroopText);
+                        System.Text.RegularExpressions.Regex RegexOptionsID = new System.Text.RegularExpressions.Regex("(?<=value=\").*?(?=\")");
+                        string IDSubGroops = null;
+                        foreach (System.Text.RegularExpressions.Match SSGroop in Matches)
+                        {
+                            IDSubGroops = IDSubGroops + RegexOptionsID.Match(SSGroop.Value).Value + ",";
+                        }
+                        Item ItemSearch = new Item();
+                        ItemSearch.Name = "Поиск";
+                        ItemSearch.Link = IDSubGroops.Remove(IDSubGroops.Length - 1) + ";Search_Groop_RuTr";
+                        ItemSearch.Type = ItemType.DIRECTORY;
+                        ItemSearch.SearchOn = "Поик в категории";
+                        ItemSearch.ImageLink = ICO_Search;
+                        ItemSearch.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + ItemSearch.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                        items.Add(ItemSearch);
+
+
+                        Regex = new System.Text.RegularExpressions.Regex("(?<=class=\"root_forum has_sf\">).*?(?=&nbsp;)");
+                        foreach (System.Text.RegularExpressions.Match SGroop in Regex.Matches(GroopText))
+                        {
+                            Item Item = new Item();
+                            Item.Name = SGroop.Value;
+                            switch (Item.Name)
+                            {
+                                case "F.A.Q.":
+                                    break;
+                                default:
+                                    Item.Type = ItemType.DIRECTORY;
+                                    Item.ImageLink = ICO_Folder;
+                                    Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                                    Item.Link = Groop + ";" + Item.Name + ";RuTrSubGroop";
+                                    items.Add(Item);
+                                    break;
+                            }
+                        }
+                        break;
+                    }
+                default:
+                    {
+
+
+
+
+                        Regex = new System.Text.RegularExpressions.Regex("(<option).*?(class=\"root_forum has_sf\">" + SubGroop + ")");
+                        string SubSubGroopStart = Regex.Match(GroopText.Replace("^", "\n")).Value;
+
+
+                        Regex = new System.Text.RegularExpressions.Regex("(" + SubSubGroopStart + ").*?(?=class=\"root_forum has_sf\">|optgroup>)");
+                        string Options = Regex.Match(GroopText).Value;
+
+                        Regex = new System.Text.RegularExpressions.Regex("(<option).*?(option>)");
+                        System.Text.RegularExpressions.Regex RegexOptionsName = new System.Text.RegularExpressions.Regex("(?<=\"root_forum has_sf\">|\"root_forum\">|::).*?(?=&nbsp;)");
+                        System.Text.RegularExpressions.Regex RegexOptionsID = new System.Text.RegularExpressions.Regex("(?<=value=\").*?(?=\")");
+
+
+                        System.Text.RegularExpressions.MatchCollection Matches = Regex.Matches(Options);
+
+                        string IDSubGroops = null;
+                        foreach (System.Text.RegularExpressions.Match SSGroop in Matches)
+                        {
+                            IDSubGroops = IDSubGroops + RegexOptionsID.Match(SSGroop.Value).Value + ",";
+                        }
+                        Item ItemSearch = new Item();
+                        ItemSearch.Name = "Поиск";
+                        ItemSearch.Link = IDSubGroops.Remove(IDSubGroops.Length - 1) + ";Search_Groop_RuTr";
+                        ItemSearch.Type = ItemType.DIRECTORY;
+                        ItemSearch.SearchOn = "Поик в подкатегории";
+                        ItemSearch.ImageLink = ICO_Search;
+                        ItemSearch.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + ItemSearch.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                        items.Add(ItemSearch);
+
+                        foreach (System.Text.RegularExpressions.Match SSGroop in Matches)
+                        {
+                            Item Item = new Item();
+                            Item.Name = RegexOptionsName.Match(SSGroop.Value).Value;
+                            Item.Type = ItemType.DIRECTORY;
+                            Item.ImageLink = ICO_FolderVideo;
+                            Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                            Item.Link = TrackerServer + "/forum/tracker.php?f=" + RegexOptionsID.Match(SSGroop.Value).Value + ";PAGERUTR";
+                            items.Add(Item);
+                        }
+
+
+
+                        break;
+                    }
+            }
+
+
+            PlayList.IsIptv = "False";
+            return PlayListPlugPar(items, context);
+        }
+
+        public PluginApi.Plugins.Playlist GetPageRuTr(IPluginContext context, string URL)
+        {
+            System.Net.WebRequest RequestPost = System.Net.WebRequest.Create(URL);
+
+            if (ProxyEnablerRuTr == true)
+            {
+                RequestPost.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestPost.Method = "POST";
+            RequestPost.ContentType = "text/html; charset=windows-1251";
+            RequestPost.Headers.Add("Cookie", Cookies);
+            RequestPost.ContentType = "application/x-www-form-urlencoded";
+            System.IO.Stream myStream = RequestPost.GetRequestStream();
+            byte[] DataByte = System.Text.Encoding.GetEncoding(1251).GetBytes("prev_new=0&prev_oop=0&o=1&s=2&tm=-1&pn=&nm=");
+            myStream.Write(DataByte, 0, DataByte.Length);
+            myStream.Close();
+
+            System.Net.WebResponse Response = RequestPost.GetResponse();
+            System.IO.Stream dataStream = Response.GetResponseStream();
+            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string ResponseFromServer = reader.ReadToEnd();
+
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("start|f-1");
+            if (Regex.IsMatch(URL) == false)
+            {
+                Regex = new System.Text.RegularExpressions.Regex("(?<=f=).*?(?=&|$)");
+                Item ItemSearch = new Item();
+                ItemSearch.Name = "Поиск";
+                ItemSearch.Link = Regex.Match(URL).Value + ";Search_Groop_RuTr";
+                ItemSearch.Type = ItemType.DIRECTORY;
+                ItemSearch.SearchOn = "Поик в категории";
+                ItemSearch.ImageLink = ICO_Search;
+                ItemSearch.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + ItemSearch.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                items.Add(ItemSearch);
+            }
+
+            Regex = new System.Text.RegularExpressions.Regex("(<tr class=\"tCenter hl-tr\">).*?(</tr>)");
+            System.Text.RegularExpressions.MatchCollection Result = Regex.Matches(ResponseFromServer.Replace("\n", " "));
+            if (Result.Count > 0)
+            {
+                foreach (System.Text.RegularExpressions.Match Match in Result)
+                {
+                    Item Item = new Item();
+                    Regex = new System.Text.RegularExpressions.Regex("(?<=<a data-topic_id=\").*?(?=\")");
+                    string LinkID = Regex.Matches(Match.Value)[0].Value;
+                    Item.Link = TrackerServer + "/forum/viewtopic.php?t=" + LinkID + ";PAGEFILMRUTR";
+                    Regex = new System.Text.RegularExpressions.Regex("(?<=" + LinkID + "\">).*?(?=</a>)");
+                    Item.Name = Regex.Matches(Match.Value)[0].Value;
+                    Item.ImageLink = ICO_TorrentFile;
+                    Item.Description = GetDescriptionRuTr(Match.Value);
+                    items.Add(Item);
+                }
+            }
+            else
+            {
+                return NonSearch(context, true);
+            }
+
+
+            next_page_url = null;
+            Regex = new System.Text.RegularExpressions.Regex("(?<=&amp;start=).*?(?=\")");
+            Result = Regex.Matches(ResponseFromServer);
+            if (Result.Count > 0)
+            {
+                Regex = new System.Text.RegularExpressions.Regex("(.*).*(?=&start)");
+                System.Text.RegularExpressions.MatchCollection Matchs = Regex.Matches(URL);
+                if (Matchs.Count > 0)
+                {
+                    next_page_url = Matchs[0].Value + "&start=" + Result[Result.Count - 1].Value + ";PAGERUTR";
+                }
+                else
+                {
+                    next_page_url = URL + "&start=" + Result[Result.Count - 1].Value + ";PAGERUTR";
+                }
+            }
+
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context, next_page_url);
+        }
+
+        public string GetDescriptionRuTr(string HTML)
+        {
+
+
+            string Title = null;
+            System.Text.RegularExpressions.Regex RegexTop = new System.Text.RegularExpressions.Regex("(?<=href=\"viewtopic.php).*?(?=</a>)");
+            System.Text.RegularExpressions.Regex RegexSub = new System.Text.RegularExpressions.Regex("(?<=>).*(.*)");
+            try
+            {
+                Title = RegexSub.Matches(RegexTop.Matches(HTML)[0].Value)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+
+
+
+            RegexTop = new System.Text.RegularExpressions.Regex("(?<=<a class=\"small tr-dl dl-stub\").*?(?=;</a>)");
+            RegexSub = new System.Text.RegularExpressions.Regex("(?<=\">).*(?=&)");
+            string SizeFile = null;
+            try
+            {
+                SizeFile = "<br>Размер: " + RegexSub.Matches(RegexTop.Matches(HTML)[0].Value)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            RegexTop = new System.Text.RegularExpressions.Regex("(?<=title=\"Личи\"><b>).*?(</b>)");
+            RegexSub = new System.Text.RegularExpressions.Regex("(?<=<b class=\"seedmed\">).*?(?=</b>)");
+            string SidsPirs = null;
+            try
+            {
+                SidsPirs = "<br><br>Seeders: " + RegexSub.Matches(HTML)[0].Value + "<br>Leechers: " + RegexTop.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            RegexTop = new System.Text.RegularExpressions.Regex("(?<=<a class=\"gen f\").*?(?=</a>)");
+            RegexSub = new System.Text.RegularExpressions.Regex("(?<=\">).*(.*)");
+            string Razdel = null;
+            try
+            {
+                Razdel = "<br><br>Раздел: " + RegexSub.Matches(RegexTop.Matches(HTML)[0].Value)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+            RegexTop = new System.Text.RegularExpressions.Regex("(?<=<td class=\"row4 small nowrap\").*?(?=</td>)");
+            RegexSub = new System.Text.RegularExpressions.Regex("(?<=<p>).*(?=</p>)");
+            string DataCreate = null;
+            try
+            {
+
+                DataCreate = "<br><br>Создан: " + RegexSub.Matches(RegexTop.Matches(HTML)[0].Value)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+
+
+
+            return "<span style=\"color:#3090F0\">" + Title + "</span><br>" + SizeFile + SidsPirs + Razdel + DataCreate;
+        }
+
+        public PluginApi.Plugins.Playlist GetTopListRuTr(IPluginContext context)
+        {
+            if (AuthorizationTest() == false)
+            {
+                return SetLogin(context);
+            }
+
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            Item Item = new Item();
+
+            Item.Name = "Поиск";
+            Item.Link = "Search_rutracker";
+            Item.Type = ItemType.DIRECTORY;
+            Item.SearchOn = "Поик на RuTracker";
+            Item.ImageLink = ICO_Search;
+            Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+            items.Add(Item);
+
+            Item = new Item();
+            Item.Name = "Торренты за сегодня";
+            Item.Link = TrackerServer + "/forum/tracker.php?f-1;PAGERUTR";
+            Item.Type = ItemType.DIRECTORY;
+            Item.ImageLink = ICO_FolderVideo;
+            Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+            items.Add(Item);
+
+
+            System.Net.WebRequest RequestPost = System.Net.WebRequest.Create(TrackerServer + "/forum/tracker.php");
+            if (ProxyEnablerRuTr == true)
+            {
+                RequestPost.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestPost.Method = "POST";
+            RequestPost.ContentType = "text/html; charset=windows-1251";
+            RequestPost.Headers.Add("Cookie", Cookies);
+            RequestPost.ContentType = "application/x-www-form-urlencoded";
+            System.IO.Stream myStream = RequestPost.GetRequestStream();
+            byte[] DataByte = System.Text.Encoding.GetEncoding(1251).GetBytes("prev_new=0&prev_oop=0&o=1&s=2&tm=-1&pn=&nm=");
+            myStream.Write(DataByte, 0, DataByte.Length);
+            myStream.Close();
+
+            System.Net.WebResponse Response = RequestPost.GetResponse();
+            System.IO.Stream dataStream = Response.GetResponseStream();
+            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string ResponseFromServer = reader.ReadToEnd().Replace("\n", "^");
+
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<p class=\"select\">).*?(</select>)");
+            KategoriRuTracker = Regex.Matches(ResponseFromServer)[0].Value;
+
+
+            Regex = new System.Text.RegularExpressions.Regex("(<optgroup).*?(</optgroup>)");
+            foreach (System.Text.RegularExpressions.Match Groop in Regex.Matches(KategoriRuTracker))
+            {
+
+                Regex = new System.Text.RegularExpressions.Regex("(?<=label=\"&nbsp;).*?(?=\")");
+
+                switch (Regex.Matches(Groop.Value)[0].Value)
+                {
+                    case "Новости":
+                    case "Книги и журналы":
+                    case "Игры":
+                    case "Программы и Дизайн":
+                    case "Обсуждения, встречи, общение":
+                        break;
+                    default:
+                        Item = new Item();
+                        Item.Name = Regex.Matches(Groop.Value)[0].Value;
+                        Item.Link = Item.Name + ";RuTrGroop";
+                        Item.Type = ItemType.DIRECTORY;
+                        Item.ImageLink = ICO_Folder;
+                        Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"" + LOGO_RuTr + "\" /> <p>" + UserAuthorization;
+                        items.Add(Item);
+                        break;
+                }
+            }
+
+
+            Item = new Item();
+            Item.Name = "";
+            Item.Link = "";
+            Item.Type = ItemType.FILE;
+            Item.ImageLink = ICO_Pusto;
+            items.Add(Item);
+
+
+            Item = new Item();
+            Item.Name = "Выйти с RuTracker";
+            Item.Link = "RuTrNonAuthorization";
+            Item.Type = ItemType.DIRECTORY;
+            Item.ImageLink = ICO_Delete;
+            items.Add(Item);
+
+            PlayList.IsIptv = "False";
+            return PlayListPlugPar(items, context);
+        }
+
+        public PluginApi.Plugins.Playlist GetTorrentPageRuTr(IPluginContext context, string URL)
+        {
+
+            System.Net.WebRequest RequestGet = System.Net.WebRequest.Create(URL);
+            if (ProxyEnablerRuTr == true)
+            {
+                RequestGet.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestGet.Method = "Get";
+            RequestGet.Headers.Add("Cookie", Cookies);
+
+            System.Net.WebResponse Response = RequestGet.GetResponse();
+            System.IO.Stream dataStream = Response.GetResponseStream();
+            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string responseFromServer = reader.ReadToEnd();
+            reader.Close();
+            dataStream.Close();
+            Response.Close();
+
+
+
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<p><a href=\").*?(?=\")");
+            string TorrentPath = TrackerServer + "/forum/" + Regex.Matches(responseFromServer)[0].Value;
+
+
+            System.Net.WebRequest RequestTorrent = System.Net.WebRequest.Create(TorrentPath);
+            if (ProxyEnablerRuTr == true)
+            {
+                RequestTorrent.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestTorrent.Method = "Get";
+            RequestTorrent.Headers.Add("Cookie", Cookies);
+
+            Response = RequestTorrent.GetResponse();
+            dataStream = Response.GetResponseStream();
+            reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string FileTorrent = reader.ReadToEnd();
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath() + "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251));
+            reader.Close();
+            dataStream.Close();
+            Response.Close();
+
+
+            TorrentPlayList[] PlayListtoTorrent = GetFileList(System.IO.Path.GetTempPath() + "TorrentTemp.torrent");
+
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+
+            string Description = FormatDescriptionFileRuTr(responseFromServer);
+            foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
+            {
+
+                Item Item = new Item();
+                Item.Name = PlayListItem.Name;
+                Item.ImageLink = PlayListItem.ImageLink;
+                Item.Link = PlayListItem.Link;
+                Item.Type = ItemType.FILE;
+                Item.Description = Description;
+                items.Add(Item);
+            }
+
+
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+
+        public string FormatDescriptionFileRuTr(string HTML)
+        {
+
+            HTML = HTML.Replace("\n", "");
+
+            string Title = null;
+            try
+            {
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<title>).*?(</title>)");
+                Title = Regex.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+                Title = ex.Message;
+            }
+
+            string SidsPirs = null;
+            try
+            {
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<td class=\"catTitle\">).*?(?=<td class=\"row3 pad_4\">)");
+                SidsPirs = Regex.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+                SidsPirs = ex.Message;
+            }
+
+
+            string ImagePath = null;
+            try
+            {
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<var class=\"postImg postImgAligned img-right\" title=\").*?(?=\">)");
+                ImagePath = Regex.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+            }
+
+
+            string InfoFile = null;
+            try
+            {
+                System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<span class=\"post-b\">).*(?=<div class=\"sp-wrap\">)");
+                InfoFile = Regex.Matches(HTML)[0].Value;
+            }
+            catch (Exception ex)
+            {
+                InfoFile = ex.Message;
+            }
+
+            return "<div id=\"poster\" style=\"float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;\">" + "<img src=\"" + ImagePath + "\" style=\"width:180px;float:left;\" /></div><span style=\"color:#3090F0\">" + Title + "</span><br><font face=\"Arial Narrow\" size=\"4\"><span style=\"color:#70A4A3\">" + SidsPirs + "</font></span>" + InfoFile;
+
+        }
+
+        public PluginApi.Plugins.Playlist SearchListRuTr(IPluginContext context, string search)
+        {
+            return SearchListRuTr(context, search, null);
+        }
+
+        //INSTANT C# NOTE: Overloaded method(s) are created above to convert the following method having optional parameters:
+        //ORIGINAL LINE: Public Function SearchListRuTr(context As IPluginContext, ByVal search As String, Optional ByVal Category As String = null) As PluginApi.Plugins.Playlist
+        public PluginApi.Plugins.Playlist SearchListRuTr(IPluginContext context, string search, string Category)
+        {
+            System.Net.WebRequest RequestPost = null;
+            if (Category == "")
+            {
+                RequestPost = System.Net.WebRequest.Create(TrackerServer + "/forum/tracker.php?nm=" + search);
+            }
+            else
+            {
+                RequestPost = System.Net.WebRequest.Create(TrackerServer + "/forum/tracker.php?f=" + Category + "&nm=" + search);
+            }
+
+
+
+            if (ProxyEnablerRuTr == true)
+            {
+                RequestPost.Proxy = new System.Net.WebProxy(ProxyServr, ProxyPort);
+            }
+            RequestPost.Method = "POST";
+            RequestPost.ContentType = "text/html; charset=windows-1251";
+            RequestPost.Headers.Add("Cookie", Cookies);
+            RequestPost.ContentType = "application/x-www-form-urlencoded";
+            System.IO.Stream myStream = RequestPost.GetRequestStream();
+            string DataStr = "prev_new=0&prev_oop=0&o=10&s=2&pn=&nm=" + search;
+            byte[] DataByte = System.Text.Encoding.GetEncoding(1251).GetBytes(DataStr);
+            myStream.Write(DataByte, 0, DataByte.Length);
+            myStream.Close();
+
+            System.Net.WebResponse Response = RequestPost.GetResponse();
+            System.IO.Stream dataStream = Response.GetResponseStream();
+            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
+            string ResponseFromServer = reader.ReadToEnd();
+
+
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<tr class=\"tCenter hl-tr\">).*?(</tr>)");
+            System.Text.RegularExpressions.MatchCollection Result = Regex.Matches(ResponseFromServer.Replace("\n", " "));
+
+            if (Result.Count > 0)
+            {
+
+                foreach (System.Text.RegularExpressions.Match Match in Result)
+                {
+                    Item Item = new Item();
+                    Regex = new System.Text.RegularExpressions.Regex("(?<=<a data-topic_id=\").*?(?=\")");
+                    string LinkID = Regex.Matches(Match.Value)[0].Value;
+                    Item.Link = TrackerServer + "/forum/viewtopic.php?t=" + LinkID + ";PAGEFILMRUTR";
+                    Regex = new System.Text.RegularExpressions.Regex("(?<=" + LinkID + "\">).*?(?=</a>)");
+                    Item.Name = Regex.Matches(Match.Value)[0].Value;
+                    Item.ImageLink = ICO_TorrentFile;
+                    Item.Description = GetDescriptionRuTr(Match.Value);
+                    items.Add(Item);
+                }
+            }
+            else
+            {
+                return NonSearch(context);
+            }
+
+            next_page_url = null;
+
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+
+        #endregion
+
 
         #region RuTor
         private string TrackerServerRuTor = "http://mega-tor.org";
@@ -704,7 +1544,7 @@ namespace RemoteFork.Plugins
             {
 
                 Item Item = new Item();
-                Item.Name = "- СВЯЗАННЫЕ РАЗДАЧИ -";
+                Item.Name = "<span style=\"color:#C0DAE3\">" + "- СВЯЗАННЫЕ РАЗДАЧИ -" + "</span>";
                 Item.ImageLink = ICO_Pusto;
                 Item.Type = ItemType.FILE;
                 items.Add(Item);
@@ -713,7 +1553,7 @@ namespace RemoteFork.Plugins
                 System.Text.RegularExpressions.MatchCollection MatchesSearchNext = Regex.Matches(Matches[0].Value);
                 Item ItemSearchNext = new Item();
                 ItemSearchNext.ImageLink = ICO_Search2;
-                ItemSearchNext.Name = "Искать ещё похожие раздачи";
+                ItemSearchNext.Name = "<span style=\"color:#C0E3D3\">" + "Искать ещё похожие раздачи" + "</span>";
                 ItemSearchNext.Link = TrackerServerRuTor + MatchesSearchNext[MatchesSearchNext.Count - 1].Value + ";PAGERUTOR";
 
 
@@ -731,7 +1571,7 @@ namespace RemoteFork.Plugins
                     Item.Link = TrackerServerRuTor + Regex.Matches(Macth.Value)[1].Value + ";PAGEFILMRUTOR";
 
                     Regex = new System.Text.RegularExpressions.Regex("(?<=\">).*?(?=</a>)");
-                    Item.Name = Regex.Matches(Macth.Value)[1].Value;
+                    Item.Name = "<span style=\"color:#E3D6C0\">" + Regex.Matches(Macth.Value)[1].Value + "</span>";
 
                     Regex = new System.Text.RegularExpressions.Regex("(<td align=\"right\">).*?(</td>)");
                     System.Text.RegularExpressions.MatchCollection MatchSize = Regex.Matches(Macth.Value);
@@ -817,7 +1657,9 @@ namespace RemoteFork.Plugins
             InfoFile = replacetags(InfoFile).Replace("<br /><br />", "");
             Title = replacetags(Title);
 
-            return "<div id=\"poster\" style=\"float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;\">" + "<img src=\"" + ImagePath + "\" style=\"width:180px;float:left;\" /></div><span style=\"color:#3090F0\">" + Title + "</span><br><font face=\"Arial Narrow\" size=\"4\"><span style=\"color:#868668\">" + SidsPirs + "</span>" + InfoFile + "</font>";
+
+
+            return "<div id=\"poster\" style=\"float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;\">" + "<img src=\"" + ImagePath + "\" style=\"width:180px;float:left;\" /></div><span style=\"color:#3090F0\">" + Title + "</span><br><font face=\"Arial Narrow\" size=\"4\"><span style=\"color:#70A4A3\">" + SidsPirs + "</font></span>" + InfoFile;
 
         }
 
@@ -834,7 +1676,10 @@ namespace RemoteFork.Plugins
             System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(<a href=\"magnet).*?(</span></td></tr>)");
             System.Text.RegularExpressions.MatchCollection Matches = Regex.Matches(ResponseFromServer);
 
-
+            if (Matches.Count == 0)
+            {
+                return NonSearch(context);
+            }
 
 
             foreach (System.Text.RegularExpressions.Match Macth in Matches)
@@ -877,7 +1722,6 @@ namespace RemoteFork.Plugins
             }
 
             PlayList.IsIptv = "false";
-
             return PlayListPlugPar(items, context, next_page_url);
         }
 
@@ -1029,13 +1873,42 @@ namespace RemoteFork.Plugins
             }
             else
             {
-                Item Item = new Item();
-                Item.Name = "Ничего не найдено";
-                Item.Link = "";
-
-                items.Add(Item);
+                return NonSearch(context);
             }
 
+            PlayList.IsIptv = "false";
+            return PlayListPlugPar(items, context);
+        }
+
+
+        public PluginApi.Plugins.Playlist NonSearch(IPluginContext context)
+        {
+            return NonSearch(context, false);
+        }
+
+        //INSTANT C# NOTE: Overloaded method(s) are created above to convert the following method having optional parameters:
+        //ORIGINAL LINE: Function NonSearch(context As IPluginContext, Optional ByVal Categor As Boolean = false) As PluginApi.Plugins.Playlist
+        public PluginApi.Plugins.Playlist NonSearch(IPluginContext context, bool Categor)
+        {
+            System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+            Item Item = new Item();
+            Item.Link = "";
+            Item.ImageLink = ICO_Pusto;
+            if (Categor == true)
+            {
+                Item.Name = "<span style=\"color#F68648\">" + " - Здесь ничего нет - " + "</span>";
+                Item.Description = "Нет информации для отображения";
+            }
+            else
+            {
+                Item.Name = "<span style=\"color#F68648\">" + " - Ничего не найдено - " + "</span>";
+                Item.Description = "Поиск не дал результатов";
+            }
+
+
+            items.Add(Item);
+
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
 
@@ -1188,7 +2061,7 @@ namespace RemoteFork.Plugins
             Item.ImageLink = ICO_Folder;
             Item.Description = "<html><font face=\"Arial\" size=\"5\"><b>" + Item.Name + "</font></b><p><img src=\"http://assets.nnm-club.ws/forum/images/logos/10let8.png\" />";
             items.Add(Item);
-
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
 
@@ -1275,18 +2148,19 @@ namespace RemoteFork.Plugins
             RequestGet.Headers.Add("Cookie", CookiesNNM);
 
             System.Net.WebResponse Response = RequestGet.GetResponse();
-            System.IO.Stream dataStream = Response.GetResponseStream();
-            System.IO.StreamReader reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
-            string responseFromServer = reader.ReadToEnd();
-            reader.Close();
-            dataStream.Close();
+            System.IO.Stream DataStream = Response.GetResponseStream();
+            System.IO.StreamReader Reader = new System.IO.StreamReader(DataStream, System.Text.Encoding.GetEncoding(1251));
+            string ResponseFromServer = Reader.ReadToEnd();
+            Reader.Close();
+            DataStream.Close();
             Response.Close();
+
 
             string TorrentPath = null;
             try
             {
                 System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<span class=\"genmed\"><b><a href=\").*?(?=&amp;)");
-                TorrentPath = TrackerServerNNM + "/forum/" + Regex.Matches(responseFromServer)[0].Value;
+                TorrentPath = TrackerServerNNM + "/forum/" + Regex.Matches(ResponseFromServer)[0].Value;
             }
             catch (Exception ex)
             {
@@ -1299,7 +2173,7 @@ namespace RemoteFork.Plugins
             try
             {
                 System.Text.RegularExpressions.Regex Regex = new System.Text.RegularExpressions.Regex("(?<=<span style=\"font-weight: bold\">).*?(?=</span>)");
-                Title = Regex.Matches(responseFromServer)[0].Value;
+                Title = Regex.Matches(ResponseFromServer)[0].Value;
             }
             catch (Exception ex)
             {
@@ -1315,20 +2189,23 @@ namespace RemoteFork.Plugins
             RequestTorrent.Headers.Add("Cookie", CookiesNNM);
 
             Response = RequestTorrent.GetResponse();
-            dataStream = Response.GetResponseStream();
-            reader = new System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251));
-            string FileTorrent = reader.ReadToEnd();
+            DataStream = Response.GetResponseStream();
+            Reader = new System.IO.StreamReader(DataStream, System.Text.Encoding.GetEncoding(1251));
+            string FileTorrent = Reader.ReadToEnd();
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath() + "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251));
-            reader.Close();
-            dataStream.Close();
+            Reader.Close();
+            DataStream.Close();
             Response.Close();
 
+
             System.Collections.Generic.List<Item> items = new System.Collections.Generic.List<Item>();
+
+
+
             try
             {
-                string Description = FormatDescriptionFileNNM(responseFromServer);
+                string Description = FormatDescriptionFileNNM(ResponseFromServer);
                 TorrentPlayList[] PlayListtoTorrent = GetFileList(System.IO.Path.GetTempPath() + "TorrentTemp.torrent");
-                // Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(TorrentPath)
 
                 foreach (TorrentPlayList PlayListItem in PlayListtoTorrent)
                 {
@@ -1355,7 +2232,6 @@ namespace RemoteFork.Plugins
             PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
-
 
         public string FormatDescriptionFileNNM(string HTML)
         {
@@ -1621,13 +2497,13 @@ namespace RemoteFork.Plugins
             //    .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             //End With
             //items.Add(Item)
-
+            PlayList.IsIptv = "false";
             return PlayListPlugPar(items, context);
         }
 
         public PluginApi.Plugins.Playlist LastModifiedPlayList(string NamePlayList, IPluginContext context)
         {
-
+            PlayList.IsIptv = "true";
             string PathFileUpdateTime = System.IO.Path.GetTempPath() + NamePlayList + ".UpdateTime.tmp";
             string PathFilePlayList = System.IO.Path.GetTempPath() + NamePlayList + ".PlayList.m3u8";
 
@@ -1653,7 +2529,8 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycs%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                // Item.GetInfo = WC.DownloadString(PathFilePlayList)
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
@@ -1662,15 +2539,17 @@ namespace RemoteFork.Plugins
             {
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader);
                 Item.Type = ItemType.DIRECTORY;
-                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycs%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+                // Item.GetInfo = WC.DownloadString(PathFilePlayList)
                 items.Add(Item);
                 return PlayListPlugPar(items, context);
             }
 
             Item.Type = ItemType.DIRECTORY;
-            Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycsvb%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+            Item.GetInfo = "http://" + IPAdress + ":" + PortRemoteFork + "/treeview?pluginacetorrentplaycs%5c.xml&host=" + IPAdress + "%3a8027&pluginPath=getinfo&ID=" + WC.DownloadString(PathFilePlayList);
+            // Item.GetInfo = WC.DownloadString(PathFilePlayList)
             items.Add(Item);
-            PlayList.IsIptv = "true";
+
             return PlayListPlugPar(items, context);
 
         }
@@ -1681,7 +2560,7 @@ namespace RemoteFork.Plugins
             System.Net.WebClient WC = new System.Net.WebClient();
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36");
             WC.Encoding = System.Text.Encoding.UTF8;
-            //  WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce, PathFilePlayList)
+
             string PlayList = WC.DownloadString("http://super-pomoyka.us.to/trash/ttv-list/ttv." + NamePlayList + ".iproxy.m3u?ip=" + IPAdress + ":" + PortAce);
             System.IO.File.WriteAllText(PathFilePlayList, PlayList.Replace("(Эротика)", "(Эротика 18+)"));
             WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath() + "MyTraf.tmp");
@@ -1746,7 +2625,7 @@ namespace RemoteFork.Plugins
             {
                 case "GetFileListJSON":
                     {
-                        GetFileListJSON:
+                      
                         string[] CodeZnaki = { "\\U0430", "\\U0431", "\\U0432", "\\U0433", "\\U0434", "\\U0435", "\\U0451", "\\U0436", "\\U0437", "\\U0438", "\\U0439", "\\U043A", "\\U043B", "\\U043C", "\\U043D", "\\U043E", "\\U043F", "\\U0440", "\\U0441", "\\U0442", "\\U0443", "\\U0444", "\\U0445", "\\U0446", "\\U0447", "\\U0448", "\\U0449", "\\U044A", "\\U044B", "\\U044C", "\\U044D", "\\U044E", "\\U044F", "\\U0410", "\\U0411", "\\U0412", "\\U0413", "\\U0414", "\\U0415", "\\U0401", "\\U0416", "\\U0417", "\\U0418", "\\U0419", "\\U041A", "\\U041B", "\\U041C", "\\U041D", "\\U041E", "\\U041F", "\\U0420", "\\U0421", "\\U0422", "\\U0423", "\\U0424", "\\U0425", "\\U0426", "\\U0427", "\\U0428", "\\U0429", "\\U042A", "\\U042B", "\\U042C", "\\U042D", "\\U042E", "\\U042F", "\\U00AB", "\\U00BB", "U2116" };
                         string[] DecodeZnaki = { "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я", "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№" };
 
