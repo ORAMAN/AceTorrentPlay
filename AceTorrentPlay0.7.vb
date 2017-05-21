@@ -2429,7 +2429,6 @@ GetFileListJSON:
                     PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
                     PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
 
-                    IO.File.WriteAllText("d:\My Desktop\test.html", AceMadiaInfo)
 
                     Dim ListSplit() As String = PlayListJson.Split("""")
 
