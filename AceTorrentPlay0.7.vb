@@ -8,7 +8,6 @@ Imports System.Drawing
 Imports Microsoft.VisualBasic
 Imports System
 
-
 Namespace RemoteFork.Plugins
     <PluginAttribute(Id:="acetorrentplay", Version:="0.7", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
@@ -206,7 +205,7 @@ Namespace RemoteFork.Plugins
 
             IPAdress = context.GetRequestParams.Get("host").Split(":")(0)
 
-            PlayList.source = Nothing
+            ' PlayList.source = Nothing
             Dim path = context.GetRequestParams().Get(PLUGIN_PATH)
             path = (If((path Is Nothing), "plugin", "plugin;" & path))
 
@@ -339,8 +338,17 @@ Namespace RemoteFork.Plugins
                     Return PlayListPlugPar(items, context)
 
                 Case ".m3u8", ".m3u"
+                    Dim Item As New Item
                     Dim WC As New System.Net.WebClient
-                    Return toSource(WC.DownloadString(PathFiles), context)
+                    WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
+                    WC.Encoding = System.Text.Encoding.UTF8
+                    With Item
+                        .Type = ItemType.DIRECTORY
+                        .GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?plugin" & IDPlagin & "%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFiles)
+                    End With
+                    items.Add(Item)
+                    PlayList.IsIptv = "true"
+                    Return PlayListPlugPar(items, context)
             End Select
 
             Dim ListFolders() As String = System.IO.Directory.GetDirectories(PathFiles)
@@ -435,12 +443,10 @@ Namespace RemoteFork.Plugins
             playlist.Items = items.ToArray()
             Return playlist
         End Function
-
-        Public Function toSource(ByVal source As String, ByVal context As IPluginContext) As Playlist 'Отдает текст source напрямую в forkplayer игнорируя остальные поля Playlist
-            PlayList.source = source
-            Return PlayList
-        End Function
-
+        'Public Function toSource(ByVal source As String, ByVal context As IPluginContext) As Playlist 'Отдает текст source напрямую в forkplayer игнорируя остальные поля Playlist
+        '    PlayList.source = source
+        '    Return PlayList
+        'End Function
         Function PlayListPlugPar(ByVal items As System.Collections.Generic.List(Of Item), ByVal context As IPluginContext, Optional ByVal next_page_url As String = "") As PluginApi.Plugins.Playlist
             If next_page_url <> "" Then
                 Dim pluginParams = New NameValueCollection()
@@ -638,51 +644,19 @@ Namespace RemoteFork.Plugins
             Return HtmlFile
 
         End Function
-
-        'Function GetRequest(ByVal link As String, Optional ByVal Cookies As String = Nothing, Optional ByVal ProxySwitch As Boolean = False, Optional ByVal Method As String = "GET", Optional ByVal Data As String = Nothing) As String ''''''''""""""""""""""""""""""""""""""
-        '    Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(link)
-        '    If ProxySwitch = True Then Request.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-        '    Request.Method = Method
-        '    Request.ContentType = "text/html; charset=windows-1251"
-        '    If Cookies <> Nothing Then Request.Headers.Add("Cookie", Cookies)
-
-        '    Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
-        '    Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
-        '    Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
-        '    Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
-        '    Request.Headers.Add(Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7")
-        '    Request.KeepAlive = True
-        '    Request.ContentType = "application/x-www-form-urlencoded"
-        '    Request.AllowAutoRedirect = False
-        '    Request.AutomaticDecompression = Net.DecompressionMethods.GZip
-
-        '    If Data <> Nothing Then
-        '        Request.ContentType = "application/x-www-form-urlencoded"
-        '        Dim myStream As System.IO.Stream = Request.GetRequestStream
-        '        Dim DataByte() As Byte = System.Text.Encoding.GetEncoding(1251).GetBytes(Data)
-        '        myStream.Write(DataByte, 0, DataByte.Length)
-        '        myStream.Close()
-        '    End If
-
-        '    Dim Response As System.Net.HttpWebResponse = Request.GetResponse()
-        '    Dim dataStream As System.IO.Stream = Response.GetResponseStream()
-        '    Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-        '    Return reader.ReadToEnd()
-        'End Function
-
 #Region "Rutracker"
         Dim ProxyEnablerRuTr As Boolean = True
         Dim TrackerServer As String = "https://rutracker.org"
 #Region "Авторизация"
-        Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
+        Dim Login, Password, Cap_Sid, Cap_Code, Capcha, Cookies As String
 
         Dim UserAuthorization As String
         Function AuthorizationTest() As Boolean
-            CookiesRuTr = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", "")
-            If CookiesRuTr = "" Then CookiesRuTr = "bb_ssl=1"
+            Cookies = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", "")
+            If Cookies = "" Then Cookies = "bb_ssl=1"
             Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php")
             Request.Method = "GET"
-            Request.Headers.Add("Cookie", CookiesRuTr)
+            Request.Headers.Add("Cookie", Cookies)
             Request.Host = "rutracker.org"
             Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -716,7 +690,7 @@ Namespace RemoteFork.Plugins
                 Reg = New System.Text.RegularExpressions.Regex("(<span class=""logged-in-as-cap"">).*?(</div>)")
                 Matchs = Reg.Matches(OtvetServera)
                 If Matchs.Count > 0 Then
-                    Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", CookiesRuTr)
+                    Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", Cookies)
                     UserAuthorization = Matchs(0).Value
                     Return True
                 End If
@@ -726,10 +700,10 @@ Namespace RemoteFork.Plugins
 
         Function AuthorizationRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items As New System.Collections.Generic.List(Of Item)
-            CookiesRuTr = "bb_ssl=1"
+            Cookies = "bb_ssl=1"
             Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/login.php?redirect=tracker.php")
             Request.Method = "POST"
-            Request.Headers.Add("Cookie", CookiesRuTr)
+            Request.Headers.Add("Cookie", Cookies)
             Request.Host = "rutracker.org"
             Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -763,10 +737,10 @@ Namespace RemoteFork.Plugins
 
             If Not String.IsNullOrEmpty(Response.Headers("Set-Cookie")) Then
 
-                CookiesRuTr = Response.Headers("Set-Cookie")
+                Cookies = Response.Headers("Set-Cookie")
                 Request = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php")
                 Request.Method = "GET"
-                Request.Headers.Add("Cookie", CookiesRuTr)
+                Request.Headers.Add("Cookie", Cookies)
                 Request.Host = "rutracker.org"
                 Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
                 Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
@@ -798,7 +772,7 @@ Namespace RemoteFork.Plugins
                     Reg = New System.Text.RegularExpressions.Regex("(<span class=""logged-in-as-cap"">).*?(</div>)")
                     Matchs = Reg.Matches(OtvetServera)
                     If Matchs.Count > 0 Then
-                        Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", CookiesRuTr)
+                        Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", Cookies)
                         Return GetTopListRuTr(context)
                     End If
                 End If
@@ -984,7 +958,7 @@ Namespace RemoteFork.Plugins
             If ProxyEnablerRuTr = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=windows-1251"
-            RequestPost.Headers.Add("Cookie", CookiesRuTr)
+            RequestPost.Headers.Add("Cookie", Cookies)
             RequestPost.ContentType = "application/x-www-form-urlencoded"
             Dim myStream As System.IO.Stream = RequestPost.GetRequestStream
             Dim DataByte() As Byte = System.Text.Encoding.GetEncoding(1251).GetBytes("prev_new=0&prev_oop=0&o=1&s=2&tm=-1&pn=&nm=")
@@ -1103,27 +1077,6 @@ Namespace RemoteFork.Plugins
             Return "<span style=""color:#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
         End Function
 
-        Sub LoadSaveGroupeRuTr()
-            Dim RequestPost As System.Net.WebRequest = System.Net.WebRequest.CreateHttp(TrackerServer & "/forum/tracker.php")
-            If ProxyEnablerRuTr = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-            RequestPost.Method = "POST"
-            RequestPost.ContentType = "text/html; charset=windows-1251"
-            RequestPost.Headers.Add("Cookie", CookiesRuTr)
-            RequestPost.ContentType = "application/x-www-form-urlencoded"
-            Dim myStream As System.IO.Stream = RequestPost.GetRequestStream
-            Dim DataByte() As Byte = System.Text.Encoding.GetEncoding(1251).GetBytes("prev_new=0&prev_oop=0&o=1&s=2&tm=-1&pn=&nm=")
-            myStream.Write(DataByte, 0, DataByte.Length)
-            myStream.Close()
-
-            Dim Response As System.Net.HttpWebResponse = RequestPost.GetResponse
-            Dim dataStream As System.IO.Stream = Response.GetResponseStream
-            Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
-            Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, "^")
-
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "GroopRuTr", ResponseFromServer)
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr", Date.Now.Date)
-        End Sub
-
         Public Function GetTopListRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
             If AuthorizationTest() = False Then Return SetLogin(context)
 
@@ -1150,19 +1103,28 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End With
 
-            If (System.IO.File.Exists(System.IO.Path.GetTempPath & "GroopRuTr") AndAlso System.IO.File.Exists(System.IO.Path.GetTempPath & "UpdateGroopRuTr")) = False Then
-                LoadSaveGroupeRuTr()
-            End If
-            If Date.Now.Date <> System.IO.File.ReadAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr") Then
-                LoadSaveGroupeRuTr()
-            End If
 
-            Dim RuTrHTML As String = IO.File.ReadAllText(System.IO.Path.GetTempPath & "GroopRuTr")
+            Dim RequestPost As System.Net.WebRequest = System.Net.WebRequest.CreateHttp(TrackerServer & "/forum/tracker.php")
+            If ProxyEnablerRuTr = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            RequestPost.Method = "POST"
+            RequestPost.ContentType = "text/html; charset=windows-1251"
+            RequestPost.Headers.Add("Cookie", Cookies)
+            RequestPost.ContentType = "application/x-www-form-urlencoded"
+            Dim myStream As System.IO.Stream = RequestPost.GetRequestStream
+            Dim DataByte() As Byte = System.Text.Encoding.GetEncoding(1251).GetBytes("prev_new=0&prev_oop=0&o=1&s=2&tm=-1&pn=&nm=")
+            myStream.Write(DataByte, 0, DataByte.Length)
+            myStream.Close()
+
+            Dim Response As System.Net.HttpWebResponse = RequestPost.GetResponse
+            Dim dataStream As System.IO.Stream = Response.GetResponseStream
+            Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
+            Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, "^")
+
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<img class=""site-logo"" src="").*?("")")
-            LOGO_RuTr = "https:" & Regex.Match(RuTrHTML).Value
+            LOGO_RuTr = "https:" & Regex.Match(ResponseFromServer).Value
 
             Regex = New System.Text.RegularExpressions.Regex("(<p class=""select"">).*?(</select>)")
-            KategoriRuTracker = Regex.Matches(RuTrHTML)(0).Value
+            KategoriRuTracker = Regex.Matches(ResponseFromServer)(0).Value
 
 
             Regex = New System.Text.RegularExpressions.Regex("(<optgroup).*?(</optgroup>)")
@@ -1214,13 +1176,12 @@ Namespace RemoteFork.Plugins
             Dim RequestGet As System.Net.WebRequest = Net.WebRequest.CreateHttp(URL)
             If ProxyEnablerRuTr = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "Get"
-            RequestGet.Headers.Add("Cookie", CookiesRuTr)
+            RequestGet.Headers.Add("Cookie", Cookies)
 
             Dim Response As Net.HttpWebResponse = RequestGet.GetResponse
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
             Dim responseFromServer As String = reader.ReadToEnd
-
             reader.Close()
             dataStream.Close()
             Response.Close()
@@ -1234,13 +1195,13 @@ Namespace RemoteFork.Plugins
             Dim RequestTorrent As System.Net.WebRequest = Net.WebRequest.CreateHttp(TorrentPath)
             If ProxyEnablerRuTr = True Then RequestTorrent.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestTorrent.Method = "Get"
-            RequestTorrent.Headers.Add("Cookie", CookiesRuTr)
+            RequestTorrent.Headers.Add("Cookie", Cookies)
 
             Response = RequestTorrent.GetResponse
             dataStream = Response.GetResponseStream()
             reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim FileTorrent As String = reader.ReadToEnd
-
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
             reader.Close()
             dataStream.Close()
             Response.Close()
@@ -1323,7 +1284,7 @@ Namespace RemoteFork.Plugins
             If ProxyEnablerRuTr = True Then RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=windows-1251"
-            RequestPost.Headers.Add("Cookie", CookiesRuTr)
+            RequestPost.Headers.Add("Cookie", Cookies)
             RequestPost.ContentType = "application/x-www-form-urlencoded"
             Dim myStream As System.IO.Stream = RequestPost.GetRequestStream
             Dim DataStr As String = "prev_new=0&prev_oop=0&o=10&s=2&pn=&nm=" & search
@@ -1365,6 +1326,7 @@ Namespace RemoteFork.Plugins
         End Function
 
 #End Region
+
 
 #Region "RuTor"
         Dim TrackerServerRuTor As String = "http://mega-tor.org"
@@ -1689,8 +1651,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "NNM Club"
-
         Dim CookiesNNM As String = "phpbb2mysql_4_data=a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A32%3A%2296229c9a3405ae99cce1f3bc0cefce2e%22%3Bs%3A6%3A%22userid%22%3Bs%3A8%3A%2213287549%22%3B%7D"
+
         Public Function SearchListNNM(context As IPluginContext, ByVal search As String) As PluginApi.Plugins.Playlist
 
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerNNM & "/forum/tracker.php")
@@ -1709,7 +1671,7 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
-            ' Dim ResponseFromServer As String = GetRequest(TrackerServerNNM & "/forum/tracker.php", CookiesNNM, ProxyEnablerNNM, "POST", DataStr)
+
 
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Regex As New System.Text.RegularExpressions.Regex("(<tr class=""prow).*?(</tr>)")
@@ -1938,7 +1900,6 @@ Namespace RemoteFork.Plugins
                 Dim dataStream As System.IO.Stream = Response2.GetResponseStream()
                 Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
                 Dim responseFromServer As String = reader.ReadToEnd()
-                '  Dim responseFromServer As String = GetRequest(URL, CookiesNNM, ProxyEnablerNNM)
 
                 Dim Regex As New System.Text.RegularExpressions.Regex("(<td class=""pcatHead""><img class=""picon"").*?("" /></span>)")
 
@@ -2002,7 +1963,7 @@ Namespace RemoteFork.Plugins
             Reader.Close()
             DataStream.Close()
             Response.Close()
-            ' Dim ResponseFromServer As String = GetRequest(URL, CookiesNNM, ProxyEnablerNNM)
+
 
             Dim TorrentPath As String = Nothing
             Try
@@ -2031,7 +1992,6 @@ Namespace RemoteFork.Plugins
             DataStream = Response.GetResponseStream()
             Reader = New System.IO.StreamReader(DataStream, System.Text.Encoding.GetEncoding(1251))
             Dim FileTorrent As String = Reader.ReadToEnd
-            ' Dim FileTorrent As String = GetRequest(TorrentPath, CookiesNNM, ProxyEnablerNNM)
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
             Reader.Close()
             DataStream.Close()
@@ -2329,12 +2289,12 @@ Namespace RemoteFork.Plugins
             Return PlayListPlugPar(items, context)
         End Function
 
-        Public Function LastModifiedPlayList(ByVal NamePlayList As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+        Function LastModifiedPlayList(ByVal NamePlayList As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             PlayList.IsIptv = "true"
-            Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath() & NamePlayList & ".UpdateTime.tmp"
-            Dim PathFilePlayList As String = System.IO.Path.GetTempPath() & NamePlayList & ".PlayList.m3u8"
+            Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath & NamePlayList & ".UpdateTime.tmp"
+            Dim PathFilePlayList As String = System.IO.Path.GetTempPath & NamePlayList & ".PlayList.m3u8"
 
-            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
+            Dim request As System.Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp("http://super-pomoyka.us.to/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
             request.Method = "HEAD"
             request.ContentType = "text/html"
             request.KeepAlive = True
@@ -2345,24 +2305,37 @@ Namespace RemoteFork.Plugins
             Dim responHeader = response.GetResponseHeader("Last-Modified")
             response.Close()
 
-            Dim WC As New System.Net.WebClient()
+            Dim WC As New System.Net.WebClient
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim items As New System.Collections.Generic.List(Of Item)()
-            Dim Item As New Item()
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
 
             If (System.IO.File.Exists(PathFileUpdateTime) AndAlso System.IO.File.Exists(PathFilePlayList)) = False Then
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader)
-                Return toSource(WC.DownloadString(PathFilePlayList), context)
+                Item.Type = ItemType.DIRECTORY
+                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+                ' Item.GetInfo = WC.DownloadString(PathFilePlayList)
+                items.Add(Item)
+                Return PlayListPlugPar(items, context)
             End If
 
-            If responHeader IsNot System.IO.File.ReadAllText(PathFileUpdateTime) Then
+            If responHeader <> System.IO.File.ReadAllText(PathFileUpdateTime) Then
                 UpdatePlayList(NamePlayList, PathFilePlayList, PathFileUpdateTime, responHeader)
-
-                Return toSource(WC.DownloadString(PathFilePlayList), context)
+                Item.Type = ItemType.DIRECTORY
+                Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+                ' Item.GetInfo = WC.DownloadString(PathFilePlayList)
+                items.Add(Item)
+                Return PlayListPlugPar(items, context)
             End If
-            Return toSource(WC.DownloadString(PathFilePlayList), context)
+
+            Item.Type = ItemType.DIRECTORY
+            Item.GetInfo = "http://" & IPAdress & ":" & PortRemoteFork & "/treeview?pluginacetorrentplay%5c.xml&host=" & IPAdress & "%3a8027&pluginPath=getinfo&ID=" & WC.DownloadString(PathFilePlayList)
+            ' Item.GetInfo = WC.DownloadString(PathFilePlayList)
+            items.Add(Item)
+
+            Return PlayListPlugPar(items, context)
 
         End Function
 
@@ -2394,14 +2367,14 @@ Namespace RemoteFork.Plugins
 
         Function GetID(ByVal PathTorrent As String) As String
             Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
             WC.Encoding = System.Text.Encoding.UTF8
             Dim FileTorrent() As Byte = WC.DownloadData(PathTorrent)
 
             Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
             FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
 
-            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
+            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://api.torrentstream.net/upload/raw")
             request.Method = "POST"
             request.ContentType = "application/octet-stream\r\n"
             request.ContentLength = FileTorrent.Length
@@ -2409,7 +2382,7 @@ Namespace RemoteFork.Plugins
             dataStream.Write(FileTorrent, 0, FileTorrent.Length)
             dataStream.Close()
 
-            Dim response As System.Net.WebResponse = request.GetResponse()
+            Dim response As System.Net.HttpWebResponse = request.GetResponse()
             dataStream = response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream)
             Dim responseFromServer As String = reader.ReadToEnd()
@@ -2422,8 +2395,8 @@ Namespace RemoteFork.Plugins
         Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
 
             Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
-            WC.Encoding = System.Text.UTF8Encoding.UTF8
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+            WC.Encoding = System.Text.Encoding.UTF8
 
             Dim ID As String = GetID(PathTorrent)
             Dim PlayListTorrent() As TorrentPlayList = Nothing
@@ -2456,8 +2429,12 @@ GetFileListJSON:
                     PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
                     PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
 
+                    IO.File.WriteAllText("d:\My Desktop\test.html", AceMadiaInfo)
+
                     Dim ListSplit() As String = PlayListJson.Split("""")
+
                     ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
+
                     Dim N As Integer
                     For I As Integer = 1 To ListSplit.Length - 2
                         PlayListTorrent(N).IDX = ListSplit(I)
@@ -2485,19 +2462,24 @@ GetFileListJSON:
                     AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?id=" & ID)
 
                     Dim Regex As New System.Text.RegularExpressions.Regex("(?<=EXTINF:-1,).*(.*)")
-                    Dim RegexLink As New System.Text.RegularExpressions.Regex("(http:).*(?=.*?)")
                     Dim Itog As System.Text.RegularExpressions.MatchCollection = Regex.Matches(AceMadiaInfo)
-                    Dim ItogLink As System.Text.RegularExpressions.MatchCollection = RegexLink.Matches(AceMadiaInfo)
+
 
                     ReDim PlayListTorrent(Itog.Count - 1)
                     Dim N As Integer
                     For Each Match As System.Text.RegularExpressions.Match In Itog
                         PlayListTorrent(N).Name = Match.Value
                         PlayListTorrent(N).ImageLink = IconFile(Match.Value)
-                        PlayListTorrent(N).Link = ItogLink(N).Value
                         N += 1
                     Next
 
+                    N = 0
+                    Regex = New System.Text.RegularExpressions.Regex("(http:).*(?=.*?)")
+                    Itog = Regex.Matches(AceMadiaInfo)
+                    For Each Match As System.Text.RegularExpressions.Match In Itog
+                        PlayListTorrent(N).Link = Match.Value
+                        N += 1
+                    Next
             End Select
 
 
