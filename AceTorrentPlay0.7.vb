@@ -107,7 +107,15 @@ Namespace RemoteFork.Plugins
                 Case "ProxyNNM"
                     ProxyEnablerNNM = Not ProxyEnablerNNM
                 Case "TrackerServerNNM"
-                    If TrackerServerNNM = "http://nnmclub.to" Then TrackerServerNNM = "http://nnm-club.me" Else TrackerServerNNM = "http://nnmclub.to"
+                    Select Case TrackerServerNNM
+                        Case "http://nnmclub.to"
+                            TrackerServerNNM = "https://nnm-club.name"
+                        Case "https://nnm-club.name"
+                            TrackerServerNNM = "http://nnm-club.me"
+                        Case "http://nnm-club.me"
+                            TrackerServerNNM = "http://nnmclub.to"
+                    End Select
+                    '   If TrackerServerNNM = "http://nnmclub.to" Then TrackerServerNNM = "https://nnm-club.name" Else TrackerServerNNM = "http://nnmclub.to"
             End Select
             Save_Settings()
 
@@ -117,6 +125,7 @@ Namespace RemoteFork.Plugins
             With Item_Top
                 .Name = " - N N M - C l u b -"
                 .ImageLink = ICO_Pusto
+                .Description = "Доступ к ресурсу " & TrackerServerNNM & "<p><b> Прокси: " & ProxyEnablerNNM
                 .Type = ItemType.FILE
                 Items.Add(Item_Top)
             End With
