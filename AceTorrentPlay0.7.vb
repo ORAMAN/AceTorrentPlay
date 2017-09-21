@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.71", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.72", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -496,16 +496,25 @@ Namespace RemoteFork.Plugins
 
                 End With
 
+                Try
+
+                Catch ex As Exception
+
+                End Try
                 With ItemTorrentTV
                     .Name = "Torrent TV"
                     .Type = ItemType.DIRECTORY
                     .Link = "torrenttv"
                     .ImageLink = "http://s1.iconbird.com/ico/1112/Television/w256h25613523820647.png"
+                    Try
+                        If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
+                            WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
+                        End If
+                        .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
+                    Catch ex As Exception
 
-                    If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
-                        WC.DownloadFile("http://super-pomoyka.us.to/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
-                    End If
-                    .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
+                    End Try
+
                 End With
 
                 With ItemNNMClub
@@ -682,6 +691,7 @@ Namespace RemoteFork.Plugins
 #Region "Rutracker"
         Dim ProxyEnablerRuTr As Boolean = True
         Dim TrackerServer As String = "https://rutracker.org"
+        ' Dim TrackerServer As String = "http://рутрекер.org"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -689,17 +699,17 @@ Namespace RemoteFork.Plugins
         Function AuthorizationTest() As Boolean
             CookiesRuTr = Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", "")
             If CookiesRuTr = "" Then CookiesRuTr = "bb_ssl=1"
-            Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php")
+            Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServer & "/forum/index.php")
             Request.Method = "GET"
             Request.Headers.Add("Cookie", CookiesRuTr)
-            Request.Host = "rutracker.org"
+            Request.Host = New Uri(TrackerServer).Host
             Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7")
             Request.KeepAlive = True
-            Request.Referer = "https://rutracker.org/forum/index.php"
+            Request.Referer = TrackerServer & "/forum/index.php"
 
             Request.ContentType = "application/x-www-form-urlencoded"
             Request.AllowAutoRedirect = False
@@ -736,17 +746,17 @@ Namespace RemoteFork.Plugins
         Function AuthorizationRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items As New System.Collections.Generic.List(Of Item)
             CookiesRuTr = "bb_ssl=1"
-            Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/login.php?redirect=tracker.php")
+            Dim Request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServer & "/forum/login.php?redirect=tracker.php")
             Request.Method = "POST"
             Request.Headers.Add("Cookie", CookiesRuTr)
-            Request.Host = "rutracker.org"
+            Request.Host = New Uri(TrackerServer).Host
             Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7")
             Request.KeepAlive = True
-            Request.Referer = "https://rutracker.org/forum/index.php"
+            Request.Referer = TrackerServer & "/forum/index.php"
             Request.ContentType = "application/x-www-form-urlencoded"
             Request.AllowAutoRedirect = False
             Request.AutomaticDecompression = Net.DecompressionMethods.GZip
@@ -773,17 +783,17 @@ Namespace RemoteFork.Plugins
             If Not String.IsNullOrEmpty(Response.Headers("Set-Cookie")) Then
 
                 CookiesRuTr = Response.Headers("Set-Cookie")
-                Request = System.Net.HttpWebRequest.CreateHttp("https://rutracker.org/forum/index.php")
+                Request = System.Net.HttpWebRequest.CreateHttp(TrackerServer & "/forum/index.php")
                 Request.Method = "GET"
                 Request.Headers.Add("Cookie", CookiesRuTr)
-                Request.Host = "rutracker.org"
+                Request.Host = New Uri(TrackerServer).Host
                 Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
                 Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
                 Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
                 Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
                 Request.Headers.Add(Net.HttpRequestHeader.AcceptCharset, "windows-1251,utf-8;q=0.7,*;q=0.7")
                 Request.KeepAlive = True
-                Request.Referer = "https://rutracker.org/forum/login.php?redirect=tracker.php"
+                Request.Referer = TrackerServer & "/forum/login.php?redirect=tracker.php"
                 Request.Headers.Add(Net.HttpRequestHeader.Cookie, "spylog_test=1")
                 Request.ContentType = "application/x-www-form-urlencoded"
                 Request.AllowAutoRedirect = False
@@ -1229,6 +1239,7 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, Text.Encoding.GetEncoding(1251))
             Dim responseFromServer As String = reader.ReadToEnd
+
             reader.Close()
             dataStream.Close()
             Response.Close()
@@ -1248,7 +1259,9 @@ Namespace RemoteFork.Plugins
             dataStream = Response.GetResponseStream()
             reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim FileTorrent As String = reader.ReadToEnd
+
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
+
             reader.Close()
             dataStream.Close()
             Response.Close()
@@ -2422,6 +2435,7 @@ Namespace RemoteFork.Plugins
             Dim reader As New System.IO.StreamReader(dataStream)
             Dim responseFromServer As String = reader.ReadToEnd()
 
+            'MsgBox(responseFromServer)
             Dim responseSplit() As String = responseFromServer.Split("""")
             Dim ID As String = responseSplit(3)
             Return ID
@@ -2447,6 +2461,7 @@ GetFileListJSON:
                     "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№"}
 
                     AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&content_id=" & ID)
+                    ' MsgBox(AceMadiaInfo)
                     For I As Integer = 0 To 68
                         AceMadiaInfo = Microsoft.VisualBasic.Strings.Replace(AceMadiaInfo, Microsoft.VisualBasic.Strings.LCase(CodeZnaki(I)), DecodeZnaki(I))
                     Next
@@ -2479,6 +2494,7 @@ GetFileListJSON:
 
                 Case "GetFileListM3U"
                     AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?id=" & ID & "&format=json&use_api_events=1&use_stop_notifications=1")
+                    'MsgBox(AceMadiaInfo)
                     If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
                         GoTo GetFileListJSON
                     End If
