@@ -1705,6 +1705,8 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
                 items.Add(Item)
             End With
+
+
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
         End Function
@@ -2390,14 +2392,14 @@ Namespace RemoteFork.Plugins
             End With
             items.Add(Item)
 
-            'Item = New Item
-            'With Item
-            '    .Type = ItemType.DIRECTORY
-            '    .Name = "ВСЕ КАНАЛЫ"
-            '    .Link = "all"
-            '    .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            'End With
-            'items.Add(Item)
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ВСЕ КАНАЛЫ"
+                .Link = "all"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
         End Function
