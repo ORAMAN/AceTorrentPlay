@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.81", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.82", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -290,6 +290,8 @@ Namespace RemoteFork.Plugins
                     Return GetTorrentTV(context)
                 Case "acestreamnettv"
                     Return GetAceStreamNetTV(context)
+                Case "SEARCHTV"
+                    Return GetPageSearchStreamTV(context, PathSpliter(PathSpliter.Length - 2), PathSpliter(PathSpliter.Length - 3))
 
 
                     'Настройки
@@ -2199,11 +2201,11 @@ Namespace RemoteFork.Plugins
 #Region "TorrentTV"
 
         'Поиск ТВ
-        Public Function GetPageSearchStreamTV(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
+        Public Function GetPageSearchStreamTV(context As IPluginContext, ByVal URL As String, Optional ByVal Page As Integer = 0) As PluginApi.Plugins.Playlist
             Dim Items As New System.Collections.Generic.List(Of Item)
             Dim ReGexInfioHash As New System.Text.RegularExpressions.Regex("(?<=""infohash"":"").*?(?="")")
             Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=""name"":"").*?(?="")")
-            Dim Str As String = ReCoder(Requesters("https://search.acestream.net/?method=search&api_version=1.0&api_key=test_api_key&query=" & URL & "&page_size=50"))
+            Dim Str As String = ReCoder(Requesters("https://search.acestream.net/?method=search&api_version=1.0&api_key=test_api_key&query=" & URL & "&page_size=50&page=" & Page))
 
             If ReGexInfioHash.IsMatch(Str) = True Then
                 Dim InfoHashs, Names As System.Text.RegularExpressions.MatchCollection
@@ -2223,7 +2225,7 @@ Namespace RemoteFork.Plugins
             End If
 
 
-            next_page_url = ""
+            next_page_url = Page + 1 & ";" & URL & ";SEARCHTV"
             PlayList.IsIptv = "true"
             Return PlayListPlugPar(Items, context, next_page_url)
         End Function
