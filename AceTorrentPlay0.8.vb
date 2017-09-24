@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.8", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.81", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -212,7 +212,7 @@ Namespace RemoteFork.Plugins
 
 
         Public Function GetList(context As IPluginContext) As PluginApi.Plugins.Playlist Implements IPlugin.GetList
-
+            Load_Settings()
             IPAdress = context.GetRequestParams.Get("host").Split(":")(0)
 
             PlayList.source = Nothing
@@ -245,8 +245,8 @@ Namespace RemoteFork.Plugins
             Select Case path
                 Case "plugin"
                     Return GetTopList(context)
-                Case "plugin;torrenttv"
-                    Return GetTorrentTV(context)
+                Case "plugin;tv"
+                    Return GetTV(context)
                 Case "plugin;nnmclub"
                     Return GetTopNNMClubList(context)
                 Case "plugin;rutor"
@@ -285,43 +285,24 @@ Namespace RemoteFork.Plugins
                     Microsoft.Win32.Registry.CurrentUser.DeleteSubKeyTree("Software\RemoteFork\Plugins\RuTracker\", False)
                     Return GetTopListRuTr(context)
 
-                  'Торрент тв
-                Case "ent"
-                    Return LastModifiedPlayList("ent", context)
-                Case "child"
-                    Return LastModifiedPlayList("child", context)
-                Case "common"
-                    Return LastModifiedPlayList("common", context)
-                Case "discover"
-                    Return LastModifiedPlayList("discover", context)
-                Case "HD"
-                    Return LastModifiedPlayList("HD", context)
-                Case "film"
-                    Return LastModifiedPlayList("film", context)
-                Case "man"
-                    Return LastModifiedPlayList("man", context)
-                Case "music"
-                    Return LastModifiedPlayList("music", context)
-                Case "news"
-                    Return LastModifiedPlayList("news", context)
-                Case "region"
-                    Return LastModifiedPlayList("region", context)
-                Case "relig"
-                    Return LastModifiedPlayList("relig", context)
-                Case "sport"
-                    Return LastModifiedPlayList("sport", context)
-                         'Взрослый контент
-                Case "porn"
-                    Return LastModifiedPlayList("porn", context)
-                Case "all"
-                    Return LastModifiedPlayList("all", context)
+                  'Тв
+                Case "torrenttv"
+                    Return GetTorrentTV(context)
+                Case "acestreamnettv"
+                    Return GetAceStreamNetTV(context)
+
 
                     'Настройки
                 Case "SETTINGS"
                     Return GetListSettings(context, PathSpliter(PathSpliter.Length - 2))
-
                 Case "SETTINGS_NNM"
                     Return GetListSettingsNNM(context, PathSpliter(PathSpliter.Length - 2))
+            End Select
+
+            'тв
+            Select Case Right(PathSpliter(PathSpliter.Length - 1), 7)
+                Case ".iproxy"
+                    Return LastModifiedPlayList(PathSpliter(PathSpliter.Length - 1), context)
             End Select
 
             Dim PathFiles As String = Microsoft.VisualBasic.Strings.Replace(PathSpliter(PathSpliter.Length - 1), "|", "\")
@@ -481,7 +462,7 @@ Namespace RemoteFork.Plugins
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
             WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim ItemTop, ItemTorrentTV, ItemNNMClub, ItemRuTor, ItemRuTracker As New Item
+            Dim ItemTop, ItemTorrentTV, ItemNNMClub, ItemRuTor, ItemRuTracker, ItemTV As New Item
             Try
                 AceProxEnabl = True
                 Dim AceMadiaGet As String
@@ -498,25 +479,19 @@ Namespace RemoteFork.Plugins
 
                 End With
 
-                Try
-
-                Catch ex As Exception
-
-                End Try
-                With ItemTorrentTV
-                    .Name = "Torrent TV"
+                With ItemTV
+                    .Name = "Телевиденье"
                     .Type = ItemType.DIRECTORY
-                    .Link = "torrenttv"
+                    .Link = "tv"
                     .ImageLink = "http://s1.iconbird.com/ico/1112/Television/w256h25613523820647.png"
                     Try
                         If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
                             WC.DownloadFile("http://pomoyka.win/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                         End If
-                        .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
+                        .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""https://1enter.net/upload/image/TV.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
                     Catch ex As Exception
 
                     End Try
-
                 End With
 
                 With ItemNNMClub
@@ -548,7 +523,8 @@ Namespace RemoteFork.Plugins
                 End With
 
                 items.Add(ItemTop)
-                items.Add(ItemTorrentTV)
+                'items.Add(ItemTorrentTV)
+                items.Add(ItemTV)
                 items.Add(ItemRuTor)
                 items.Add(ItemRuTracker)
                 items.Add(ItemNNMClub)
@@ -2262,7 +2238,8 @@ Namespace RemoteFork.Plugins
         End Function
         'ТВ
 
-        Public Function GetTorrentTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+
+        Public Function GetTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             With Item
@@ -2277,9 +2254,36 @@ Namespace RemoteFork.Plugins
 
             Item = New Item
             With Item
+                .Name = "Torrent TV"
+                .Type = ItemType.DIRECTORY
+                .Link = "torrenttv"
+                .ImageLink = "https://cs5-2.4pda.to/7342878.png"
+                .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>"
+
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Name = "AceStream.Net TV"
+                .Type = ItemType.DIRECTORY
+                .Link = "acestreamnettv"
+                .ImageLink = "http://lh3.googleusercontent.com/Vh58wclC2o-4lMfibmBqiuhY2j9vBZbxO4bTJCZtjZ1jeLNe0fgoYpy1888fgGa9EL0=w300"
+                .Description = "<html><img src=""http://static.acestream.net/sites/acestream/img/ACE-logo.png""></html><p>"
+
+            End With
+            items.Add(Item)
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+        Public Function GetAceStreamNetTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items = New Collections.Generic.List(Of Item)
+            Dim Item As New Item
+            With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "РАЗВЛЕКАТЕЛЬНЫЕ"
-                .Link = "ent"
+                .Link = "ace.entertaining.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2288,7 +2292,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "ДЕТСКИЕ"
-                .Link = "child"
+                .Link = "ace.kids.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2296,26 +2300,8 @@ Namespace RemoteFork.Plugins
             Item = New Item
             With Item
                 .Type = ItemType.DIRECTORY
-                .Name = "ПОЗНАВАТЕЛЬНЫЕ"
-                .Link = "discover"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            End With
-            items.Add(Item)
-
-            Item = New Item
-            With Item
-                .Type = ItemType.DIRECTORY
-                .Name = "HD"
-                .Link = "HD"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            End With
-            items.Add(Item)
-
-            Item = New Item
-            With Item
-                .Type = ItemType.DIRECTORY
-                .Name = "ОБЩИЕ"
-                .Link = "common"
+                .Name = "ОБРАЗОВАТЕЛЬНЫЕ"
+                .Link = "ace.educational.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2324,7 +2310,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "ФИЛЬМЫ"
-                .Link = "film"
+                .Link = "ace.movies.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2332,8 +2318,26 @@ Namespace RemoteFork.Plugins
             Item = New Item
             With Item
                 .Type = ItemType.DIRECTORY
-                .Name = "МУЖСКИЕ"
-                .Link = "man"
+                .Name = "СЕРИАЛЫ"
+                .Link = "ace.series.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ИНФОРМАЦИОННЫЕ"
+                .Link = "ace.informational.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "СПОРТИВНЫЕ"
+                .Link = "ace.sport.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2342,16 +2346,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "МУЗЫКАЛЬНЫЕ"
-                .Link = "music"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            End With
-            items.Add(Item)
-
-            Item = New Item
-            With Item
-                .Type = ItemType.DIRECTORY
-                .Name = "НОВОСТИ"
-                .Link = "news"
+                .Link = "ace.music.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2360,25 +2355,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "РЕГИОНАЛЬНЫЕ"
-                .Link = "region"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            End With
-            items.Add(Item)
-
-            Item = New Item
-            With Item
-                .Type = ItemType.DIRECTORY
-                .Name = "РЕЛИГИОЗНЫЕ"
-                .Link = "relig"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
-            End With
-            items.Add(Item)
-
-            Item = New Item
-            With Item
-                .Type = ItemType.DIRECTORY
-                .Name = "СПОРТ"
-                .Link = "sport"
+                .Link = "ace.regional.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2387,7 +2364,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "ЭРОТИКА 18+"
-                .Link = "porn"
+                .Link = "ace.erotic_18_plus.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2396,7 +2373,141 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "ВСЕ КАНАЛЫ"
-                .Link = "all"
+                .Link = "ace.all.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+
+            PlayList.IsIptv = "false"
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Public Function GetTorrentTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items = New Collections.Generic.List(Of Item)
+            Dim Item As New Item
+
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "РАЗВЛЕКАТЕЛЬНЫЕ"
+                .Link = "ttv.ent.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ДЕТСКИЕ"
+                .Link = "ttv.child.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ПОЗНАВАТЕЛЬНЫЕ"
+                .Link = "ttv.discover.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "HD"
+                .Link = "ttv.hd.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ОБЩИЕ"
+                .Link = "ttv.common.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ФИЛЬМЫ"
+                .Link = "ttv.film.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "МУЖСКИЕ"
+                .Link = "ttv.man.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "МУЗЫКАЛЬНЫЕ"
+                .Link = "ttv.music.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ИНФОРМАЦИОННЫЕ"
+                .Link = "ttv.news.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "РЕГИОНАЛЬНЫЕ"
+                .Link = "ttv.region.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "РЕЛИГИОЗНЫЕ"
+                .Link = "ttv.relig.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "СПОРТИВНЫЕ"
+                .Link = "ttv.sport.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ЭРОТИКА 18+"
+                .Link = "ttv.porn.iproxy"
+                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ВСЕ КАНАЛЫ"
+                .Link = "ttv.all.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
@@ -2409,7 +2520,7 @@ Namespace RemoteFork.Plugins
             Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath() & NamePlayList & ".UpdateTime.tmp"
             Dim PathFilePlayList As String = System.IO.Path.GetTempPath() & NamePlayList & ".PlayList.m3u8"
 
-            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://pomoyka.win/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
+            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://pomoyka.win/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
             request.Method = "HEAD"
             request.ContentType = "text/html"
             request.KeepAlive = True
@@ -2447,7 +2558,7 @@ Namespace RemoteFork.Plugins
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim PlayList As String = WC.DownloadString("http://pomoyka.win/trash/ttv-list/ttv." & NamePlayList & ".iproxy.m3u?ip=" & IPAdress & ":" & PortAce)
+            Dim PlayList As String = WC.DownloadString("http://pomoyka.win/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
             System.IO.File.WriteAllText(PathFilePlayList, PlayList.Replace("(Эротика)", "(Эротика 18+)"))
             WC.DownloadFile("http://pomoyka.win/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
             WC.Dispose()
