@@ -2419,7 +2419,7 @@ Namespace RemoteFork.Plugins
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "HD"
-                .Link = "ttv.hd.iproxy"
+                .Link = "ttv.HD.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
             items.Add(Item)
