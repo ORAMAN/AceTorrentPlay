@@ -490,7 +490,7 @@ Namespace RemoteFork.Plugins
                         If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
                             WC.DownloadFile("http://pomoyka.lib.emergate.net/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                         End If
-                        .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""http://www.jonathanwrightmusic.com/wp-content/uploads/2014/10/Client_Logos.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
+                        .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""https://i.imgur.com/f9fZYNE.jpg""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
                     Catch ex As Exception
                         .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p></html><p>" & ex.Message
 
