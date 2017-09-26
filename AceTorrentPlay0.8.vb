@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.831", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.84", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -490,7 +490,7 @@ Namespace RemoteFork.Plugins
                         If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
                             WC.DownloadFile("http://pomoyka.lib.emergate.net/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                         End If
-                        .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""https://i.imgur.com/f9fZYNE.jpg""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
+                        .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""https://retailradio.biz/wp-content/uploads/2016/10/video-wall.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
                     Catch ex As Exception
                         .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p></html><p>" & ex.Message
 
@@ -2277,12 +2277,24 @@ Namespace RemoteFork.Plugins
             End With
             items.Add(Item)
 
+            Item = New Item
+            With Item
+                .Type = ItemType.DIRECTORY
+                .Name = "ALLFON-TV"
+                .Link = "allfon.all.iproxy"
+                .ImageLink = "http://allfon-tv.pro/css/images/favicon.png"
+                .Description = "<html><img src=""http://static.acestream.net/sites/acestream/img/ACE-logo.png""></html><p>"
+            End With
+            items.Add(Item)
+
             PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
         Public Function GetAceStreamNetTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
+
+            Item = New Item
             With Item
                 .Type = ItemType.DIRECTORY
                 .Name = "РАЗВЛЕКАТЕЛЬНЫЕ"
