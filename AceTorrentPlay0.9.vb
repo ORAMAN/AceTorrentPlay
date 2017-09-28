@@ -2348,7 +2348,7 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
                     .Name = ReGexName.Match(Mstch.Value).Value
                     .Link = ReGexLink.Match(Mstch.Value).Value & ";TvP2PChanel"
                     .ImageLink = "http://tv-p2p.ru" & ReGexIcon.Match(Mstch.Value).Value
-                    .Description = .ImageLink
+                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """></html><p>"
                 End With
                 items.Add(Item)
             Next
@@ -2358,7 +2358,7 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
                 GoTo LineGo
             End If
 
-            PlayList.IsIptv = "true"
+            PlayList.IsIptv = "True"
             Return PlayListPlugPar(items, context)
         End Function
 
