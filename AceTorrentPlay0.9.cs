@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace RemoteFork.Plugins
 {
-    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.9", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
+    [PluginAttribute(Id = "acetorrentplaycs", Version = "0.91", Author = "ORAMAN", Name = "AceTorrentPlay CS", Description = "Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")]
     public class acetorrentplaycs : IPlugin
     {
         private string IPAdress;
@@ -2538,7 +2538,7 @@ namespace RemoteFork.Plugins
 			Item.Type = ItemType.DIRECTORY;
 			Item.Name = "ALLFON-TV";
 			Item.Link = "allfon.all.iproxy";
-			Item.ImageLink = "http://allfon-tv.pro/css/images/favicon.png";
+			Item.ImageLink = "http://allfon-tv.com/css/images/favicon.png";
 			Item.Description = "<html><img src=\"http://static.acestream.net/sites/acestream/img/ACE-logo.png\"></html><p>";
 			items.Add(Item);
 
