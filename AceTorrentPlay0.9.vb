@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="0.9", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="0.91", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -1126,7 +1126,7 @@ Namespace RemoteFork.Plugins
             Dim ResponseFromServer As String = reader.ReadToEnd.Replace(vbLf, "^")
 
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "GroopRuTr", ResponseFromServer)
-            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr", Date.Now.Date)
+            System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr", Date.Now.Date.ToString)
         End Sub
 
         Public Function GetTopListRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
@@ -1158,7 +1158,7 @@ Namespace RemoteFork.Plugins
             If (System.IO.File.Exists(System.IO.Path.GetTempPath & "GroopRuTr") AndAlso System.IO.File.Exists(System.IO.Path.GetTempPath & "UpdateGroopRuTr")) = False Then
                 LoadSaveGroupeRuTr()
             End If
-            If Date.Now.Date <> System.IO.File.ReadAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr") Then
+            If Date.Now.Date.ToString <> System.IO.File.ReadAllText(System.IO.Path.GetTempPath & "UpdateGroopRuTr") Then
                 LoadSaveGroupeRuTr()
             End If
 
@@ -2287,8 +2287,8 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ALLFON-TV"
                 .Link = "allfon.all.iproxy"
-                .ImageLink = "http://allfon-tv.pro/css/images/favicon.png"
-                .Description = "<html><img src=""http://static.acestream.net/sites/acestream/img/ACE-logo.png""></html><p>"
+                .ImageLink = "http://allfon-tv.com/css/images/favicon.png"
+                .Description = "<html><img src=""http://allfon-tv.com/css/images/favicon.png""></html><p>"
             End With
             items.Add(Item)
 
