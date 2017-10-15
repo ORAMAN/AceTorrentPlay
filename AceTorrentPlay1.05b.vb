@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.00", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.05b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -55,7 +55,7 @@ Namespace RemoteFork.Plugins
         Dim LOGO_RuTr As String = "https://rutrk.org/logo/logo.png"
         Dim LOGO_TrackerRutor As String = "http://mega-tor.org/s/logo.jpg"
         Dim LOGO_NoNaMeClub As String = "http://assets.nnm-club.ws/forum/images/logos/10let8.png"
-        Dim LOGO_Kinozal As String = "https://jnka-dot-com-st.appspot.com/pic/logo3.gif"
+        Dim LOGO_Kinozal As String = "http://service-nk.ru/images/articles/kinozal-tv1.jpg"
 #End Region
 
 #Region "Параметры"
@@ -2221,7 +2221,7 @@ Namespace RemoteFork.Plugins
             RequestGet.Method = "GET"
             RequestGet.ContentType = "text/html; charset=windows-1251"
             RequestGet.Headers.Add("Cookie", CookiesKNZL)
-
+            RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
 
             Dim Response As System.Net.HttpWebResponse = RequestGet.GetResponse()
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
@@ -2264,6 +2264,7 @@ Namespace RemoteFork.Plugins
                 SearchCategory = "sid=&s=" & Search & " &g=0&c=" & Category & "&v=0&d=0&w=0&t=1&f=0&page=" & Page
             End If
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/browse.php?" & SearchCategory)
+            RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=windows-1251"
             RequestPost.Headers.Add("Cookie", CookiesKNZL)
@@ -2344,6 +2345,7 @@ Namespace RemoteFork.Plugins
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/get_srv_details.php?" & ID & "&action=2")
+            RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=UTF-8"
             RequestPost.Headers.Add("Cookie", CookiesKNZL)
@@ -2365,6 +2367,7 @@ Namespace RemoteFork.Plugins
 
 
             Dim RequestGet As System.Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/details.php?" & ID)
+            RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "GET"
             RequestGet.Headers.Add("Cookie", CookiesKNZL)
             RequestGet.ContentType = "text/html; charset=windows-1251"
@@ -3005,35 +3008,71 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
             Dim WC As New System.Net.WebClient
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
             WC.Encoding = System.Text.UTF8Encoding.UTF8
+
+
+            Dim PlayListTorrent() As TorrentPlayList = Nothing
             Dim AceMadiaInfo As String
 
-            AceMadiaInfo = ReCoder(WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&infohash=" & InfoHash))
-            WC.Dispose()
+            Select Case FunctionsGetTorrentPlayList
+                Case "GetFileListJSON"
+GetFileListJSON:
+
+                    AceMadiaInfo = ReCoder(WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&infohash=" & InfoHash))
+                    WC.Dispose()
 
 
-            Dim PlayListJson As String = AceMadiaInfo
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
-            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
-            Dim PlayListTorrent() As TorrentPlayList = Nothing
-            Dim ListSplit() As String = PlayListJson.Split("""")
-            ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
-            Dim N As Integer
-            For I As Integer = 1 To ListSplit.Length - 2
-                PlayListTorrent(N).IDX = ListSplit(I)
-                PlayListTorrent(N).Name = ListSplit(I + 1)
-                PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
-                PlayListTorrent(N).ImageLink = IconFile(PlayListTorrent(N).Name)
-                I += 1
-                N += 1
-            Next
+                    Dim PlayListJson As String = AceMadiaInfo
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
+                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
 
+                    Dim ListSplit() As String = PlayListJson.Split("""")
+                    ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
+                    Dim N As Integer
+                    For I As Integer = 1 To ListSplit.Length - 2
+                        PlayListTorrent(N).IDX = ListSplit(I)
+                        PlayListTorrent(N).Name = ListSplit(I + 1)
+                        PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
+                        PlayListTorrent(N).ImageLink = IconFile(PlayListTorrent(N).Name)
+                        I += 1
+                        N += 1
+                    Next
+                Case "GetFileListM3U"
+                    AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&format=json&use_api_events=1&use_stop_notifications=1")
+                    If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
+                        GoTo GetFileListJSON
+                    End If
+                    If AceMadiaInfo.StartsWith("{""response"": null, ""error"": """) = True Then
+                        ReDim PlayListTorrent(0)
+                        PlayListTorrent(0).Name = "ОШИБКА: " & New System.Text.RegularExpressions.Regex("(?<={""response"": null, ""error"": "").*?(?="")").Matches(AceMadiaInfo)(0).Value
+                        PlayListTorrent(0).ImageLink = ICO_Error
+                        Return PlayListTorrent
+                    End If
+
+                    '"Получение потока в формате HLS
+                    AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash)
+
+                    Dim Regex As New System.Text.RegularExpressions.Regex("(?<=EXTINF:-1,).*(.*)")
+                    Dim RegexLink As New System.Text.RegularExpressions.Regex("(http:).*(?=.*?)")
+                    Dim Itog As System.Text.RegularExpressions.MatchCollection = Regex.Matches(AceMadiaInfo)
+                    Dim ItogLink As System.Text.RegularExpressions.MatchCollection = RegexLink.Matches(AceMadiaInfo)
+
+                    ReDim PlayListTorrent(Itog.Count - 1)
+                    Dim N As Integer
+                    For Each Match As System.Text.RegularExpressions.Match In Itog
+                        PlayListTorrent(N).Name = Match.Value
+                        PlayListTorrent(N).ImageLink = IconFile(Match.Value)
+                        PlayListTorrent(N).Link = ItogLink(N).Value
+                        N += 1
+                    Next
+
+            End Select
             Return PlayListTorrent
         End Function
 
