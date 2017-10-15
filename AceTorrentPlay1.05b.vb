@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.05b", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.05", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2304,7 +2304,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .SearchOn = "Поиск в категории"
                 .ImageLink = ICO_Search
-                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(LOGO_Kinozal & "OPT:ContentType--image/jpegOPEND:/") & "/" & """ />"
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(LOGO_Kinozal & "OPT:ContentType--image/jpegOPEND:/") & "/" & """ />"
             End With
             items.Add(Item)
             For Each ItemFile As System.Text.RegularExpressions.Match In TopReGex.Matches(ResponseFromServer)
@@ -2314,7 +2314,7 @@ Namespace RemoteFork.Plugins
                     .Name = NameReGex.Match(ItemFile.Value).Value
                     .Link = LinkReGex.Match(ItemFile.Value).Value & ";PAGEFILMKNZL"
                     .ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImageReGex.Match(ItemFile.Value).Value & "OPT:ContentType--image/jpegOPEND:/") & "/"
-                    .Description = ItemFile.Value.Replace("</td>", "</td><p>")
+                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ")
                 End With
                 items.Add(Item)
                 ' IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
@@ -2326,10 +2326,10 @@ Namespace RemoteFork.Plugins
                     .Name = NameReGex.Match(ItemFile.Value).Value
                     .Link = LinkReGex.Match(ItemFile.Value).Value & ";PAGEFILMKNZL"
                     .ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImageReGex.Match(ItemFile.Value).Value & "OPT:ContentType--image/jpegOPEND:/") & "/"
-                    .Description = ItemFile.Value.Replace("</td>", "</td><p>")
+                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ")
                 End With
                 items.Add(Item)
-                ' IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
+                '   IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
             Next
             PlayList.IsIptv = "False"
             Dim ReGexNext As New System.Text.RegularExpressions.Regex(">Вперед</a>")
