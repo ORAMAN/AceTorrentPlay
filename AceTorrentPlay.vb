@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.05", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.06", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -181,13 +181,13 @@ Namespace RemoteFork.Plugins
                 Items.Add(Item_Top)
             End With
 
-
             With Item_NNM
                 .Name = "Настройка доступа к NNM-Club"
                 .Link = ";SETTINGS_NNM"
                 .ImageLink = ICO_SettingsFolder
                 Items.Add(Item_NNM)
             End With
+
 
             With Item_FGPL
                 .Name = "Обработка содержимого torrent файла"
@@ -1581,6 +1581,16 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End With
 
+
+            Item = New Item
+            With Item
+                .Name = "Топ торренты"
+                .Link = TrackerServerRuTor & "/top/;PAGERUTOR"
+                .ImageLink = ICO_Folder
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
+                items.Add(Item)
+            End With
+
             Item = New Item
             With Item
                 .Name = "Зарубежные фильмы"
@@ -2191,8 +2201,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Kinozal"
-        Dim TrackerServerKinozal As String = "https://kinozal-tv.appspot.com"
-        Dim CookiesKNZL As String = "__cfduid=df315f7a0562b29aa835b974e819a84771504615941; __lnkrntdmcvrd=-1; uid=19118433; pass=3nAmKV26nB; v97Bt=761bfd74c11eab387f7eb960212469d8e12f960ad65d; MarketGidStorage=%7B%220%22%3A%7B%22svspr%22%3A%22http%3A%2F%2Fkinozal.tv%2F%22%2C%22svsds%22%3A12%2C%22TejndEEDj%22%3A%22ZhjdLywhl%22%7D%2C%22C647334%22%3A%7B%22page%22%3A10%2C%22time%22%3A1507973065835%7D%7D"
+        Dim TrackerServerKinozal As String = "https://kinozal.guru"
+        Dim CookiesKNZL As String = "__cfduid=d6de6389e33d747cad9a1dad0b7e89e151508321950; uid=20229744; pass=JPiL8H1EPt"
         Public Function GetTopListKinozal(context As IPluginContext) As PluginApi.Plugins.Playlist
 
             Dim items As New System.Collections.Generic.List(Of Item)
@@ -2218,17 +2228,17 @@ Namespace RemoteFork.Plugins
             items.Add(Item)
 
             Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/browse.php")
-            RequestGet.Method = "GET"
+            RequestGet.Method = "Get"
             RequestGet.ContentType = "text/html; charset=windows-1251"
             RequestGet.Headers.Add("Cookie", CookiesKNZL)
-            RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+
 
             Dim Response As System.Net.HttpWebResponse = RequestGet.GetResponse()
             Dim dataStream As System.IO.Stream = Response.GetResponseStream()
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
 
             Dim responseFromServer As String = reader.ReadToEnd()
-            ' IO.File.WriteAllText("d:\My Desktop\test.html", responseFromServer, System.Text.Encoding.GetEncoding(1251))
+            '  IO.File.WriteAllText("d:\My Desktop\test.html", responseFromServer, System.Text.Encoding.GetEncoding(1251))
             responseFromServer = responseFromServer.Replace(vbLf, " ")
 
             Dim TopReGex As New System.Text.RegularExpressions.Regex("(?<=<span class=sw190><select name=""c"" class=""w190 styled"">).*?(?=<option  value=23)")
@@ -2264,7 +2274,6 @@ Namespace RemoteFork.Plugins
                 SearchCategory = "sid=&s=" & Search & " &g=0&c=" & Category & "&v=0&d=0&w=0&t=1&f=0&page=" & Page
             End If
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/browse.php?" & SearchCategory)
-            RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=windows-1251"
             RequestPost.Headers.Add("Cookie", CookiesKNZL)
@@ -2279,7 +2288,7 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
-            ' IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
+            '  IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
             ResponseFromServer = ResponseFromServer.Replace(vbLf, " ")
 
             Dim NeNahelReGex As New System.Text.RegularExpressions.Regex("Нет активных раздач, приносим извинения")
@@ -2294,7 +2303,7 @@ Namespace RemoteFork.Plugins
             Dim NameReGex As New System.Text.RegularExpressions.Regex("(?<=class=""r\d"">).*?(?=</a>)")
 
 
-            Dim ImageReGex As New System.Text.RegularExpressions.Regex("(?<=src="").*?(?="")")
+            Dim ImageReGex As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
 
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
@@ -2313,11 +2322,11 @@ Namespace RemoteFork.Plugins
                 With Item
                     .Name = NameReGex.Match(ItemFile.Value).Value
                     .Link = LinkReGex.Match(ItemFile.Value).Value & ";PAGEFILMKNZL"
-                    .ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImageReGex.Match(ItemFile.Value).Value & "OPT:ContentType--image/jpegOPEND:/") & "/"
-                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ")
+                    .ImageLink = TrackerServerKinozal & ImageReGex.Match(ItemFile.Value).Value
+                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
                 items.Add(Item)
-                ' IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
+                '     IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
             Next
             For Each ItemFile As System.Text.RegularExpressions.Match In FullReGex.Matches(ResponseFromServer)
 
@@ -2325,8 +2334,8 @@ Namespace RemoteFork.Plugins
                 With Item
                     .Name = NameReGex.Match(ItemFile.Value).Value
                     .Link = LinkReGex.Match(ItemFile.Value).Value & ";PAGEFILMKNZL"
-                    .ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImageReGex.Match(ItemFile.Value).Value & "OPT:ContentType--image/jpegOPEND:/") & "/"
-                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ")
+                    .ImageLink = TrackerServerKinozal & ImageReGex.Match(ItemFile.Value).Value
+                    .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
                 items.Add(Item)
                 '   IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
@@ -2345,7 +2354,6 @@ Namespace RemoteFork.Plugins
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/get_srv_details.php?" & ID & "&action=2")
-            RequestPost.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestPost.Method = "POST"
             RequestPost.ContentType = "text/html; charset=UTF-8"
             RequestPost.Headers.Add("Cookie", CookiesKNZL)
@@ -2367,7 +2375,6 @@ Namespace RemoteFork.Plugins
 
 
             Dim RequestGet As System.Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/details.php?" & ID)
-            RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "GET"
             RequestGet.Headers.Add("Cookie", CookiesKNZL)
             RequestGet.ContentType = "text/html; charset=windows-1251"
@@ -2375,13 +2382,13 @@ Namespace RemoteFork.Plugins
             dataStream = Response.GetResponseStream()
             reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             ResponseFromServer = reader.ReadToEnd
-            'IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
+            ' IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
             ResponseFromServer = ResponseFromServer.Replace(vbLf, " ")
 
 
             Try
-                Dim Description As String = FormatDescriptionKinozal(ResponseFromServer)
                 Dim PlayListtoTorrent() As TorrentPlayList = GetFileListInfoHash(InfoHash)
+                Dim Description As String = FormatDescriptionKinozal(ResponseFromServer)
 
                 For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
                     Item = New Item
@@ -2412,9 +2419,10 @@ Namespace RemoteFork.Plugins
         End Function
 
         Function FormatDescriptionKinozal(ByVal HTML As String) As String
-
+            '   IO.File.WriteAllText("d:\My Desktop\test.html", HTML, System.Text.Encoding.GetEncoding(1251))
             Dim Title As String = Nothing
-            Dim Regex As New System.Text.RegularExpressions.Regex("(?<=class=""r\d"">).*?(?=</a>)")
+            Dim Regex As New System.Text.RegularExpressions.Regex("(?<=Class=""r\d"">).*?(?=</a>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+
             Try
                 Title = Regex.Match(HTML).Value
             Catch ex As Exception
@@ -2422,7 +2430,7 @@ Namespace RemoteFork.Plugins
             End Try
 
 
-            'Dim SidsPirs As String = Nothing
+            '  Dim SidsPirs As String = Nothing
             'Try
             '    Regex = New System.Text.RegularExpressions.Regex("(<table cellspacing=""0"").*?(</table>)")
             '    SidsPirs = Regex.Matches(HTML)(0).Value
@@ -2433,9 +2441,9 @@ Namespace RemoteFork.Plugins
 
             Dim ImagePath As String = Nothing
             Try
-                Regex = New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
+                ' HTML = HTML.Replace("<img src=""//", "ImagePath")
+                Regex = New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ImagePath = Regex.Matches(HTML)(2).Value
-                ImagePath = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImagePath & "OPT:ContentType--image/jpegOPEND:/") & "/"
             Catch ex As Exception
 
             End Try
@@ -2443,7 +2451,7 @@ Namespace RemoteFork.Plugins
 
             Dim InfoFile As String = Nothing
             Try
-                Regex = New System.Text.RegularExpressions.Regex("(?<=<div class=""justify mn2 pad5x5"" id=""tabs""><b>).*?(?=</div>)")
+                Regex = New System.Text.RegularExpressions.Regex("(?<=<div Class=""justify mn2 pad5x5"" id=""tabs""><b>).*?(?=</div>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 InfoFile = Regex.Match(HTML).Value
             Catch ex As Exception
             End Try
@@ -2451,7 +2459,7 @@ Namespace RemoteFork.Plugins
             Dim Opisanie As String = Nothing
 
             Try
-                Regex = New System.Text.RegularExpressions.Regex("(?<=<div class=""bx1 justify""><p>).*?(?=</p></div>)")
+                Regex = New System.Text.RegularExpressions.Regex("(?<=<div Class=""bx1 justify""><p>).*?(?=</p></div>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 Opisanie = Regex.Matches(HTML)(0).Value
             Catch ex As Exception
                 Opisanie = ex.Message
@@ -2465,6 +2473,7 @@ Namespace RemoteFork.Plugins
             Title = replacetags(Title)
             Opisanie = replacetags(Opisanie)
 
+            '  IO.File.WriteAllText("d:\My Desktop\test.html", "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile, System.Text.Encoding.GetEncoding(1251))
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile
         End Function
 
@@ -3013,48 +3022,35 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
             Dim PlayListTorrent() As TorrentPlayList = Nothing
             Dim AceMadiaInfo As String
 
-            Select Case FunctionsGetTorrentPlayList
-                Case "GetFileListJSON"
-GetFileListJSON:
-
-                    AceMadiaInfo = ReCoder(WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&infohash=" & InfoHash))
-                    WC.Dispose()
+            AceMadiaInfo = ReCoder(WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/server/api?method=get_media_files&infohash=" & InfoHash))
+            WC.Dispose()
 
 
-                    Dim PlayListJson As String = AceMadiaInfo
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
-                    PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
+            Dim PlayListJson As String = AceMadiaInfo
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ",", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, ":", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "}", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "{", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "result", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "error", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, "null", Nothing)
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """""", """")
+            PlayListJson = Microsoft.VisualBasic.Strings.Replace(PlayListJson, """ """, """")
 
-                    Dim ListSplit() As String = PlayListJson.Split("""")
-                    ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
-                    Dim N As Integer
-                    For I As Integer = 1 To ListSplit.Length - 2
-                        PlayListTorrent(N).IDX = ListSplit(I)
-                        PlayListTorrent(N).Name = ListSplit(I + 1)
-                        PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
-                        PlayListTorrent(N).ImageLink = IconFile(PlayListTorrent(N).Name)
-                        I += 1
-                        N += 1
-                    Next
-                Case "GetFileListM3U"
-                    AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&format=json&use_api_events=1&use_stop_notifications=1")
-                    If AceMadiaInfo.StartsWith("{""response"": {""event_url"": """) = True Then
-                        GoTo GetFileListJSON
-                    End If
-                    If AceMadiaInfo.StartsWith("{""response"": null, ""error"": """) = True Then
-                        ReDim PlayListTorrent(0)
-                        PlayListTorrent(0).Name = "ОШИБКА: " & New System.Text.RegularExpressions.Regex("(?<={""response"": null, ""error"": "").*?(?="")").Matches(AceMadiaInfo)(0).Value
-                        PlayListTorrent(0).ImageLink = ICO_Error
-                        Return PlayListTorrent
-                    End If
+            Dim ListSplit() As String = PlayListJson.Split("""")
+            ReDim PlayListTorrent((ListSplit.Length / 2) - 2)
+            Dim N As Integer
+            For I As Integer = 1 To ListSplit.Length - 2
+                PlayListTorrent(N).IDX = ListSplit(I)
+                PlayListTorrent(N).Name = ListSplit(I + 1)
+                PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
+                PlayListTorrent(N).ImageLink = IconFile(PlayListTorrent(N).Name)
+                I += 1
+                N += 1
+            Next
 
+            If PlayListTorrent.Count > 1 Then
+                If FunctionsGetTorrentPlayList = "GetFileListM3U" Then
                     '"Получение потока в формате HLS
                     AceMadiaInfo = WC.DownloadString("http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash)
 
@@ -3064,15 +3060,15 @@ GetFileListJSON:
                     Dim ItogLink As System.Text.RegularExpressions.MatchCollection = RegexLink.Matches(AceMadiaInfo)
 
                     ReDim PlayListTorrent(Itog.Count - 1)
-                    Dim N As Integer
+                    N = 0
                     For Each Match As System.Text.RegularExpressions.Match In Itog
                         PlayListTorrent(N).Name = Match.Value
                         PlayListTorrent(N).ImageLink = IconFile(Match.Value)
                         PlayListTorrent(N).Link = ItogLink(N).Value
                         N += 1
                     Next
-
-            End Select
+                End If
+            End If
             Return PlayListTorrent
         End Function
 
