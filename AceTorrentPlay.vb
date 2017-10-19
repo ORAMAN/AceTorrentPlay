@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.06", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.07", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2477,9 +2477,6 @@ Namespace RemoteFork.Plugins
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile
         End Function
 
-
-
-
 #End Region
 
 #Region "TorrentTV"
@@ -3043,7 +3040,7 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
             For I As Integer = 1 To ListSplit.Length - 2
                 PlayListTorrent(N).IDX = ListSplit(I)
                 PlayListTorrent(N).Name = ListSplit(I + 1)
-                PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
+                PlayListTorrent(N).Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?infohash=" & InfoHash & "&_idx=" & PlayListTorrent(N).IDX
                 PlayListTorrent(N).ImageLink = IconFile(PlayListTorrent(N).Name)
                 I += 1
                 N += 1
