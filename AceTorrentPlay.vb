@@ -8,10 +8,9 @@ Imports System.Drawing
 Imports Microsoft.VisualBasic
 Imports System
 
-
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.07", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
-    Public Class AceTorrentPlay
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.08", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    Public Class AceTorrentPlay1
         Implements IPlugin
 
         Dim IPAdress As String
@@ -80,7 +79,7 @@ Namespace RemoteFork.Plugins
 
             TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ""))
             If TempStr = "" Then
-                ProxyEnablerNNM = True
+                ProxyEnablerNNM = False
                 Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "ProxyEnablerNNM", ProxyEnablerNNM)
             Else
                 ProxyEnablerNNM = CBool(TempStr)
@@ -88,7 +87,7 @@ Namespace RemoteFork.Plugins
 
             TempStr = CStr(Microsoft.Win32.Registry.GetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", ""))
             If TempStr = "" Then
-                TrackerServerNNM = "http://nnmclub.to"
+                TrackerServerNNM = "https://nnm-club.name"
                 Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\AceTorrentPlay\", "TrackerServerNNM", TrackerServerNNM)
             Else
                 TrackerServerNNM = TempStr
@@ -249,6 +248,8 @@ Namespace RemoteFork.Plugins
                     Return GetTopList(context)
                 Case "plugin;tv"
                     Return GetTV(context)
+                Case "plugin;ttvfilms"
+                    Return GetTopTTVFilms(context)
                 Case "plugin;nnmclub"
                     Return GetTopNNMClubList(context)
                 Case "plugin;rutor"
@@ -307,6 +308,17 @@ Namespace RemoteFork.Plugins
                     Return GetCategoryTvP2P(PathSpliter(PathSpliter.Length - 2), context)
                 Case "TvP2PChanel"
                     Return GetTvChanel(PathSpliter(PathSpliter.Length - 2), context)
+
+                    'ТТВ Фильмы
+                Case "PageTTVFilm"
+                    Return GetPageTTVFilms(PathSpliter(PathSpliter.Length - 2), context)
+                Case "TTVFilm"
+                    Return GetTTVFilms(PathSpliter(PathSpliter.Length - 2), context)
+                Case "TorrentTTVFilms"
+                    Return GetTorrentTTVFilms(PathSpliter(PathSpliter.Length - 3), PathSpliter(PathSpliter.Length - 2), context)
+                Case "SearchTTVFilm"
+                    '  SearchTTVFilms(context.GetRequestParams("search"), context)
+                    Return GetPageTTVFilms("http://p2pfilms.online/film_selector.php?search=" & context.GetRequestParams("search"), context)
 
                     'Настройки
                 Case "SETTINGS"
@@ -477,7 +489,7 @@ Namespace RemoteFork.Plugins
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
             WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim ItemTop, ItemTorrentTV, ItemNNMClub, ItemRuTor, ItemRuTracker, ItemKinozal, ItemTV As New Item
+            Dim ItemTop, ItemTorrentTV, ItemNNMClub, ItemRuTor, ItemRuTracker, ItemKinozal, ItemTV, ItemTTVFilms As New Item
             Try
                 AceProxEnabl = True
                 Dim AceMadiaGet As String
@@ -509,6 +521,18 @@ Namespace RemoteFork.Plugins
 
                     End Try
                 End With
+
+                With ItemTTVFilms
+                    .Name = "Фильмы от TTV"
+                    .Type = ItemType.DIRECTORY
+                    .Link = "ttvfilms"
+                    .ImageLink = "https://pp.vk.me/c616517/v616517472/8bd2/JUqdneE1pCQ.jpg"
+                    Dim Description_TTVFilms As String = "Фильмы от ТОРРЕНТ ТВ"
+                    .Description = "<html><font face="" Arial"" size="" 5""><b>" & .Name & "<p><img src=""" & LogoTTVFilm & """/></html>"
+
+                End With
+
+
 
                 With ItemNNMClub
                     .ImageLink = ICO_NNMClub
@@ -549,6 +573,7 @@ Namespace RemoteFork.Plugins
 
                 items.Add(ItemTop)
                 items.Add(ItemTV)
+                items.Add(ItemTTVFilms)
                 items.Add(ItemRuTor)
                 items.Add(ItemRuTracker)
                 items.Add(ItemNNMClub)
@@ -658,10 +683,218 @@ Namespace RemoteFork.Plugins
 
         End Function
 
+#Region "ТТВ Фильмы"
+        Dim TTVFilmsAdress As String = "http://p2pfilms.online"
+        Dim LogoTTVFilm As String = "http://p2pfilms.online/images/logo-tv.png"
+
+        Public Function GetPageTTVFilms(ByVal URL As String, context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
+            Dim HTML As String = GetHTMLPageTTVFilms(URL)
+            Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<div id=""film_container).*?(</a>      </div>)")
+            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=<strong>).*?(?=</strong>)")
+            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=<a href="").*?(?="")")
+            Dim ReGexImage As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
+
+
+            For Each Macthe As System.Text.RegularExpressions.Match In ReGexItem.Matches(HTML)
+                Item = New Item
+                With Item
+                    .ImageLink = ReGexImage.Match(Macthe.Value).Value
+                    .Type = ItemType.DIRECTORY
+                    .Name = ReGexName.Match(Macthe.Value).Value
+                    .Link = ReGexLink.Match(Macthe.Value).Value & ";TTVFilm"
+                    .Description = FormatDescriptionTTVFilmsPage(Macthe.Value, .ImageLink, .Name)
+                End With
+                items.Add(Item)
+            Next
+
+            PlayList.IsIptv = "False"
+
+            Dim ReGexNext As New System.Text.RegularExpressions.Regex("(сюда).*?(туда)")
+            If ReGexNext.IsMatch(HTML) = True Then
+                Dim ReGexNextPage = New System.Text.RegularExpressions.Regex("(&page=).*?(?="")")
+                If ReGexNext.IsMatch(HTML) = True Then
+                    Return PlayListPlugPar(items, context, URL & ReGexNextPage.Match(ReGexNext.Match(HTML).Value).Value & ";PageTTVFilm")
+                End If
+            End If
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Function FormatDescriptionTTVFilmsPage(ByVal HTML As String, ByVal ImagePath As String, ByVal Title As String) As String
+            HTML = HTML.Replace("12px", "24px")
+            HTML = HTML.Replace("<br><br>", "")
+            Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=</strong>).*?(?=Добавить в избранное)")
+            Dim InfoFile As String = ReGex.Match(HTML).Value.Replace("src=""", "src=""" & TTVFilmsAdress)
+            ReGex = New System.Text.RegularExpressions.Regex("(?<=Добавить в избранное</span>).*(</div>)")
+            Dim InfoFilms As String = ReGex.Match(HTML).Value
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & InfoFile & InfoFilms
+        End Function
+
+        Public Function GetTopTTVFilms(context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
+
+            With Item
+                .Name = "Поиск"
+                .Link = "SearchTTVFilm"
+                .Type = ItemType.DIRECTORY
+                .SearchOn = "Поиск видео на ТОРРЕНТ ТВ"
+                .ImageLink = ICO_Search
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LogoTTVFilm & """ />"
+            End With
+            items.Add(Item)
+
+            Dim HTML As String = GetHTMLPageTTVFilms(TTVFilmsAdress & "/films")
+
+            Dim ReGex As New System.Text.RegularExpressions.Regex("(<li style=""float).*(Популярное за)")
+            Dim StrCat1 As String = ReGex.Match(HTML).Value
+            Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<li style=""float).*?(</a>)")
+            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=\>).*?(?=<)")
+            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(http).*?(?="")")
+
+            For Each Macthe As System.Text.RegularExpressions.Match In ReGexItem.Matches(StrCat1)
+                Item = New Item
+                With Item
+                    .ImageLink = ICO_Folder
+                    .Type = ItemType.DIRECTORY
+                    .Name = ReGexName.Matches(Macthe.Value)(1).Value
+                    .Link = ReGexLink.Match(Macthe.Value).Value & ";PageTTVFilm"
+                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LogoTTVFilm & """ />"
+
+                    Select Case UCase(.Name)
+                        Case "МОИ ПОСЛЕДНИЕ ФИЛЬМЫ"
+                        Case Else
+                            items.Add(Item)
+                    End Select
+                End With
+
+            Next
+
+            ReGex = New System.Text.RegularExpressions.Regex("(<h2>Категории</h2>).*?(</div>)")
+            Dim StrCat2 As String = ReGex.Match(HTML).Value
+
+            ReGexItem = New System.Text.RegularExpressions.Regex("(<a href=).*?(</a>)")
+            ReGexName = New System.Text.RegularExpressions.Regex("(?<=>).*?(?=<)")
+            ReGexLink = New System.Text.RegularExpressions.Regex("(http).*?(?="")")
+
+            For Each Macthe As System.Text.RegularExpressions.Match In ReGexItem.Matches(StrCat2)
+                Item = New Item
+                With Item
+                    .ImageLink = ICO_Folder
+                    .Type = ItemType.DIRECTORY
+                    .Name = ReGexName.Match(Macthe.Value).Value
+                    .Link = ReGexLink.Match(Macthe.Value).Value & ";PageTTVFilm"
+                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LogoTTVFilm & """ />"
+                End With
+                items.Add(Item)
+            Next
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Function FormatDescriptionTTVFilms(ByVal HTML As String, Optional ByVal AllText As Boolean = False) As String
+            Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=<img id=""ctp_img"" src="").*?(?="")")
+            Dim ImagePath As String = ReGex.Match(HTML).Value
+            ReGex = New System.Text.RegularExpressions.Regex("(?<=<div class=""channel-name"">).*?(?= смотреть онлайн|<)")
+            Dim Title As String = ReGex.Match(HTML).Value
+            ReGex = New System.Text.RegularExpressions.Regex("(<div class=""channel-description"").*?(</div>)")
+            Dim InfoFilms As String = ReplaceTags(ReGex.Match(HTML).Value)
+            If AllText = False Then InfoFilms = Left(InfoFilms, 460)
+
+            InfoFilms = "<div style=""margin:0px 13px 1px 0px""; align=""justify"">" & InfoFilms & "</div>"
+            ReGex = New System.Text.RegularExpressions.Regex("(<div id=""ratings"").*?(</div>)")
+            Dim Rating As String = ReGex.Match(HTML).Value.Replace("font: 32px", "font: 24px").Replace("text-align: center", "text-align: left").Replace("<br>", "")
+
+            Return "<div id=""poster"" style=""float:left;padding:4px; background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span>" & InfoFilms & Rating
+        End Function
+
+        Public Function GetTTVFilms(ByVal URL As String, context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
+            Dim HTML As String = GetHTMLPageTTVFilms(URL)
+            Dim Description As String = FormatDescriptionTTVFilms(HTML)
+
+            If New System.Text.RegularExpressions.Regex("onclick=""change_torrent").IsMatch(HTML) = True Then
+                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=""TorrentsTableBody"">).*?(</table>)")
+                HTML = HTML.Replace("onclick", "")
+                HTML = ReGex.Match(HTML).Value.Replace("<img src=""", "<img src=""" & TTVFilmsAdress)
+                Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<tr>).*?(</tr>)")
+                Dim ReGexTDItem As New System.Text.RegularExpressions.Regex("(<td).*?(</td>)")
+                Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=>).*?(?=<)")
+                Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=').*?(?=')")
+
+                For Each Macthe As System.Text.RegularExpressions.Match In ReGexItem.Matches(HTML)
+                    Item = New Item
+                    With Item
+                        .ImageLink = ICO_TorrentFile
+                        .Type = ItemType.DIRECTORY
+                        .Name = ReGexTDItem.Matches(Macthe.Value)(3).Value
+                        .Description = Description & Macthe.Value
+                        .Link = ReGexLink.Matches(ReGexTDItem.Matches(Macthe.Value)(3).Value)(0).Value & ";" & URL & ";TorrentTTVFilms"
+                    End With
+                    items.Add(Item)
+                Next
+
+            Else
+                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=""torrent_url"":"").*?(?="")")
+                Dim PathTorrent As String = ReGex.Match(HTML).Value.Replace("\", "")
+                Return GetTorrentTTVFilms(PathTorrent, URL, context)
+            End If
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Public Function GetTorrentTTVFilms(ByVal PathTorrent As String, ByVal URLDescription As String, context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
+
+
+            Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(PathTorrent)
+            Dim Description As String = FormatDescriptionTTVFilms(GetHTMLPageTTVFilms(URLDescription), True)
+            For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
+                Item = New Item
+                With Item
+                    .Name = PlayListItem.Name
+                    .ImageLink = PlayListItem.ImageLink
+                    .Link = PlayListItem.Link
+                    .Type = ItemType.FILE
+                    .Description = Description
+                End With
+                items.Add(Item)
+            Next
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Dim CookiesTTVFilms As String = "torrenttv_remember=PDDxxlBkF1FGr5tLHcruSSkDHDo7GHSm"
+        Function GetHTMLPageTTVFilms(ByVal URL As String, Optional ByVal Method As String = "Get", Optional ByVal StringData As String = "") As String
+            Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(URL)
+            RequestGet.Method = Method
+            RequestGet.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+            RequestGet.Host = New Uri(URL).Host
+            RequestGet.Headers.Add("Cookie", CookiesTTVFilms)
+            RequestGet.KeepAlive = True
+            RequestGet.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/62.0.3202.75 Safari/537.36"
+
+            Dim Response As System.Net.HttpWebResponse = RequestGet.GetResponse()
+            Dim dataStream As System.IO.Stream = Response.GetResponseStream()
+            Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.UTF8)
+            Dim responseFromServer As String = reader.ReadToEnd()
+
+            responseFromServer = responseFromServer.Replace(vbLf, " ").Replace(vbCr, " ")
+
+            Return responseFromServer
+        End Function
+
+#End Region
+
 #Region "Rutracker"
-        Dim ProxyEnablerRuTr As Boolean = True
-        Dim TrackerServer As String = "https://rutracker.org"
+        Dim ProxyEnablerRuTr As Boolean = False
+        ' Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
+         Dim TrackerServer As String = "https://rutracker.net"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -673,7 +906,7 @@ Namespace RemoteFork.Plugins
             Request.Method = "GET"
             Request.Headers.Add("Cookie", CookiesRuTr)
             Request.Host = New Uri(TrackerServer).Host
-            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
@@ -719,7 +952,7 @@ Namespace RemoteFork.Plugins
             Request.Method = "POST"
             Request.Headers.Add("Cookie", CookiesRuTr)
             Request.Host = New Uri(TrackerServer).Host
-            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36"
             Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
             Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
             Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
@@ -756,7 +989,7 @@ Namespace RemoteFork.Plugins
                 Request.Method = "GET"
                 Request.Headers.Add("Cookie", CookiesRuTr)
                 Request.Host = New Uri(TrackerServer).Host
-                Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+                Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36"
                 Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8"
                 Request.Headers.Add(Net.HttpRequestHeader.AcceptLanguage, "ru-ru,ru;q=0.8,en-us;q=0.5,en;q=0.3")
                 Request.Headers.Add(Net.HttpRequestHeader.AcceptEncoding, "gzip,deflate")
@@ -774,7 +1007,7 @@ Namespace RemoteFork.Plugins
                 Reader = New System.IO.StreamReader(Stream, System.Text.Encoding.GetEncoding(1251))
                 OtvetServera = Reader.ReadToEnd.Replace(vbLf, " ")
                 Reader.Close()
-                Stream.Close()
+                Stream.Dispose()
 
                 Dim Reg As New System.Text.RegularExpressions.Regex("(<a href=""profile.php?mode=register""><b>).*?(</span>)")
                 Dim Matchs As System.Text.RegularExpressions.MatchCollection = Reg.Matches(OtvetServera)
@@ -793,7 +1026,7 @@ Namespace RemoteFork.Plugins
             End If
 
             Dim AdressCapha As String
-            Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<td class=""tRight nowrap"">Код:</td> 					<td> 			<div><img src=""//).*?(.jpg)")
+            Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<td class=""tRight nowrap"">Код</td> 					<td> 			<div><img src=""//).*?(.jpg)")
             Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(OtvetServera)
             If Matches.Count > 0 Then
                 AdressCapha = "http://" & Regex.Matches(OtvetServera)(0).Value
@@ -869,7 +1102,7 @@ Namespace RemoteFork.Plugins
 
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<optgroup label=""&nbsp;" & Groop & ").*?(optgroup>)")
-            Dim GroopText As String = Regex.Matches(KategoriRuTracker)(0).Value.Replace(" |- ", "::").Replace("(", " ").Replace(")", " ")
+            Dim GroopText As String = Regex.Matches(KategoriRuTracker)(0).Value.Replace(" |- ", "").Replace("(", " ").Replace(")", " ")
 
 
 
@@ -924,7 +1157,7 @@ Namespace RemoteFork.Plugins
                     Dim Options As String = Regex.Match(GroopText).Value
 
                     Regex = New System.Text.RegularExpressions.Regex("(<option).*?(option>)")
-                    Dim RegexOptionsName As New System.Text.RegularExpressions.Regex("(?<=""root_forum has_sf"">|""root_forum"">|::).*?(?=&nbsp;)")
+                    Dim RegexOptionsName As New System.Text.RegularExpressions.Regex("(?<=""root_forum has_sf"">|""root_forum"">|).*?(?=&nbsp;)")
                     Dim RegexOptionsID As New System.Text.RegularExpressions.Regex("(?<=value="").*?(?="")")
 
 
@@ -1056,7 +1289,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<="">).*(?=&)")
             Dim SizeFile As String = Nothing
             Try
-                SizeFile = "<br>Размер: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                SizeFile = "<br>Размер " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1064,7 +1297,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<=<b class=""seedmed"">).*?(?=</b>)")
             Dim SidsPirs As String = Nothing
             Try
-                SidsPirs = "<br><br>Seeders: " & RegexSub.Matches(HTML)(0).Value & "<br>Leechers: " & RegexTop.Matches(HTML)(0).Value
+                SidsPirs = "<br><br>Seeders " & RegexSub.Matches(HTML)(0).Value & "<br>Leechers: " & RegexTop.Matches(HTML)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1072,7 +1305,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<="">).*(.*)")
             Dim Razdel As String = Nothing
             Try
-                Razdel = "<br><br>Раздел: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                Razdel = "<br><br>Раздел " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1081,14 +1314,14 @@ Namespace RemoteFork.Plugins
             Dim DataCreate As String = Nothing
             Try
 
-                DataCreate = "<br><br>Создан: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                DataCreate = "<br><br>Создан " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
 
 
 
-            Return "<span style=""color:#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
+            Return "<span style=""color#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
         End Function
 
         Sub LoadSaveGroupeRuTr()
@@ -1113,6 +1346,7 @@ Namespace RemoteFork.Plugins
         End Sub
 
         Public Function GetTopListRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
+            Load_Settings()
             If AuthorizationTest() = False Then Return SetLogin(context)
 
             Dim items As New System.Collections.Generic.List(Of Item)
@@ -1147,7 +1381,7 @@ Namespace RemoteFork.Plugins
 
             Dim RuTrHTML As String = IO.File.ReadAllText(System.IO.Path.GetTempPath & "GroopRuTr")
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<img class=""site-logo"" src="").*?("")")
-            LOGO_RuTr = "https:" & Regex.Match(RuTrHTML).Value
+            '  LOGO_RuTr = "https" & Regex.Match(RuTrHTML).Value
 
             Regex = New System.Text.RegularExpressions.Regex("(<p class=""select"">).*?(</select>)")
             KategoriRuTracker = Regex.Matches(RuTrHTML)(0).Value
@@ -1198,7 +1432,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTorrentPageRuTr(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
-
+            Load_Settings()
             Dim RequestGet As System.Net.WebRequest = Net.WebRequest.CreateHttp(URL)
             If ProxyEnablerRuTr = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "Get"
@@ -1210,7 +1444,7 @@ Namespace RemoteFork.Plugins
             Dim responseFromServer As String = reader.ReadToEnd
 
             reader.Close()
-            dataStream.Close()
+            dataStream.Dispose()
             Response.Close()
 
 
@@ -1233,7 +1467,7 @@ Namespace RemoteFork.Plugins
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
 
             reader.Close()
-            dataStream.Close()
+            dataStream.Dispose()
             Response.Close()
 
 
@@ -1298,7 +1532,7 @@ Namespace RemoteFork.Plugins
                 InfoFile = ex.Message
             End Try
 
-            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
+            Return "<div id=""poster"" style=""floatleft;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
 
         End Function
         Public Function SearchListRuTr(context As IPluginContext, ByVal search As String, Optional ByVal Category As String = Nothing) As PluginApi.Plugins.Playlist
@@ -1361,10 +1595,12 @@ Namespace RemoteFork.Plugins
         Dim TrackerServerRuTor As String = "http://mega-tor.org"
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
+            Load_Settings()
             Dim items As New System.Collections.Generic.List(Of Item)()
             Dim WC As New System.Net.WebClient
+            WC.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
             WC.Encoding = System.Text.Encoding.UTF8
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             Dim ResponseFromServer As String = WC.DownloadString(URL).Replace(vbLf, " ")
 
 
@@ -1393,7 +1629,7 @@ Namespace RemoteFork.Plugins
 
                 Dim Item As New Item
                 With Item
-                    .Name = "<span style=""color:#C0DAE3"">" & "- СВЯЗАННЫЕ РАЗДАЧИ -" & "</span>"
+                    .Name = "<span style=""color#C0DAE3"">" & "- СВЯЗАННЫЕ РАЗДАЧИ -" & "</span>"
                     .ImageLink = ICO_Pusto
                     .Type = ItemType.FILE
                 End With
@@ -1404,13 +1640,13 @@ Namespace RemoteFork.Plugins
                 Dim ItemSearchNext As New Item
                 With ItemSearchNext
                     .ImageLink = ICO_Search2
-                    .Name = "<span style=""color:#C0E3D3"">" & "Искать ещё похожие раздачи" & "</span>"
+                    .Name = "<span style=""color#C0E3D3"">" & "Искать ещё похожие раздачи" & "</span>"
                     .Link = TrackerServerRuTor & MatchesSearchNext(MatchesSearchNext.Count - 1).Value & ";PAGERUTOR"
                 End With
 
 
 
-                Regex = New System.Text.RegularExpressions.Regex("(<a href=""magnet:).*?(</span></td></tr>)")
+                Regex = New System.Text.RegularExpressions.Regex("(<a href=""magnet).*?(</span></td></tr>)")
 
                 Matches = Regex.Matches(Matches(0).Value)
 
@@ -1423,21 +1659,21 @@ Namespace RemoteFork.Plugins
                         .Link = TrackerServerRuTor & Regex.Matches(Macth.Value)(1).Value & ";PAGEFILMRUTOR"
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<="">).*?(?=</a>)")
-                        .Name = "<span style=""color:#E3D6C0"">" & Regex.Matches(Macth.Value)(1).Value & "</span>"
+                        .Name = "<span style=""color#E3D6C0"">" & Regex.Matches(Macth.Value)(1).Value & "</span>"
 
                         Regex = New System.Text.RegularExpressions.Regex("(<td align=""right"">).*?(</td>)")
                         Dim MatchSize As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Macth.Value)
                         Dim SizeFile As String = MatchSize(MatchSize.Count - 1).Value
-                        SizeFile = "Размер: " & SizeFile
+                        SizeFile = "Размер " & SizeFile
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<=alt=""S"" />&nbsp;).*?(?=<)")
-                        Dim Seeders As String = "Seeders: " & Regex.Matches(Macth.Value)(0).Value
+                        Dim Seeders As String = "Seeders " & Regex.Matches(Macth.Value)(0).Value
 
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<=alt=""L"" /><span class=""red"">&nbsp;).*?(?=</span>)")
-                        Dim Leechers As String = "Leechers: " & Regex.Matches(Macth.Value)(0).Value
+                        Dim Leechers As String = "Leechers " & Regex.Matches(Macth.Value)(0).Value
 
-                        .Description = "</div><span style=""color:#3090F0"">" & .Name & "</span><p><br>" & SizeFile & "<br><p>" & Seeders & "<br>" & Leechers
+                        .Description = "</div><span style=""color#3090F0"">" & .Name & "</span><p><br>" & SizeFile & "<br><p>" & Seeders & "<br>" & Leechers
 
                     End With
                     items.Add(Item)
@@ -1479,7 +1715,7 @@ Namespace RemoteFork.Plugins
             Dim SidsPirs As String = Nothing
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(<td class=""header"">Раздают).*?(?=<td class=""header"" nowrap=""nowrap"">Добавить)")
-                SidsPirs = Regex.Matches(HTML)(0).Value.Replace("</td><td>", ":(</td><td>").Replace("</td></tr>", "</td></tr>) ")
+                SidsPirs = Regex.Matches(HTML)(0).Value.Replace("</td><td>", "(</td><td>").Replace("</td></tr>", "</td></tr>) ")
             Catch ex As Exception
                 SidsPirs = ex.Message
             End Try
@@ -1494,12 +1730,12 @@ Namespace RemoteFork.Plugins
 
             Dim InfoFile As String = HTML
 
-            InfoFile = replacetags(InfoFile).Replace("<br /><br />", "")
-            Title = replacetags(Title)
+            InfoFile = ReplaceTags(InfoFile).Replace("<br /><br />", "")
+            Title = ReplaceTags(Title)
 
 
 
-            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
+            Return "<div id=""poster"" style=""floatleft;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
 
         End Function
 
@@ -1508,8 +1744,9 @@ Namespace RemoteFork.Plugins
 
             Dim items As New System.Collections.Generic.List(Of Item)()
             Dim WC As New System.Net.WebClient
+            WC.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
             WC.Encoding = System.Text.Encoding.UTF8
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             Dim ResponseFromServer As String = WC.DownloadString(URL).Replace(vbLf, " ")
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<a href=""magnet).*?(</span></td></tr>)")
@@ -1558,6 +1795,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTopListRuTor(context As IPluginContext) As PluginApi.Plugins.Playlist
+            Load_Settings()
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
@@ -1795,7 +2033,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTopNNMClubList(context As IPluginContext) As PluginApi.Plugins.Playlist
-
+            Load_Settings()
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
@@ -1993,6 +2231,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTorrentPAGENNM(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
+            Load_Settings()
             Dim RequestGet As System.Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp(URL)
             If ProxyEnablerNNM = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             RequestGet.Method = "GET"
@@ -2003,7 +2242,7 @@ Namespace RemoteFork.Plugins
             Dim Reader As New System.IO.StreamReader(DataStream, Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = Reader.ReadToEnd
             Reader.Close()
-            DataStream.Close()
+            DataStream.Dispose()
             Response.Close()
             ' Dim ResponseFromServer As String = GetRequest(URL, CookiesNNM, ProxyEnablerNNM)
 
@@ -2039,7 +2278,7 @@ Namespace RemoteFork.Plugins
             ' Dim FileTorrent As String = GetRequest(TorrentPath, CookiesNNM, ProxyEnablerNNM)
             System.IO.File.WriteAllText(System.IO.Path.GetTempPath & "TorrentTemp.torrent", FileTorrent, System.Text.Encoding.GetEncoding(1251))
             Reader.Close()
-            DataStream.Close()
+            DataStream.Dispose()
             Response.Close()
 
 
@@ -2140,15 +2379,15 @@ Namespace RemoteFork.Plugins
 
 
 
-            SidsPirs = replacetags(SidsPirs)
-            InfoFile = replacetags(InfoFile)
-            Title = replacetags(Title)
-            Opisanie = replacetags(Opisanie)
+            SidsPirs = ReplaceTags(SidsPirs)
+            InfoFile = ReplaceTags(InfoFile)
+            Title = ReplaceTags(Title)
+            Opisanie = ReplaceTags(Opisanie)
 
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & SidsPirs & "<br>" & Opisanie & "<span style=""color:#3090F0"">Информация</span><br>" & InfoFile
         End Function
 
-        Public Function replacetags(ByVal s As String) As String
+        Public Function ReplaceTags(ByVal s As String) As String
             Try
                 Dim rgx As New System.Text.RegularExpressions.Regex("<[^b].*?>")
                 s = rgx.Replace(s, "").Replace("<b>", "")
@@ -2204,7 +2443,7 @@ Namespace RemoteFork.Plugins
         Dim TrackerServerKinozal As String = "https://kinozal.guru"
         Dim CookiesKNZL As String = "__cfduid=d6de6389e33d747cad9a1dad0b7e89e151508321950; uid=20229744; pass=JPiL8H1EPt"
         Public Function GetTopListKinozal(context As IPluginContext) As PluginApi.Plugins.Playlist
-
+            Load_Settings()
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
@@ -2238,7 +2477,6 @@ Namespace RemoteFork.Plugins
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
 
             Dim responseFromServer As String = reader.ReadToEnd()
-            '  IO.File.WriteAllText("d:\My Desktop\test.html", responseFromServer, System.Text.Encoding.GetEncoding(1251))
             responseFromServer = responseFromServer.Replace(vbLf, " ")
 
             Dim TopReGex As New System.Text.RegularExpressions.Regex("(?<=<span class=sw190><select name=""c"" class=""w190 styled"">).*?(?=<option  value=23)")
@@ -2288,7 +2526,6 @@ Namespace RemoteFork.Plugins
             Dim dataStream As System.IO.Stream = Response.GetResponseStream
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
-            '  IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
             ResponseFromServer = ResponseFromServer.Replace(vbLf, " ")
 
             Dim NeNahelReGex As New System.Text.RegularExpressions.Regex("Нет активных раздач, приносим извинения")
@@ -2315,7 +2552,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(LOGO_Kinozal & "OPT:ContentType--image/jpegOPEND:/") & "/" & """ />"
             End With
-            items.Add(Item)
+            If Search = "" Then items.Add(Item)
             For Each ItemFile As System.Text.RegularExpressions.Match In TopReGex.Matches(ResponseFromServer)
 
                 Item = New Item
@@ -2326,7 +2563,6 @@ Namespace RemoteFork.Plugins
                     .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
                 items.Add(Item)
-                '     IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
             Next
             For Each ItemFile As System.Text.RegularExpressions.Match In FullReGex.Matches(ResponseFromServer)
 
@@ -2338,7 +2574,7 @@ Namespace RemoteFork.Plugins
                     .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
                 items.Add(Item)
-                '   IO.File.WriteAllText("d:\My Desktop\test.html", ItemFile.Value, System.Text.Encoding.GetEncoding(1251))
+
             Next
             PlayList.IsIptv = "False"
             Dim ReGexNext As New System.Text.RegularExpressions.Regex(">Вперед</a>")
@@ -2382,7 +2618,7 @@ Namespace RemoteFork.Plugins
             dataStream = Response.GetResponseStream()
             reader = New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             ResponseFromServer = reader.ReadToEnd
-            ' IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer, System.Text.Encoding.GetEncoding(1251))
+
             ResponseFromServer = ResponseFromServer.Replace(vbLf, " ")
 
 
@@ -2419,7 +2655,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Function FormatDescriptionKinozal(ByVal HTML As String) As String
-            '   IO.File.WriteAllText("d:\My Desktop\test.html", HTML, System.Text.Encoding.GetEncoding(1251))
+
             Dim Title As String = Nothing
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=Class=""r\d"">).*?(?=</a>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
 
@@ -2441,7 +2677,7 @@ Namespace RemoteFork.Plugins
 
             Dim ImagePath As String = Nothing
             Try
-                ' HTML = HTML.Replace("<img src=""//", "ImagePath")
+
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ImagePath = Regex.Matches(HTML)(2).Value
             Catch ex As Exception
@@ -2469,11 +2705,10 @@ Namespace RemoteFork.Plugins
 
 
             ' SidsPirs = replacetags(SidsPirs)
-            InfoFile = replacetags(InfoFile)
-            Title = replacetags(Title)
-            Opisanie = replacetags(Opisanie)
+            InfoFile = ReplaceTags(InfoFile)
+            Title = ReplaceTags(Title)
+            Opisanie = ReplaceTags(Opisanie)
 
-            '  IO.File.WriteAllText("d:\My Desktop\test.html", "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile, System.Text.Encoding.GetEncoding(1251))
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile
         End Function
 
@@ -3068,7 +3303,6 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
             End If
             Return PlayListTorrent
         End Function
-
 
         Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
 
