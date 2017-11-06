@@ -9,8 +9,8 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.08", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
-    Public Class AceTorrentPlay1
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.09", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    Public Class AceTorrentPlay
         Implements IPlugin
 
         Dim IPAdress As String
@@ -894,7 +894,7 @@ Namespace RemoteFork.Plugins
         Dim ProxyEnablerRuTr As Boolean = False
         ' Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
-         Dim TrackerServer As String = "https://rutracker.net"
+        Dim TrackerServer As String = "https://rutracker.net"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -1102,7 +1102,7 @@ Namespace RemoteFork.Plugins
 
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<optgroup label=""&nbsp;" & Groop & ").*?(optgroup>)")
-            Dim GroopText As String = Regex.Matches(KategoriRuTracker)(0).Value.Replace(" |- ", "").Replace("(", " ").Replace(")", " ")
+            Dim GroopText As String = Regex.Matches(KategoriRuTracker)(0).Value.Replace(" |- ", "::").Replace("(", " ").Replace(")", " ")
 
 
 
@@ -1157,7 +1157,7 @@ Namespace RemoteFork.Plugins
                     Dim Options As String = Regex.Match(GroopText).Value
 
                     Regex = New System.Text.RegularExpressions.Regex("(<option).*?(option>)")
-                    Dim RegexOptionsName As New System.Text.RegularExpressions.Regex("(?<=""root_forum has_sf"">|""root_forum"">|).*?(?=&nbsp;)")
+                    Dim RegexOptionsName As New System.Text.RegularExpressions.Regex("(?<=""root_forum has_sf"">|""root_forum"">|::).*?(?=&nbsp;)")
                     Dim RegexOptionsID As New System.Text.RegularExpressions.Regex("(?<=value="").*?(?="")")
 
 
@@ -1289,7 +1289,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<="">).*(?=&)")
             Dim SizeFile As String = Nothing
             Try
-                SizeFile = "<br>Размер " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                SizeFile = "<br>Размер: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1297,7 +1297,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<=<b class=""seedmed"">).*?(?=</b>)")
             Dim SidsPirs As String = Nothing
             Try
-                SidsPirs = "<br><br>Seeders " & RegexSub.Matches(HTML)(0).Value & "<br>Leechers: " & RegexTop.Matches(HTML)(0).Value
+                SidsPirs = "<br><br>Seeders: " & RegexSub.Matches(HTML)(0).Value & "<br>Leechers: " & RegexTop.Matches(HTML)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1305,7 +1305,7 @@ Namespace RemoteFork.Plugins
             RegexSub = New System.Text.RegularExpressions.Regex("(?<="">).*(.*)")
             Dim Razdel As String = Nothing
             Try
-                Razdel = "<br><br>Раздел " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                Razdel = "<br><br>Раздел: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
@@ -1314,14 +1314,14 @@ Namespace RemoteFork.Plugins
             Dim DataCreate As String = Nothing
             Try
 
-                DataCreate = "<br><br>Создан " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
+                DataCreate = "<br><br>Создан: " & RegexSub.Matches(RegexTop.Matches(HTML)(0).Value)(0).Value
             Catch ex As Exception
             End Try
 
 
 
 
-            Return "<span style=""color#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
+            Return "<span style=""color:#3090F0"">" & Title & "</span><br>" & SizeFile & SidsPirs & Razdel & DataCreate
         End Function
 
         Sub LoadSaveGroupeRuTr()
@@ -1381,7 +1381,7 @@ Namespace RemoteFork.Plugins
 
             Dim RuTrHTML As String = IO.File.ReadAllText(System.IO.Path.GetTempPath & "GroopRuTr")
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<img class=""site-logo"" src="").*?("")")
-            '  LOGO_RuTr = "https" & Regex.Match(RuTrHTML).Value
+            '  LOGO_RuTr = "https:" & Regex.Match(RuTrHTML).Value
 
             Regex = New System.Text.RegularExpressions.Regex("(<p class=""select"">).*?(</select>)")
             KategoriRuTracker = Regex.Matches(RuTrHTML)(0).Value
@@ -1532,8 +1532,7 @@ Namespace RemoteFork.Plugins
                 InfoFile = ex.Message
             End Try
 
-            Return "<div id=""poster"" style=""floatleft;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
-
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
         End Function
         Public Function SearchListRuTr(context As IPluginContext, ByVal search As String, Optional ByVal Category As String = Nothing) As PluginApi.Plugins.Playlist
             Dim RequestPost As System.Net.WebRequest
@@ -1629,7 +1628,7 @@ Namespace RemoteFork.Plugins
 
                 Dim Item As New Item
                 With Item
-                    .Name = "<span style=""color#C0DAE3"">" & "- СВЯЗАННЫЕ РАЗДАЧИ -" & "</span>"
+                    .Name = "<span style=""color:#C0DAE3"">" & "- СВЯЗАННЫЕ РАЗДАЧИ -" & "</span>"
                     .ImageLink = ICO_Pusto
                     .Type = ItemType.FILE
                 End With
@@ -1640,13 +1639,13 @@ Namespace RemoteFork.Plugins
                 Dim ItemSearchNext As New Item
                 With ItemSearchNext
                     .ImageLink = ICO_Search2
-                    .Name = "<span style=""color#C0E3D3"">" & "Искать ещё похожие раздачи" & "</span>"
+                    .Name = "<span style=""color:#C0E3D3"">" & "Искать ещё похожие раздачи" & "</span>"
                     .Link = TrackerServerRuTor & MatchesSearchNext(MatchesSearchNext.Count - 1).Value & ";PAGERUTOR"
                 End With
 
 
 
-                Regex = New System.Text.RegularExpressions.Regex("(<a href=""magnet).*?(</span></td></tr>)")
+                Regex = New System.Text.RegularExpressions.Regex("(<a href=""magnet:).*?(</span></td></tr>)")
 
                 Matches = Regex.Matches(Matches(0).Value)
 
@@ -1659,21 +1658,21 @@ Namespace RemoteFork.Plugins
                         .Link = TrackerServerRuTor & Regex.Matches(Macth.Value)(1).Value & ";PAGEFILMRUTOR"
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<="">).*?(?=</a>)")
-                        .Name = "<span style=""color#E3D6C0"">" & Regex.Matches(Macth.Value)(1).Value & "</span>"
+                        .Name = "<span style=""color:#E3D6C0"">" & Regex.Matches(Macth.Value)(1).Value & "</span>"
 
                         Regex = New System.Text.RegularExpressions.Regex("(<td align=""right"">).*?(</td>)")
                         Dim MatchSize As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Macth.Value)
                         Dim SizeFile As String = MatchSize(MatchSize.Count - 1).Value
-                        SizeFile = "Размер " & SizeFile
+                        SizeFile = "Размер: " & SizeFile
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<=alt=""S"" />&nbsp;).*?(?=<)")
-                        Dim Seeders As String = "Seeders " & Regex.Matches(Macth.Value)(0).Value
+                        Dim Seeders As String = "Seeders: " & Regex.Matches(Macth.Value)(0).Value
 
 
                         Regex = New System.Text.RegularExpressions.Regex("(?<=alt=""L"" /><span class=""red"">&nbsp;).*?(?=</span>)")
-                        Dim Leechers As String = "Leechers " & Regex.Matches(Macth.Value)(0).Value
+                        Dim Leechers As String = "Leechers: " & Regex.Matches(Macth.Value)(0).Value
 
-                        .Description = "</div><span style=""color#3090F0"">" & .Name & "</span><p><br>" & SizeFile & "<br><p>" & Seeders & "<br>" & Leechers
+                        .Description = "</div><span style=""color:#3090F0"">" & .Name & "</span><p><br>" & SizeFile & "<br><p>" & Seeders & "<br>" & Leechers
 
                     End With
                     items.Add(Item)
@@ -1734,8 +1733,7 @@ Namespace RemoteFork.Plugins
             Title = ReplaceTags(Title)
 
 
-
-            Return "<div id=""poster"" style=""floatleft;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><font face=""Arial Narrow"" size=""4""><span style=""color:#70A4A3"">" & SidsPirs & "</font></span>" & InfoFile
 
         End Function
 
