@@ -20,7 +20,7 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "acetorrentplay"
 
-
+'
 #Region "Настройки"
 
 #Region "Иконки"
@@ -815,33 +815,47 @@ Namespace RemoteFork.Plugins
             Dim Item As New Item
             Dim HTML As String = GetHTMLPageTTVFilms(URL)
             Dim Description As String = FormatDescriptionTTVFilms(HTML)
-            IO.File.WriteAllText("d:\My Desktop\Test.html", HTML, Text.Encoding.UTF8)
+            ' IO.File.WriteAllText("d:\My Desktop\Test.html", HTML, Text.Encoding.UTF8)
 
             '  If New System.Text.RegularExpressions.Regex("onclick=""change_torrent").IsMatch(HTML) = True Then
 
-            If New System.Text.RegularExpressions.Regex("http://torrent.p2pfilms.online/torrent").Matches(HTML).Count > 1 Then
-                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=""TorrentsTableBody"">).*?(</table>)")
-                HTML = HTML.Replace("onclick", "")
-                HTML = ReGex.Match(HTML).Value.Replace("<img src=""", "<img src=""" & TTVFilmsAdress)
-                Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<tr>).*?(</tr>)")
-                Dim ReGexTDItem As New System.Text.RegularExpressions.Regex("(<td).*?(</td>)")
-                Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=>).*?(?=<)")
-                Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=').*?(?=')")
 
-                For Each Macthe As System.Text.RegularExpressions.Match In ReGexItem.Matches(HTML)
+            ' If New System.Text.RegularExpressions.Regex("http://torrent.p2pfilms.online/torrent").Matches(HTML).Count > 1 Then
+            If New System.Text.RegularExpressions.Regex("<table class=""film-torrents multiple"">").IsMatch(HTML) = True Then
+                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=<table class=""film-torrents multiple"">).*?(</table>)")
+                ' HTML = HTML.Replace("onclick", "")
+                HTML = ReGex.Match(HTML).Value.Replace("<img src=""", "<img src=""" & TTVFilmsAdress).Replace("src=""/", "src=""" & TTVFilmsAdress & "/")
+                '  IO.File.WriteAllText("d:\My Desktop\Test.html", HTML, Text.Encoding.UTF8)
+
+                Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<tr).*?(</tr>)")
+
+                Dim ReGexTDItem As New System.Text.RegularExpressions.Regex("(<td).*?(</td>)")
+                '   Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=>).*?(?=<)")
+                Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=data-url="").*?(?="")")
+
+
+                Dim Macthe As System.Text.RegularExpressions.MatchCollection = ReGexItem.Matches(HTML)
+                'MsgBox(Macthe.Count)
+                ' MsgBox(Macthe(Macthe.Count).Value)
+                For I As Integer = 1 To Macthe.Count - 1
+
+
+                    '  IO.File.WriteAllText("d:\My Desktop\Test.html", Macthe(I).Value, Text.Encoding.UTF8)
+
                     Item = New Item
                     With Item
                         .ImageLink = ICO_TorrentFile
                         .Type = ItemType.DIRECTORY
-                        .Name = ReGexTDItem.Matches(Macthe.Value)(3).Value
-                        .Description = Description & Macthe.Value
-                        .Link = ReGexLink.Matches(ReGexTDItem.Matches(Macthe.Value)(3).Value)(0).Value & ";" & URL & ";TorrentTTVFilms"
+                        .Name = ReGexTDItem.Matches(Macthe(I).Value)(3).Value
+                        .Description = Description & Macthe(I).Value
+                        .Link = ReGexLink.Match(Macthe(I).Value).Value & ";" & URL & ";TorrentTTVFilms"
                     End With
                     items.Add(Item)
                 Next
 
             Else
-                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=""torrent_url"":"").*?(?="")")
+                'IO.File.WriteAllText("d:\My Desktop\Test.html", HTML, Text.Encoding.UTF8)
+                Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=data-url="").*?(?="")")
                 Dim PathTorrent As String = ReGex.Match(HTML).Value.Replace("\", "")
                 Return GetTorrentTTVFilms(PathTorrent, URL, context)
             End If
@@ -3211,32 +3225,38 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
         End Structure
 
         Function GetID(ByVal PathTorrent As String) As String
+            ' Try
             Dim WC As New System.Net.WebClient
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
-            WC.Encoding = System.Text.Encoding.UTF8
-            Dim FileTorrent() As Byte = WC.DownloadData(PathTorrent)
+                WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
+                WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
-            FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
+                Dim FileTorrent() As Byte = WC.DownloadData(PathTorrent)
 
-            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
-            request.Method = "POST"
-            request.ContentType = "application/octet-stream\r\n"
+                Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
+                FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
 
-            request.ContentLength = FileTorrent.Length
-            Dim dataStream As System.IO.Stream = request.GetRequestStream
-            dataStream.Write(FileTorrent, 0, FileTorrent.Length)
-            dataStream.Close()
+                Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
+                request.Method = "POST"
+                request.ContentType = "application/octet-stream\r\n"
 
-            Dim response As System.Net.HttpWebResponse = request.GetResponse()
-            dataStream = response.GetResponseStream()
+                request.ContentLength = FileTorrent.Length
+                Dim dataStream As System.IO.Stream = request.GetRequestStream
+                dataStream.Write(FileTorrent, 0, FileTorrent.Length)
+                dataStream.Close()
 
-            Dim reader As New System.IO.StreamReader(dataStream)
-            Dim responseFromServer As String = reader.ReadToEnd()
+                Dim response As System.Net.HttpWebResponse = request.GetResponse()
+                dataStream = response.GetResponseStream()
 
-            Dim responseSplit() As String = responseFromServer.Split("""")
-            Dim ID As String = responseSplit(3)
-            Return ID
+                Dim reader As New System.IO.StreamReader(dataStream)
+                Dim responseFromServer As String = reader.ReadToEnd()
+
+                Dim responseSplit() As String = responseFromServer.Split("""")
+                Dim ID As String = responseSplit(3)
+                Return ID
+            ' Catch ex As Exception
+            'MsgBox(ex.Message)
+            '  End Try
+
         End Function
 
         Function ReCoder(ByVal Str As String)
