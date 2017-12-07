@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.09", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.10", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -108,14 +108,15 @@ Namespace RemoteFork.Plugins
                     ProxyEnablerNNM = Not ProxyEnablerNNM
                 Case "TrackerServerNNM"
                     Select Case TrackerServerNNM
+                        Case "http://ipv6.nnm-club.name"
+                            TrackerServerNNM = "http://nnmclub.to"
                         Case "http://nnmclub.to"
                             TrackerServerNNM = "https://nnm-club.name"
                         Case "https://nnm-club.name"
                             TrackerServerNNM = "http://nnm-club.me"
                         Case "http://nnm-club.me"
-                            TrackerServerNNM = "http://nnmclub.to"
+                            TrackerServerNNM = "http://ipv6.nnm-club.name"
                     End Select
-                    '   If TrackerServerNNM = "http://nnmclub.to" Then TrackerServerNNM = "https://nnm-club.name" Else TrackerServerNNM = "http://nnmclub.to"
             End Select
             Save_Settings()
 
@@ -814,8 +815,11 @@ Namespace RemoteFork.Plugins
             Dim Item As New Item
             Dim HTML As String = GetHTMLPageTTVFilms(URL)
             Dim Description As String = FormatDescriptionTTVFilms(HTML)
+            IO.File.WriteAllText("d:\My Desktop\Test.html", HTML, Text.Encoding.UTF8)
 
-            If New System.Text.RegularExpressions.Regex("onclick=""change_torrent").IsMatch(HTML) = True Then
+            '  If New System.Text.RegularExpressions.Regex("onclick=""change_torrent").IsMatch(HTML) = True Then
+
+            If New System.Text.RegularExpressions.Regex("http://torrent.p2pfilms.online/torrent").Matches(HTML).Count > 1 Then
                 Dim ReGex As New System.Text.RegularExpressions.Regex("(?<=""TorrentsTableBody"">).*?(</table>)")
                 HTML = HTML.Replace("onclick", "")
                 HTML = ReGex.Match(HTML).Value.Replace("<img src=""", "<img src=""" & TTVFilmsAdress)
@@ -891,7 +895,7 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Rutracker"
-        Dim ProxyEnablerRuTr As Boolean = False
+        Dim ProxyEnablerRuTr As Boolean = True
         ' Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
         Dim TrackerServer As String = "https://rutracker.net"
@@ -2745,12 +2749,18 @@ Namespace RemoteFork.Plugins
         End Function
         Function Requesters(ByVal Path As String) As String
             Dim WC As New Net.WebClient
+            System.Net.ServicePointManager.SecurityProtocol = Net.SecurityProtocolType.Tls Or Net.SecurityProtocolType.Ssl3
+
             ' WC.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             WC.Headers.Item(Net.HttpRequestHeader.UserAgent) = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
             WC.Encoding = System.Text.Encoding.UTF8
-
-            Dim STR As String = WC.DownloadString(Path)
-            Return STR
+            Try
+                Dim STR As String = WC.DownloadString(Path)
+                Return STR
+            Catch ex As Exception
+                MsgBox(ex.Message)
+            End Try
+            Return Nothing
         End Function
         'ТВ
 
