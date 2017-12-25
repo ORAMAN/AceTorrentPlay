@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.10", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.11", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -20,7 +20,7 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "acetorrentplay"
 
-'
+        '
 #Region "Настройки"
 
 #Region "Иконки"
@@ -108,14 +108,12 @@ Namespace RemoteFork.Plugins
                     ProxyEnablerNNM = Not ProxyEnablerNNM
                 Case "TrackerServerNNM"
                     Select Case TrackerServerNNM
-                        Case "http://ipv6.nnm-club.name"
-                            TrackerServerNNM = "http://nnmclub.to"
-                        Case "http://nnmclub.to"
+                        Case "http://nnm-club.lib"
                             TrackerServerNNM = "https://nnm-club.name"
                         Case "https://nnm-club.name"
-                            TrackerServerNNM = "http://nnm-club.me"
-                        Case "http://nnm-club.me"
-                            TrackerServerNNM = "http://ipv6.nnm-club.name"
+                            TrackerServerNNM = "http://nnm-club.lib"
+                        Case Else
+                            TrackerServerNNM = "https://nnm-club.name"
                     End Select
             End Select
             Save_Settings()
@@ -2205,10 +2203,11 @@ Namespace RemoteFork.Plugins
                     Dim Item As New Item()
                     Item.Name = Regex.Matches(MAtch.Value)(1).Value
 
+                    'Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
                     Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
                     Item.ImageLink = Regex.Matches(MAtch.Value)(0).Value
 
-                    Item.ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(Item.ImageLink & "OPT:ContentType--image/jpegOPEND:/") & "/"
+                    '  Item.ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(Item.ImageLink & "OPT:ContentType--image/jpegOPEND:/") & "/"
 
                     Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
                     Item.Link = TrackerServerNNM & "/forum/" & Regex.Matches(MAtch.Value)(0).Value & ";PAGEFILMNNM"
@@ -2358,7 +2357,7 @@ Namespace RemoteFork.Plugins
             Try
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""postImg postImgAligned img-right"" title="").*?(?="">)")
                 ImagePath = Regex.Matches(HTML)(0).Value
-                ImagePath = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImagePath & "OPT:ContentType--image/jpegOPEND:/") & "/"
+                ' ImagePath = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(ImagePath & "OPT:ContentType--image/jpegOPEND:/") & "/"
 
             Catch ex As Exception
 
@@ -3227,32 +3226,32 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
         Function GetID(ByVal PathTorrent As String) As String
             ' Try
             Dim WC As New System.Net.WebClient
-                WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
-                WC.Encoding = System.Text.Encoding.UTF8
+            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36")
+            WC.Encoding = System.Text.Encoding.UTF8
 
-                Dim FileTorrent() As Byte = WC.DownloadData(PathTorrent)
+            Dim FileTorrent() As Byte = WC.DownloadData(PathTorrent)
 
-                Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
-                FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
+            Dim FileTorrentString As String = System.Convert.ToBase64String(FileTorrent)
+            FileTorrent = System.Text.Encoding.Default.GetBytes(FileTorrentString)
 
-                Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
-                request.Method = "POST"
-                request.ContentType = "application/octet-stream\r\n"
+            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.Create("http://api.torrentstream.net/upload/raw")
+            request.Method = "POST"
+            request.ContentType = "application/octet-stream\r\n"
 
-                request.ContentLength = FileTorrent.Length
-                Dim dataStream As System.IO.Stream = request.GetRequestStream
-                dataStream.Write(FileTorrent, 0, FileTorrent.Length)
-                dataStream.Close()
+            request.ContentLength = FileTorrent.Length
+            Dim dataStream As System.IO.Stream = request.GetRequestStream
+            dataStream.Write(FileTorrent, 0, FileTorrent.Length)
+            dataStream.Close()
 
-                Dim response As System.Net.HttpWebResponse = request.GetResponse()
-                dataStream = response.GetResponseStream()
+            Dim response As System.Net.HttpWebResponse = request.GetResponse()
+            dataStream = response.GetResponseStream()
 
-                Dim reader As New System.IO.StreamReader(dataStream)
-                Dim responseFromServer As String = reader.ReadToEnd()
+            Dim reader As New System.IO.StreamReader(dataStream)
+            Dim responseFromServer As String = reader.ReadToEnd()
 
-                Dim responseSplit() As String = responseFromServer.Split("""")
-                Dim ID As String = responseSplit(3)
-                Return ID
+            Dim responseSplit() As String = responseFromServer.Split("""")
+            Dim ID As String = responseSplit(3)
+            Return ID
             ' Catch ex As Exception
             'MsgBox(ex.Message)
             '  End Try
