@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.11", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.12", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -907,10 +907,11 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Rutracker"
-        Dim ProxyEnablerRuTr As Boolean = True
+        Dim ProxyEnablerRuTr As Boolean = False
         ' Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
-        Dim TrackerServer As String = "https://rutracker.net"
+        ' Dim TrackerServer As String = "https://rutracker.net"
+        Dim TrackerServer As String = "http://rutracker.lib"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -1607,7 +1608,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "RuTor"
-        Dim TrackerServerRuTor As String = "http://mega-tor.org"
+        '  Dim TrackerServerRuTor As String = "http://mega-tor.org"
+        Dim TrackerServerRuTor As String = "http://rutor.lib"
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Load_Settings()
@@ -2818,8 +2820,8 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ALLFON-TV"
                 .Link = "allfon.all.iproxy"
-                .ImageLink = "http://allfon-tv.com/css/images/favicon.png"
-                .Description = "<html><img src=""http://allfon-tv.com/css/images/favicon.png""></html><p>"
+                .ImageLink = "https://im0-tub-ru.yandex.net/i?id=b35051113d77e4b6cb0e75b7d7ef80b7-sr&n=13"
+                .Description = "<html><img src=""" & .ImageLink & """></html><p>"
             End With
             items.Add(Item)
 
@@ -2840,12 +2842,16 @@ Namespace RemoteFork.Plugins
         Public Function GetTvP2P(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
-            Dim ReGexTop As New System.Text.RegularExpressions.Regex("(<ul class=""hidden-menu clearfix"">).*?(</ul>)")
-            Dim ReGex As New System.Text.RegularExpressions.Regex("(<li><a href=""/).*?(</a></li>)")
-            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=<li><a href=""/).*?(?=/"">)")
-            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=/"">).*?(?=</a></li>)")
+            Dim ReGexTop As New System.Text.RegularExpressions.Regex("(<div class=""modal-body category-body"">).*?(</div>)")
+            Dim ReGex As New System.Text.RegularExpressions.Regex("(<a href="").*?(</a>)")
+            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<="").*?(?="">)")
+            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<="">).*?(?=</a>)")
             Dim WC As New Net.WebClient
-            Dim STR As String = ReGexTop.Match(WC.DownloadString("http://tv-p2p.ru").Replace(vbLf, "")).Value
+            WC.Headers.Add(Net.HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36")
+            WC.Encoding = System.Text.Encoding.GetEncoding(1251)
+            Dim STR As String = WC.DownloadString("http://tv-p2p.ru").Replace(vbLf, "")
+            STR = ReGexTop.Match(STR).Value
+
             For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR)
 
                 Item = New Item
@@ -2862,18 +2868,18 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetCategoryTvP2P(ByVal CategoryTvP2P As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim WC As New Net.WebClient
+            WC.Encoding = System.Text.Encoding.GetEncoding(1251)
             Dim STR As String = WC.DownloadString("http://tv-p2p.ru/" & CategoryTvP2P).Replace(vbLf, "")
-            Dim ReGex As New System.Text.RegularExpressions.Regex("(<div class=""c1-item"">).*?(/></div>)")
-            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=href="").*?(?="">)")
-            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=title="").*?(?=""/>)")
+            Dim ReGex As New System.Text.RegularExpressions.Regex("(<div class=""short"">).*?(</div>)")
+            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=<a href="").*?(?="")")
+            Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=title="").*?(?="")")
             Dim ReGexIcon As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
-            Dim ReGexNext As New System.Text.RegularExpressions.Regex("(?<=<span class=""pnext""><a href="").*?(?="">)")
 
-
-LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR)
+            For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR)
                 Item = New Item
                 With Item
                     .Type = ItemType.DIRECTORY
@@ -2885,20 +2891,18 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
                 items.Add(Item)
             Next
 
-            If ReGexNext.IsMatch(STR) = True Then
-                STR = WC.DownloadString(ReGexNext.Match(STR).Value).Replace(vbLf, "")
-                GoTo LineGo
-            End If
+            Dim ReGexNext As New System.Text.RegularExpressions.Regex("(?<=</a>  <a href=""http://tv-p2p.ru).*?(?="">Вперед)")
+            next_page_url = ReGexNext.Match(STR).Value & ";TvP2PCategory"
 
 
             PlayList.IsIptv = "True"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(items, context, next_page_url)
         End Function
 
         Public Function GetTvChanel(ByVal ChanelTvP2P As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
-            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=hls.loadSource).*?(?=;)")
+            Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=http://127.0.0.1:6878/ace/manifest.m3u8\?id=).*?(?="")")
             Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=<title>).*?(?=&raquo;)")
             ' Dim ReGexIcon As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
             Dim WC As New Net.WebClient
@@ -2906,7 +2910,7 @@ LineGo:     For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR
 
             With Item
                 .Type = ItemType.FILE
-                .Link = ReGexLink.Match(STR).Value.Replace("('http://127.0.0.1:6878/ace/manifest.m3u8?id=", "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=").Replace("')", "")
+                .Link = "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id=" & ReGexLink.Match(STR).Value
                 .Name = ReGexName.Match(STR).Value
                 .ImageLink = ICO_VideoFile
                 ' .Description = .Link
