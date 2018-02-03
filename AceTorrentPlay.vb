@@ -907,11 +907,11 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Rutracker"
-        Dim ProxyEnablerRuTr As Boolean = False
-        ' Dim TrackerServer As String = "https://rutracker.org"
+        Dim ProxyEnablerRuTr As Boolean = True
+        Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
         ' Dim TrackerServer As String = "https://rutracker.net"
-        Dim TrackerServer As String = "http://rutracker.lib"
+        'Dim TrackerServer As String = "http://rutracker.lib"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -1608,8 +1608,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "RuTor"
-        '  Dim TrackerServerRuTor As String = "http://mega-tor.org"
-        Dim TrackerServerRuTor As String = "http://rutor.lib"
+        Dim TrackerServerRuTor As String = "http://mega-tor.org"
+        'Dim TrackerServerRuTor As String = "http://rutor.lib"
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Load_Settings()
