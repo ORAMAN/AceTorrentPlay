@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.13", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.14", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -103,7 +103,7 @@ Namespace RemoteFork.Plugins
         Function GetListSettingsNNM(context As IPluginContext, Optional ByVal ParametrSettings As String = "") As PluginApi.Plugins.Playlist
 
 
-            Select Case ParametrSettings
+     Select Case ParametrSettings
                 Case "ProxyNNM"
                     ProxyEnablerNNM = Not ProxyEnablerNNM
                 Case "TrackerServerNNM"
@@ -114,7 +114,7 @@ Namespace RemoteFork.Plugins
                         Case "https://nnm-club.name"
                             TrackerServerNNM = "http://nnm-club.lib"
                         Case "http://nnm-club.lib"
-                            TrackerServerNNM = "https://nnm-club.me"
+                            TrackerServerNNM = "http://nnm-club.me"
                         Case "http://nnm-club.me"
                             TrackerServerNNM = "https://nnmclub.to"
 
