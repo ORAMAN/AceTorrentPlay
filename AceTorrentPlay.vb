@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.14", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.15", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -103,7 +103,7 @@ Namespace RemoteFork.Plugins
         Function GetListSettingsNNM(context As IPluginContext, Optional ByVal ParametrSettings As String = "") As PluginApi.Plugins.Playlist
 
 
-     Select Case ParametrSettings
+            Select Case ParametrSettings
                 Case "ProxyNNM"
                     ProxyEnablerNNM = Not ProxyEnablerNNM
                 Case "TrackerServerNNM"
@@ -917,7 +917,7 @@ Namespace RemoteFork.Plugins
         Dim TrackerServer As String = "https://rutracker.org"
         ' Dim TrackerServer As String = "http://рутрекер.org"
         ' Dim TrackerServer As String = "https://rutracker.net"
-        'Dim TrackerServer As String = "http://rutracker.lib"
+        ' Dim TrackerServer As String = "http://rutracker.lib"
 #Region "Авторизация"
         Dim Login, Password, Cap_Sid, Cap_Code, Capcha, CookiesRuTr As String
 
@@ -951,6 +951,7 @@ Namespace RemoteFork.Plugins
             Reader.Close()
             Stream.Close()
 
+            '  IO.File.WriteAllText("d:\My Desktop\Test.html", OtvetServera, Text.Encoding.GetEncoding(1251))
             Dim Reg As New System.Text.RegularExpressions.Regex("(>Вход</span>).*?(</span>)")
             '   Dim Matchs As System.Text.RegularExpressions.MatchCollection = Reg.Matches(OtvetServera)
 
@@ -958,7 +959,7 @@ Namespace RemoteFork.Plugins
                 Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", "bb_ssl=1")
                 Return False
             Else
-                Reg = New System.Text.RegularExpressions.Regex("(<span class=""logged-in-as-cap"">).*?(</div>)")
+                Reg = New System.Text.RegularExpressions.Regex("(<b class=""med"">).*?(</div>)")
                 If Reg.IsMatch(OtvetServera) = True Then
                     Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", CookiesRuTr)
                     UserAuthorization = Reg.Match(OtvetServera).Value
@@ -1032,14 +1033,14 @@ Namespace RemoteFork.Plugins
                 Reader.Close()
                 Stream.Dispose()
 
-                Dim Reg As New System.Text.RegularExpressions.Regex("(<a href=""profile.php?mode=register""><b>).*?(</span>)")
+                Dim Reg As New System.Text.RegularExpressions.Regex("profile.php?mode=register")
                 Dim Matchs As System.Text.RegularExpressions.MatchCollection = Reg.Matches(OtvetServera)
 
                 If Matchs.Count > 0 Then
                     Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", "bb_ssl=1")
                     Return SetLogin(context)
                 Else
-                    Reg = New System.Text.RegularExpressions.Regex("(<span class=""logged-in-as-cap"">).*?(</div>)")
+                    Reg = New System.Text.RegularExpressions.Regex("(<b class=""med"">).*?(</div>)")
                     Matchs = Reg.Matches(OtvetServera)
                     If Matchs.Count > 0 Then
                         Microsoft.Win32.Registry.SetValue("HKEY_CURRENT_USER\Software\RemoteFork\Plugins\RuTracker\", "Cookies", CookiesRuTr)
@@ -1615,7 +1616,7 @@ Namespace RemoteFork.Plugins
 
 #Region "RuTor"
         Dim TrackerServerRuTor As String = "http://mega-tor.org"
-        'Dim TrackerServerRuTor As String = "http://rutor.lib"
+        ' Dim TrackerServerRuTor As String = "http://rutor.lib"
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Load_Settings()
@@ -2837,7 +2838,7 @@ Namespace RemoteFork.Plugins
                 .Name = "TV-P2P"
                 .Link = "tvp2p"
                 .ImageLink = "http://tv-p2p.ru/favicon.png"
-                .Description = "<html><img src=""http://tv-p2p.ru/skin/p2p/images/logo.png""></html><p>"
+                .Description = "<html><img src=""" & .ImageLink & """></html><p>"
             End With
             items.Add(Item)
 
@@ -3213,7 +3214,8 @@ Namespace RemoteFork.Plugins
                 WC.Encoding = System.Text.Encoding.UTF8
 
                 Dim PlayList As String = WC.DownloadString("http://pomoyka.lib.emergate.net/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
-                System.IO.File.WriteAllText(PathFilePlayList, PlayList.Replace("(Эротика)", "(Эротика 18+)"))
+                System.IO.File.WriteAllText(PathFilePlayList, PlayList)
+
                 WC.DownloadFile("http://pomoyka.lib.emergate.net/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                 WC.Dispose()
             Catch ex As Exception
