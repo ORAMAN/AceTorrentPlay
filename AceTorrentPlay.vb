@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.16", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.17", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2686,7 +2686,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Function FormatDescriptionKinozal(ByVal HTML As String) As String
-            '   IO.File.WriteAllText("d:\My Desktop\test.html", HTML, Text.Encoding.GetEncoding(1251))
+            IO.File.WriteAllText("d:\My Desktop\test.html", HTML, Text.Encoding.GetEncoding(1251))
             Dim Title As String = Nothing
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=Class=""r\d"">).*?(?=</a>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
 
@@ -2711,6 +2711,7 @@ Namespace RemoteFork.Plugins
 
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ImagePath = Regex.Matches(HTML)(2).Value
+                If Left(ImagePath, 1) = "/" Then ImagePath = TrackerServerKinozal & ImagePath
             Catch ex As Exception
 
             End Try
