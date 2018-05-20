@@ -2686,7 +2686,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Function FormatDescriptionKinozal(ByVal HTML As String) As String
-            IO.File.WriteAllText("d:\My Desktop\test.html", HTML, Text.Encoding.GetEncoding(1251))
+            '  IO.File.WriteAllText("d:\My Desktop\test.html", HTML, Text.Encoding.GetEncoding(1251))
             Dim Title As String = Nothing
             Dim Regex As New System.Text.RegularExpressions.Regex("(?<=Class=""r\d"">).*?(?=</a>)", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
 
