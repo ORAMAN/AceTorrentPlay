@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.17", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.18", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2845,7 +2845,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "TV-P2P"
                 .Link = "tvp2p"
-                .ImageLink = "http://tv-p2p.ru/favicon.png"
+                .ImageLink = "https://lh3.googleusercontent.com/qjGPaHKvjv-qi3Z3FV6kl7WPIOT2L67N_9Xq5iHdotZSiDj8xibeliQyWBmw7-RPQ85z=s170"
                 .Description = "<html><img src=""" & .ImageLink & """></html><p>"
             End With
             items.Add(Item)
@@ -2862,9 +2862,11 @@ Namespace RemoteFork.Plugins
             Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<="").*?(?="">)")
             Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<="">).*?(?=</a>)")
             Dim WC As New Net.WebClient
+            WC.Proxy = New Net.WebProxy(ProxyServr, ProxyPort)
             WC.Headers.Add(Net.HttpRequestHeader.UserAgent, "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36")
             WC.Encoding = System.Text.Encoding.GetEncoding(1251)
             Dim STR As String = WC.DownloadString("http://tv-p2p.ru").Replace(vbLf, "")
+
             STR = ReGexTop.Match(STR).Value
 
             For Each Mstch As Text.RegularExpressions.Match In ReGex.Matches(STR)
@@ -2887,6 +2889,7 @@ Namespace RemoteFork.Plugins
             Dim items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim WC As New Net.WebClient
+            WC.Proxy = New Net.WebProxy(ProxyServr, ProxyPort)
             WC.Encoding = System.Text.Encoding.GetEncoding(1251)
             Dim STR As String = WC.DownloadString("http://tv-p2p.ru/" & CategoryTvP2P).Replace(vbLf, "")
             Dim ReGex As New System.Text.RegularExpressions.Regex("(<div class=""short"">).*?(</div>)")
@@ -2921,6 +2924,7 @@ Namespace RemoteFork.Plugins
             Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=<title>).*?(?=&raquo;)")
             ' Dim ReGexIcon As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
             Dim WC As New Net.WebClient
+            WC.Proxy = New Net.WebProxy(ProxyServr, ProxyPort)
             Dim STR As String = WC.DownloadString(ChanelTvP2P).Replace(vbLf, "")
 
             With Item
