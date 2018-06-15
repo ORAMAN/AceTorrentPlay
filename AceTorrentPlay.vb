@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.18", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.19", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -518,7 +518,7 @@ Namespace RemoteFork.Plugins
                     .ImageLink = "http://s1.iconbird.com/ico/1112/Television/w256h25613523820647.png"
                     Try
                         If System.IO.File.Exists(System.IO.Path.GetTempPath & "MyTraf.tmp") = False Then
-                            WC.DownloadFile("http://pomoyka.lib.emergate.net/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
+                            WC.DownloadFile("http://pomoyka.win/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                         End If
                         .Description = "<html><font face="" Arial"" size="" 5""><b>" & UCase(.Name) & "</font></b><p><img width=""100%"" src=""https://retailradio.biz/wp-content/uploads/2016/10/video-wall.png""></html><p>" & WC.DownloadString(System.IO.Path.GetTempPath & "MyTraf.tmp")
                     Catch ex As Exception
@@ -3186,7 +3186,7 @@ Namespace RemoteFork.Plugins
             Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath() & NamePlayList & ".UpdateTime.tmp"
             Dim PathFilePlayList As String = System.IO.Path.GetTempPath() & NamePlayList & ".PlayList.m3u8"
 
-            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://pomoyka.lib.emergate.net/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
+            Dim request As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://pomoyka.win/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
             request.Method = "HEAD"
             request.ContentType = "text/html"
             request.KeepAlive = True
@@ -3225,10 +3225,10 @@ Namespace RemoteFork.Plugins
                 WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
                 WC.Encoding = System.Text.Encoding.UTF8
 
-                Dim PlayList As String = WC.DownloadString("http://pomoyka.lib.emergate.net/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
+                Dim PlayList As String = WC.DownloadString("http://pomoyka.win/trash/ttv-list/" & NamePlayList & ".m3u?ip=" & IPAdress & ":" & PortAce)
                 System.IO.File.WriteAllText(PathFilePlayList, PlayList)
 
-                WC.DownloadFile("http://pomoyka.lib.emergate.net/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
+                WC.DownloadFile("http://pomoyka.win/trash/ttv-list/MyTraf.php", System.IO.Path.GetTempPath & "MyTraf.tmp")
                 WC.Dispose()
             Catch ex As Exception
             End Try
