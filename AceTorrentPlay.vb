@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.21", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.22", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -50,6 +50,7 @@ Namespace RemoteFork.Plugins
         Dim ICO_Login As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597246portal2.png"
         Dim ICO_Password As String = "http://s1.iconbird.com/ico/0612/GooglePlusInterfaceIcons/w128h1281338911371password.png"
         Dim ICO_LoginKey As String = "http://s1.iconbird.com/ico/0912/ToolbarIcons/w256h2561346685464Login.png"
+        Dim ICO_ClearCache As String = "http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597240ccleaner.png"
 
         Dim LOGO_RuTr As String = "https://rutrk.org/logo/logo.png"
         Dim LOGO_TrackerRutor As String = "http://mega-tor.org/s/logo.jpg"
@@ -330,6 +331,8 @@ Namespace RemoteFork.Plugins
                     Return GetListSettings(context, PathSpliter(PathSpliter.Length - 2))
                 Case "SETTINGS_NNM"
                     Return GetListSettingsNNM(context, PathSpliter(PathSpliter.Length - 2))
+                Case "CLEARCACHE"
+                    Return ClearCacaheACEStream(context)
             End Select
 
             'тв
@@ -612,6 +615,18 @@ Namespace RemoteFork.Plugins
                 End If
             Next
 
+
+            Dim ItemClearCacheACEStream As New Item
+            With ItemClearCacheACEStream
+                .Name = "Clear Cache"
+                .Link = ";CLEARCACHE"
+                .Type = ItemType.DIRECTORY
+                .ImageLink = ICO_ClearCache
+                .Description = "<html>Очистка кеша Ace Stram <p>Текущий размер кеша: " & GetSizeCache() & " мб.</html>"
+            End With
+            items.Add(ItemClearCacheACEStream)
+
+
             Dim ItemSettings As New Item
             With ItemSettings
                 .Name = "Настройки"
@@ -620,6 +635,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Settings
             End With
             items.Add(ItemSettings)
+
 
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
@@ -3466,6 +3482,33 @@ GetFileListJSON:
             End Select
         End Function
 
+        Function ClearCacaheACEStream(ByVal context As IPluginContext)
+            On Error Resume Next
+            For Each Drive As IO.DriveInfo In IO.DriveInfo.GetDrives
+                Dim PathDirectory As String = IO.Path.Combine(Drive.RootDirectory.FullName, "_acestream_cache_")
+                If IO.Directory.Exists(PathDirectory) = True Then
+                    Dim Files() As String = IO.Directory.GetFiles(PathDirectory)
+                    For Each File As String In Files
+                        IO.File.Delete(File)
+                    Next
+                End If
+            Next
+            Return GetTopList(context)
+        End Function
+
+        Function GetSizeCache() As Double
+            Dim SizeCache As Double
+            For Each Drive As IO.DriveInfo In IO.DriveInfo.GetDrives
+                Dim PathDirectory As String = IO.Path.Combine(Drive.RootDirectory.FullName, "_acestream_cache_")
+                If IO.Directory.Exists(PathDirectory) = True Then
+                    Dim Files() As String = IO.Directory.GetFiles(PathDirectory)
+                    For Each File As String In Files
+                        SizeCache = New IO.FileInfo(File).Length + SizeCache
+                    Next
+                End If
+            Next
+            Return Math.Round(SizeCache / 1024 / 1024, 2)
+        End Function
 #End Region
 
     End Class
