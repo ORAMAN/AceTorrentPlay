@@ -3490,6 +3490,7 @@ GetFileListJSON:
                     Dim Files() As String = IO.Directory.GetFiles(PathDirectory)
                     For Each File As String In Files
                         IO.File.Delete(File)
+                        Err.Clear()
                     Next
                 End If
             Next
