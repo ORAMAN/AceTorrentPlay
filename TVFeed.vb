@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.15b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.16b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -43,7 +43,7 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Cookie As String = "4qpyAa7ZVD5PyRMHfeq58xlVA0izZs2s"
+        Dim Cookie As String = "v10e9ENQZkJiNnicgHTBGYgptFlwRypd"
         Dim AdressTvFeed As String = "https://tvfeed.in"
 
 #End Region
@@ -364,15 +364,59 @@ Namespace RemoteFork.Plugins
         'End Function
 
         Public Function GetSearchList(ByVal context As IPluginContext, ByVal SearchText As String) As PluginApi.Plugins.Playlist
-            Dim STR As String = ReqHTML(AdressTvFeed & "/search/", SearchText, "POST")
-            Dim Nom As String = ""
             Dim items As New System.Collections.Generic.List(Of Item)
+            Dim STR As String = ReqHTML(AdressTvFeed & "/search/", SearchText, "POST")
+            Dim ColorText, CategoryContent As String : ColorText = "#00000" : CategoryContent = "OTHER"
+
+            Dim ReGexUneFilSer As New System.Text.RegularExpressions.Regex("(?<=<meta property=""og:url"" content="").*?(?="")")
+            If ReGexUneFilSer.IsMatch(STR) = True Then
+                Dim Item As New Item
+                Item.Type = ItemType.DIRECTORY
+                Item.Description = New System.Text.RegularExpressions.Regex("(<div class=""about"").*?(</div>)").Match(STR).Value
+                ReGexUneFilSer = New System.Text.RegularExpressions.Regex("(<div class=""page-bg"">).*?(</div>             </div>)")
+                STR = ReGexUneFilSer.Match(STR).Value
+
+                Item.Description = New System.Text.RegularExpressions.Regex("(<img src="").*?("")").Matches(STR)(1).Value & Item.Description
+                Dim RegName As New System.Text.RegularExpressions.Regex("(?<=alt="").*?(?=\/|"")")
+                Item.Name = RegName.Match(STR).Value
+                Dim RegImage As New System.Text.RegularExpressions.Regex("(?<=<img src=""|src="").*?(?="")")
+                Item.ImageLink = RegImage.Match(STR).Value
+
+                ReGexUneFilSer = New System.Text.RegularExpressions.Regex("(TVFeed.in</span>).*?(</span></a>          </div>)")
+                STR = ReGexUneFilSer.Match(STR).Value
+
+                Select Case New Text.RegularExpressions.Regex("(?<=<a href="").*?(?="")").Match(STR).Value
+                    Case "/film/"
+                        ColorText = "#DFFDFB"
+                        CategoryContent = "PAGE_FILM"
+                        Item.Description = Item.Description & "<b> ФИЛЬМЫ"
+                    Case "/serial/"
+                        ColorText = "#E0EEFC"
+                        CategoryContent = "PAGE_SERIAL"
+                        Item.Description = Item.Description & "<b> СЕРИАЛЫ"
+                    Case "/tv/"
+                        ColorText = "#F2E5F9"
+                        CategoryContent = "PAGE_TV"
+
+                End Select
+
+                Dim RegLink As New System.Text.RegularExpressions.Regex("(?<=href="").*?(?="")")
+                Item.Link = RegLink.Matches(STR)(1).Value & ";" & CategoryContent
+
+                items.Add(Item)
+                Return PlayListPlugPar(items, context)
+            End If
+
+
+
+            Dim Nom As String = ""
             Dim ReGexTop As New System.Text.RegularExpressions.Regex("(?<=<h3 class=""heading"">).*(</main>)")
+
             If ReGexTop.IsMatch(STR) = True Then
                 STR = ReGexTop.Match(STR).Value
-
+                Dim RegNENaiden As New System.Text.RegularExpressions.Regex("не найдены")
                 Dim ReGex As New System.Text.RegularExpressions.Regex(".*?(<h3 class=""heading"">|</main>)")
-                Dim ColorText, CategoryContent As String : ColorText = "#00000" : CategoryContent = "OTHER"
+
 
                 For Each ReGx As System.Text.RegularExpressions.Match In ReGex.Matches(STR)
                     Dim SearchItog As Boolean = False
@@ -381,7 +425,7 @@ Namespace RemoteFork.Plugins
 
                     Dim Item As New Item
                     Item.Type = ItemType.DIRECTORY
-                    Dim RegNENaiden As New System.Text.RegularExpressions.Regex("не найдены")
+
                     Select Case UCase(RegexCategory.Match(ReGx.Value).Value)
                         Case "СЕРИАЛЫ"
                             If RegNENaiden.IsMatch(ReGx.Value) = True Then
@@ -484,6 +528,7 @@ Namespace RemoteFork.Plugins
                         Next
                     End If
                 Next
+
 
             End If
 
