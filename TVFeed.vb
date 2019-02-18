@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.16b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.17b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -43,8 +43,12 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Cookie As String = "v10e9ENQZkJiNnicgHTBGYgptFlwRypd"
+        Dim Cookie As String = "csrftoken=awt46fUWgnf5gObDV25QI6nmC9jaqSqv; sessionid=v0vtb75gga8ih84cey5ko4ochtvi9lw6"
         Dim AdressTvFeed As String = "https://tvfeed.in"
+
+        Dim ProxyServr As String = "149.56.102.220" ' "proxy.antizapret.prostovpn.org"
+        Dim ProxyPort As Integer = 3128
+        Dim ProxyEnabler As Boolean = False
 
 #End Region
 
@@ -547,10 +551,12 @@ Namespace RemoteFork.Plugins
                 URL = AdressTvFeed & URL
             End If
             Dim Req As Net.HttpWebRequest = Net.HttpWebRequest.Create(URL)
+            If ProxyEnabler = True Then Req.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
 
             Req.Referer = AdressTvFeed & "/dashboard/"
             Req.ContentType = "application/x-www-form-urlencoded"
-            Req.Headers.Add("cookie", "csrftoken=" & Cookie)
+            Req.Headers.Add("cookie", Cookie)
+
             Req.Headers.Add("x-requested-with", "XMLHttpRequest")
 
             Select Case UCase(Method)
@@ -571,6 +577,7 @@ Namespace RemoteFork.Plugins
 
             Reader.Close()
             Res.Close()
+            '''  IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
             Return STR
         End Function
 
@@ -1100,8 +1107,10 @@ Namespace RemoteFork.Plugins
         Function GetFileList(ByVal PathTorrent As String) As TorrentPlayList()
             FunctionsGetTorrentPlayList = "GetFileListJSON"
             Dim WC As New System.Net.WebClient
+            '  If ProxyEnabler = True Then WC.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/57.0.2987.133 Safari/537.36")
             WC.Encoding = System.Text.UTF8Encoding.UTF8
+
 
             Dim ID As String = ReqHTML(PathTorrent)
             Dim PlayListTorrent() As TorrentPlayList = Nothing
