@@ -33,9 +33,7 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Параметры"
-        ' Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
-        ' Dim ProxyPort As Integer = 3128
-        ' Dim Proxyer As New Net.WebProxy(ProxyServr, ProxyPort)
+
         Dim IPAdress As String
         Dim PortRemoteFork As String = "8027"
         Dim PLUGIN_PATH As String = "pluginPath"
