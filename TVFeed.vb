@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.18b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.2b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -51,7 +51,7 @@ Namespace RemoteFork.Plugins
         Dim ProxyServr As String = "149.56.102.220" ' "proxy.antizapret.prostovpn.org"
         Dim ProxyPort As Integer = 3128
         Dim ProxyEnabler As Boolean = False
-
+        Dim WC As New System.Net.WebClient
 #End Region
 
 #Region "MAIN"
@@ -67,27 +67,35 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .SearchOn = "Поиск"
                 .ImageLink = ICO_Search
-                .Description = "<div align=""center""><img src= ""https://tvfeed.in/img/about-bg.jpg"" width=100% ></div><p><strong>О проекте:</strong></p><p>Основанный в 2012 году проект TVFeed был одной из показательных площадок системы Ace Stream. Изначальный акцент был сделан на зарубежные сериалы. Сделав ставку на высокое качество (HD) и разнообразие студий озвучек, мы начали занимать лидирующие позиции в поиске и искать своих пользователей, единомышленников.</p>"
+                .Description = "<div align=""center""><img src= """ & AdressTvFeed & "/img/about-bg.jpg"" width=100% ></div><p><strong>О проекте:</strong></p><p>Основанный в 2012 году проект TVFeed был одной из показательных площадок системы Ace Stream. Изначальный акцент был сделан на зарубежные сериалы. Сделав ставку на высокое качество (HD) и разнообразие студий озвучек, мы начали занимать лидирующие позиции в поиске и искать своих пользователей, единомышленников.</p>"
                 items.Add(ItemSearch)
             End With
 
-
+            '''
+            Dim ItemPodborki As New Item
+            With ItemPodborki
+                .Name = "Подборки"
+                .ImageLink = AdressTvFeed & "/img/tvfeedin.png"
+                .Link = ";PODBORKI"
+                .Description = .Name & "<div align=""left""><img src= """ & AdressTvFeed & "/img/ourchoice.jpg"" width=100% ></div>Подборки фильмов и сериалов<b>Фильмы и сериалы, объединенные единой идеей, спецификой или тематикой"
+                items.Add(ItemPodborki)
+            End With
             ''
             Dim ItemSerials As New Item
             With ItemSerials
                 .Name = "<span style=""color:#3090F0""><u><strong>СЕРИАЛЫ</strong></u></span>"
                 .ImageLink = "http://s1.iconbird.com/ico/2013/6/319/w128h1281371898000folder.png"
                 .Link = "/serial/;1;SERIALEZESLIST"
-                .Description = .Name & "<div align=""center""><img src= ""https://tvfeed.in/img/tvfeed-collection_v2.jpg"" width=100% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/tvfeed-collection_v2.jpg"" width=100% ></div>"
                 items.Add(ItemSerials)
             End With
 
             Dim ItemNewSerials As New Item
             With ItemNewSerials
                 .Name = "<strong>Новые сериалы</strong>"
-                .ImageLink = AdressTvFeed & "/img/icon/New.svg"
+                .ImageLink = AdressTvFeed & "/img/icon/new.svg"
                 .Link = ";/serial/newest/;1;SERIALEZESLIST"
-                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/New.svg"" width=40% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/new.svg"" width=40% ></div>"
                 items.Add(ItemNewSerials)
             End With
 
@@ -126,16 +134,16 @@ Namespace RemoteFork.Plugins
                 .Name = "<span style=color:#86F4EB><u><strong>ФИЛЬМЫ</strong></u></span>"
                 .ImageLink = "http://s1.iconbird.com/ico/2013/6/319/w128h1281371898069foldergreen.png"
                 .Link = ";/film/;1;FILMESLIST"
-                .Description = .Name & "<div align=""center""><img src= ""https://tvfeed.in/img/tvfeed-movie.jpg"" width=100% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/tvfeed-movie.jpg"" width=100% ></div>"
                 items.Add(ItemFilms)
             End With
 
             Dim ItemNewFilms As New Item
             With ItemNewFilms
                 .Name = "<strong>Новые фильмы</strong>"
-                .ImageLink = AdressTvFeed & "/img/icon/New.svg"
+                .ImageLink = AdressTvFeed & "/img/icon/new.svg"
                 .Link = ";/film/newest/;1;FILMESLIST"
-                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/New.svg"" width=40% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/new.svg"" width=40% ></div>"
                 items.Add(ItemNewFilms)
             End With
 
@@ -169,14 +177,12 @@ Namespace RemoteFork.Plugins
             ''
             '''
 
-
-
             Dim ItemTVs As New Item
             With ItemTVs
                 .Name = "<span style=""color:#CA91EB""><u><strong>ТЕЛЕКАНАЛЫ</strong></u></span>"
                 .ImageLink = "http://s1.iconbird.com/ico/2013/6/319/w128h1281371898216folderviolet.png"
                 .Link = ";/tv/popular/;1;TVS"
-                .Description = .Name & "<div align=""center""><img src= ""https://tvfeed.in/img/tvfeed-tv.jpg"" width=100% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/tvfeed-tv.jpg"" width=100% ></div>"
                 items.Add(ItemTVs)
             End With
 
@@ -188,6 +194,9 @@ Namespace RemoteFork.Plugins
                 .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/random.svg"" width=40% ></div>"
                 items.Add(ItemRandomTV)
             End With
+
+
+
 
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
@@ -256,6 +265,11 @@ Namespace RemoteFork.Plugins
                 Case "PAGE_OTZVUCH"
                     Return GetPageOzvuch(context, PathSpliter(PathSpliter.Length - 3), PathSpliter(PathSpliter.Length - 2))
 
+                    'ПОДБОРКИ
+                Case "PODBORKI"
+                    Return GetPodborki(context)
+                Case "PODBORKA"
+                    Return GetPodborka(context, PathSpliter(PathSpliter.Length - 2))
             End Select
 
 
@@ -303,6 +317,64 @@ Namespace RemoteFork.Plugins
             Return PlayList
         End Function
 
+        Public Function GetPodborki(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim STR As String = ReqHTML("/collection/")
+            Dim ReGexTop As New System.Text.RegularExpressions.Regex("(<div class=""container tcenter"">).*?(</div>      </div>          </div>)")
+            STR = ReGexTop.Match(STR).Value
+            Dim ReGexElement As New System.Text.RegularExpressions.Regex("(<div class="" row6 spad"">).*?(</div>         </a>     </div>)")
+
+            For Each Reg As System.Text.RegularExpressions.Match In ReGexElement.Matches(STR)
+
+                Dim Item As New Item
+                With Item
+                    .Description = Reg.Value
+                    .Name = New Text.RegularExpressions.Regex("(?<=<h4>).*?(?=</h4>)").Match(Reg.Value).Value
+                    .ImageLink = New Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")").Match(Reg.Value).Value
+                    .Link = New Text.RegularExpressions.Regex("(?<=href="").*?(?="")").Match(Reg.Value).Value & ";PODBORKA"
+                    items.Add(Item)
+                End With
+            Next
+
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
+
+        Public Function GetPodborka(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim STR As String = ReqHTML(URL & "/serial/")
+
+            Dim ReGexElement As New System.Text.RegularExpressions.Regex("(<div class=""row5 spad"").*?(</div>     </a> </div>)")
+
+            For Each Reg As System.Text.RegularExpressions.Match In ReGexElement.Matches(STR)
+                Dim Item As New Item
+                With Item
+                    .Description = Reg.Value & "<p><b> СЕРИАЛЫ"
+                    .Name = New Text.RegularExpressions.Regex("(?<=alt="").*?(?="")").Match(Reg.Value).Value
+                    .ImageLink = New Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")").Match(Reg.Value).Value
+                    .Link = New Text.RegularExpressions.Regex("(?<=href="").*?(?="")").Match(Reg.Value).Value & ";PAGE_SERIAL"
+                    items.Add(Item)
+                End With
+            Next
+
+            STR = ReqHTML(URL & "/film/")
+            For Each Reg As System.Text.RegularExpressions.Match In ReGexElement.Matches(STR)
+                Dim Item As New Item
+                With Item
+                    .Description = Reg.Value & "<p><b> ФИЛЬМЫ"
+                    .Name = New Text.RegularExpressions.Regex("(?<=alt="").*?(?="")").Match(Reg.Value).Value
+                    .ImageLink = New Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")").Match(Reg.Value).Value
+                    .Link = New Text.RegularExpressions.Regex("(?<=href="").*?(?="")").Match(Reg.Value).Value & ";PAGE_FILM"
+                    items.Add(Item)
+                End With
+            Next
+
+
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
 #End Region
 
 #Region "ПОИСК"
@@ -579,7 +651,7 @@ Namespace RemoteFork.Plugins
 
             Reader.Close()
             Res.Close()
-            '''IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
+            '''  IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
             Return STR
         End Function
 
