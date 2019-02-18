@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.17b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.18b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -33,7 +33,9 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Параметры"
-
+        ' Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
+        ' Dim ProxyPort As Integer = 3128
+        ' Dim Proxyer As New Net.WebProxy(ProxyServr, ProxyPort)
         Dim IPAdress As String
         Dim PortRemoteFork As String = "8027"
         Dim PLUGIN_PATH As String = "pluginPath"
@@ -41,7 +43,9 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Cookie As String = "csrftoken=awt46fUWgnf5gObDV25QI6nmC9jaqSqv; sessionid=v0vtb75gga8ih84cey5ko4ochtvi9lw6"
+        Dim Token As String = "awt46fUWgnf5gObDV25QI6nmC9jaqSqv"
+        Dim Sessionid As String = "v0vtb75gga8ih84cey5ko4ochtvi9lw6"
+
         Dim AdressTvFeed As String = "https://tvfeed.in"
 
         Dim ProxyServr As String = "149.56.102.220" ' "proxy.antizapret.prostovpn.org"
@@ -81,9 +85,9 @@ Namespace RemoteFork.Plugins
             Dim ItemNewSerials As New Item
             With ItemNewSerials
                 .Name = "<strong>Новые сериалы</strong>"
-                .ImageLink = AdressTvFeed & "/img/icon/new.svg"
+                .ImageLink = AdressTvFeed & "/img/icon/New.svg"
                 .Link = ";/serial/newest/;1;SERIALEZESLIST"
-                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/new.svg"" width=40% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/New.svg"" width=40% ></div>"
                 items.Add(ItemNewSerials)
             End With
 
@@ -129,9 +133,9 @@ Namespace RemoteFork.Plugins
             Dim ItemNewFilms As New Item
             With ItemNewFilms
                 .Name = "<strong>Новые фильмы</strong>"
-                .ImageLink = AdressTvFeed & "/img/icon/new.svg"
+                .ImageLink = AdressTvFeed & "/img/icon/New.svg"
                 .Link = ";/film/newest/;1;FILMESLIST"
-                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/new.svg"" width=40% ></div>"
+                .Description = .Name & "<div align=""center""><img src= """ & AdressTvFeed & "/img/icon/New.svg"" width=40% ></div>"
                 items.Add(ItemNewFilms)
             End With
 
@@ -308,7 +312,7 @@ Namespace RemoteFork.Plugins
         '    Req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8"
         '    Req.Headers.Add("cookie", "csrftoken=RqfGuMA3tO2VQWjdFdYhVqxLZJWCX2wE")
         '    Req.Referer = AdressTvFeed 
-        '    Req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
+        '    Req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/59.0.3071.115 Safari/537.36"
         '    Req.Headers.Add("x-requested-with", "XMLHttpRequest")
 
         '    Dim myStream As System.IO.Stream = Req.GetRequestStream
@@ -553,7 +557,7 @@ Namespace RemoteFork.Plugins
 
             Req.Referer = AdressTvFeed & "/dashboard/"
             Req.ContentType = "application/x-www-form-urlencoded"
-            Req.Headers.Add("cookie", Cookie)
+            Req.Headers.Add("cookie", "csrftoken=" & Token & "; sessionid=" & Sessionid)
 
             Req.Headers.Add("x-requested-with", "XMLHttpRequest")
 
@@ -563,7 +567,7 @@ Namespace RemoteFork.Plugins
                 Case "POST"
                     Req.Method = Method
                     Dim myStream As System.IO.Stream = Req.GetRequestStream
-                    Dim DataStr As String = "q=" & DatStr & "&csrfmiddlewaretoken=" & Cookie
+                    Dim DataStr As String = "q=" & DatStr & "&csrfmiddlewaretoken=" & Token
                     Dim DataByte As Byte() = System.Text.Encoding.UTF8.GetBytes(DataStr)
                     myStream.Write(DataByte, 0, DataByte.Length)
                     myStream.Close()
@@ -575,7 +579,7 @@ Namespace RemoteFork.Plugins
 
             Reader.Close()
             Res.Close()
-            '''  IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
+            '''IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
             Return STR
         End Function
 
