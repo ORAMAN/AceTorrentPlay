@@ -85,7 +85,7 @@ Namespace RemoteFork.Plugins
                 .Name = "Подборки"
                 .ImageLink = AdressTvFeed & "/img/ourchoice.jpg"
                 .Link = ";PODBORKI"
-                .Description = .Name & "<div align=""left""><img src= """ & AdressTvFeed & "/img/ourchoice.jpg"" width=100% ></div>Подборки фильмов и сериалов<b>Фильмы и сериалы, объединенные единой идеей, спецификой или тематикой"
+                .Description = .Name & "<div align=""left""><img src= """ & AdressTvFeed & "/img/tvfeed-collection.jpg"" width=100% ></div>Подборки фильмов и сериалов<b>Фильмы и сериалы, объединенные единой идеей, спецификой или тематикой"
                 items.Add(ItemPodborki)
             End With
 
