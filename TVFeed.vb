@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.2b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.21b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -70,17 +70,26 @@ Namespace RemoteFork.Plugins
                 .Description = "<div align=""center""><img src= """ & AdressTvFeed & "/img/about-bg.jpg"" width=100% ></div><p><strong>О проекте:</strong></p><p>Основанный в 2012 году проект TVFeed был одной из показательных площадок системы Ace Stream. Изначальный акцент был сделан на зарубежные сериалы. Сделав ставку на высокое качество (HD) и разнообразие студий озвучек, мы начали занимать лидирующие позиции в поиске и искать своих пользователей, единомышленников.</p>"
                 items.Add(ItemSearch)
             End With
-
+            ''
+            Dim ItemJanrs As New Item
+            With ItemJanrs
+                .Name = "Жанры"
+                .ImageLink = AdressTvFeed & "/img/genre-bg.jpg"
+                .Link = ";JANRS"
+                .Description = .Name & "<div align=""left""><img src= """ & AdressTvFeed & "/img/genre-bg.jpg"" width=100% ></div>Жанры, в которых сняты сериалы и фильмы, представленные на сайте"
+                items.Add(ItemJanrs)
+            End With
             '''
             Dim ItemPodborki As New Item
             With ItemPodborki
                 .Name = "Подборки"
-                .ImageLink = AdressTvFeed & "/img/tvfeedin.png"
+                .ImageLink = AdressTvFeed & "/img/ourchoice.jpg"
                 .Link = ";PODBORKI"
                 .Description = .Name & "<div align=""left""><img src= """ & AdressTvFeed & "/img/ourchoice.jpg"" width=100% ></div>Подборки фильмов и сериалов<b>Фильмы и сериалы, объединенные единой идеей, спецификой или тематикой"
                 items.Add(ItemPodborki)
             End With
-            ''
+
+            '''
             Dim ItemSerials As New Item
             With ItemSerials
                 .Name = "<span style=""color:#3090F0""><u><strong>СЕРИАЛЫ</strong></u></span>"
@@ -265,7 +274,9 @@ Namespace RemoteFork.Plugins
                 Case "PAGE_OTZVUCH"
                     Return GetPageOzvuch(context, PathSpliter(PathSpliter.Length - 3), PathSpliter(PathSpliter.Length - 2))
 
-                    'ПОДБОРКИ
+                    'ПОДБОРКИ И ЖАНРЫ
+                Case "JANRS"
+                    Return GetJanrs(context)
                 Case "PODBORKI"
                     Return GetPodborki(context)
                 Case "PODBORKA"
@@ -315,6 +326,26 @@ Namespace RemoteFork.Plugins
                 End If
             Next
             Return PlayList
+        End Function
+
+        Public Function GetJanrs(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim STR As String = ReqHTML("/genre/")
+            Dim ReGexTop As New System.Text.RegularExpressions.Regex("(<h1 class=""upper f32"">).*?(?=<div class=""col-23"">)")
+            STR = ReGexTop.Match(STR).Value
+            Dim ReGexElement As New System.Text.RegularExpressions.Regex("(<div class=""col-18 spad"">).*?(</div>         </a>     </div>)")
+            For Each Reg As System.Text.RegularExpressions.Match In ReGexElement.Matches(STR)
+                Dim Item As New Item
+                With Item
+                    .Description = Reg.Value
+                    .Name = New Text.RegularExpressions.Regex("(?<=<h4>).*?(?=</h4>)").Match(Reg.Value).Value
+                    .ImageLink = New Text.RegularExpressions.Regex("(?<=src="").*?(?="")").Match(Reg.Value).Value
+                    .Link = New Text.RegularExpressions.Regex("(?<=href="").*?(?="")").Match(Reg.Value).Value & ";PODBORKA"
+                    items.Add(Item)
+                End With
+            Next
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
         End Function
 
         Public Function GetPodborki(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
