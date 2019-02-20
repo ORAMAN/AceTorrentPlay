@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.27", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.28", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -1435,6 +1435,7 @@ Namespace RemoteFork.Plugins
 #Region "NNM Club"
 
         Dim CookiesNNM As String = "phpbb2mysql_4_data=a%3A2%3A%7Bs%3A11%3A%22autologinid%22%3Bs%3A32%3A%2296229c9a3405ae99cce1f3bc0cefce2e%22%3Bs%3A6%3A%22userid%22%3Bs%3A8%3A%2213287549%22%3B%7D"
+
         Public Function SearchListNNM(context As IPluginContext, ByVal search As String) As PluginApi.Plugins.Playlist
 
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerNNM & "/forum/tracker.php")
@@ -1943,7 +1944,7 @@ Namespace RemoteFork.Plugins
             Catch ex As Exception
                 InfoPro = ex.Message
             End Try
-            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & InfoFile & InfoPro & "<br><span style=""color:#3090F0"">Описание: </span>" & InfoFilms
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><b style=""font-size: 14px"">" & InfoFile & "<b/>" & InfoPro & "<br><span style=""color:#3090F0"">Описание: </span>" & InfoFilms
         End Function
 
 #End Region
@@ -2886,8 +2887,7 @@ Namespace RemoteFork.Plugins
 
             Dim Title As String = Nothing
             Try
-                Dim Regex As New System.Text.RegularExpressions.Regex("(?<=<h1>).*?(?=<h1>)")
-                Title = Regex.Matches(HTML)(0).Value
+                Title = New Text.RegularExpressions.Regex("(?<=<h1>).*?(?=</h1>)").Match(HTML).Value
             Catch ex As Exception
                 Title = ex.Message
             End Try
