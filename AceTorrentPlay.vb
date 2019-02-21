@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.28", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.29", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -1696,8 +1696,10 @@ Namespace RemoteFork.Plugins
                     'Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
                     Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
                     Item.ImageLink = Regex.Match(MAtch.Value).Value
-
-                    '  Item.ImageLink = "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(Item.ImageLink & "OPT:ContentType--image/jpegOPEND:/") & "/"
+                    If ProxyEnablerNNM = True Then
+                        Item.ImageLink = System.Uri.UnescapeDataString(Item.ImageLink)
+                        Item.ImageLink = Item.ImageLink.Replace(New Text.RegularExpressions.Regex("(http).*?(link=//)").Match(Item.ImageLink).Value, "http://")
+                    End If
 
                     Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
                     Item.Link = TrackerServerNNM & "/forum/" & Regex.Matches(MAtch.Value)(0).Value & ";PAGEFILMNNM"
@@ -1847,7 +1849,9 @@ Namespace RemoteFork.Plugins
             Dim ImagePath As String = Nothing
             Try
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""postImg postImgAligned img-right"" title="").*?(?="">)")
+
                 ImagePath = Regex.Matches(HTML)(0).Value
+                If ProxyEnablerNNM = True Then ImagePath = ImagePath.Replace(New Text.RegularExpressions.Regex("(http).*?(?=http)").Match(ImagePath).Value, "")
                 'Regex = New System.Text.RegularExpressions.Regex("(?<=link=).*?(?="">)")
                 'ImagePath = Regex.Matches(HTML)(0).Value
                 'MsgBox(ImagePath)
@@ -1895,6 +1899,7 @@ Namespace RemoteFork.Plugins
             Opisanie = ReplaceTags(Opisanie)
 
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & SidsPirs & "<br>" & Opisanie & "<span style=""color:#3090F0"">Информация</span><br>" & InfoFile
+
         End Function
 
         Public Function ReplaceTags(ByVal s As String) As String
@@ -1924,6 +1929,13 @@ Namespace RemoteFork.Plugins
             Try
                 Dim Regex As New System.Text.RegularExpressions.Regex("(<img class=""tit-b pims"").*(?=<span id=)")
                 InfoFile = Regex.Matches(HTML)(0).Value
+                If ProxyEnablerNNM = True Then
+                    Dim ReGExImg As New Text.RegularExpressions.Regex("(src="").*?("")")
+                    For Each Regx As Text.RegularExpressions.Match In ReGExImg.Matches(InfoFile)
+                        InfoFile = InfoFile.Replace(Regx.Value, "")
+                    Next
+
+                End If
             Catch ex As Exception
                 InfoFile = ex.Message
             End Try
@@ -1944,7 +1956,7 @@ Namespace RemoteFork.Plugins
             Catch ex As Exception
                 InfoPro = ex.Message
             End Try
-            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><b style=""font-size: 14px"">" & InfoFile & "<b/>" & InfoPro & "<br><span style=""color:#3090F0"">Описание: </span>" & InfoFilms
+            Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><b style=""font-size: 14px"">" & InfoFile & "<b/><b style=""font-size: 18px"">" & InfoPro & "<br><span style=""color:#3090F0"">Описание: </span>" & InfoFilms & "</b>"
         End Function
 
 #End Region
