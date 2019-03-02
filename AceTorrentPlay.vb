@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.29", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.30", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2236,6 +2236,34 @@ Namespace RemoteFork.Plugins
                 End With
                 items.Add(Item)
             End Try
+
+
+
+            Dim ReGexPodob As New Text.RegularExpressions.Regex("(<table class=""tables3 w100p"").*?(</div> </div></div>)")
+            Dim ReGexElement As New Text.RegularExpressions.Regex("(<a class='r0'|<a class='r1').*?(</i>|class='first'><td>)")
+            If ReGexElement.IsMatch(ReGexPodob.Match(ResponseFromServer).Value) = True Then
+                Item = New Item
+                With Item
+                    .Name = "Подобные раздачи:"
+                    .Link = ""
+                    .Type = ItemType.DIRECTORY
+                    .ImageLink = ICO_Pusto
+                End With
+                items.Add(Item)
+
+                For Each Reg As Text.RegularExpressions.Match In ReGexElement.Matches(ReGexPodob.Match(ResponseFromServer).Value)
+                    Item = New Item
+                    With Item
+                        .Name = New Text.RegularExpressions.Regex("(?<='>).*?(</a>)").Match(Reg.Value).Value
+                        .Link = New Text.RegularExpressions.Regex("(id=).*?(?=')").Match(Reg.Value).Value & ";PAGEFILMKNZL"
+                        .Description = Reg.Value.Replace("</a></td><td class='s'>", "</a></td><td class='s'> Коментариев: ").Replace("<td", "<P><td").Replace("green b'>", "green b'>Сиды: ").Replace("red b'>", "red b'>Пиры: ")
+                        .ImageLink = ICO_TorrentFile2
+                    End With
+                    items.Add(Item)
+                Next
+            End If
+
+
 
             PlayList.IsIptv = "false"
             Return PlayListPlugPar(items, context)
