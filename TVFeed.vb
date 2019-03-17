@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.21b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.23b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -207,7 +207,7 @@ Namespace RemoteFork.Plugins
 
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -284,7 +284,7 @@ Namespace RemoteFork.Plugins
             End Select
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
 
         End Function
