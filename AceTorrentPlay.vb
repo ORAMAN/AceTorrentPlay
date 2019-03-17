@@ -7,9 +7,10 @@ Imports System.Collections.Specialized
 Imports System.Drawing
 Imports Microsoft.VisualBasic
 Imports System
+Imports System.Diagnostics
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.30", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.32", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -151,7 +152,7 @@ Namespace RemoteFork.Plugins
                 Items.Add(Item_TrackerServerNNM)
             End With
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(Items, context)
         End Function
 
@@ -210,7 +211,7 @@ Namespace RemoteFork.Plugins
             End With
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(Items, context)
         End Function
 #End Region
@@ -346,7 +347,7 @@ Namespace RemoteFork.Plugins
             End Select
 
             Dim PathFiles As String = Microsoft.VisualBasic.Strings.Replace(PathSpliter(PathSpliter.Length - 1), "|", "\")
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
 
             Select Case System.IO.Path.GetExtension(PathFiles)
 
@@ -364,11 +365,11 @@ Namespace RemoteFork.Plugins
                             .Type = ItemType.FILE
                             .Description = Description
                         End With
-                        items.Add(Item)
+                        Items.Add(Item)
                     Next
 
 
-                    Return PlayListPlugPar(items, context)
+                    Return PlayListPlugPar(Items, context)
 
                 Case ".m3u8", ".m3u"
                     Dim WC As New System.Net.WebClient
@@ -384,7 +385,7 @@ Namespace RemoteFork.Plugins
                     .ImageLink = ICO_Folder
                     .Type = ItemType.DIRECTORY
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             If AceProxEnabl = True Then
@@ -397,7 +398,7 @@ Namespace RemoteFork.Plugins
                         .Description = .Name
                         .Type = ItemType.DIRECTORY
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
             End If
 
@@ -410,7 +411,7 @@ Namespace RemoteFork.Plugins
                     .Description = .Link
                     .Type = ItemType.FILE
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             For Each File As String In System.IO.Directory.EnumerateFiles(PathFiles, "*.*", System.IO.SearchOption.TopDirectoryOnly).Where(Function(s) s.EndsWith(".mp3") OrElse s.EndsWith(".flac") OrElse s.EndsWith(".wma"))
@@ -422,7 +423,7 @@ Namespace RemoteFork.Plugins
                     .Description = .Link
                     .Type = ItemType.FILE
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             For Each File As String In System.IO.Directory.EnumerateFiles(PathFiles, "*.*", System.IO.SearchOption.TopDirectoryOnly).Where(Function(s) s.EndsWith(".jpg") OrElse s.EndsWith(".png") OrElse s.EndsWith(".gif") OrElse s.EndsWith(".bmp"))
@@ -435,7 +436,7 @@ Namespace RemoteFork.Plugins
 
                     .Type = ItemType.FILE
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             For Each File As String In System.IO.Directory.EnumerateFiles(PathFiles, "*.*", System.IO.SearchOption.TopDirectoryOnly).Where(Function(s) s.EndsWith(".m3u") OrElse s.EndsWith(".m3u8"))
@@ -447,24 +448,24 @@ Namespace RemoteFork.Plugins
                     .Description = .Link
                     .Type = ItemType.DIRECTORY
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
 
         End Function
 
         Public Function GetInfo(ByVal context As IPluginContext) As Playlist
             Dim playlist = New PluginApi.Plugins.Playlist()
-            Dim items As New List(Of Item)()
+            Dim Items As New List(Of Item)()
             Dim Item As New Item()
             Item.Name = "information"
             Item.Link = "2"
             Item.Type = ItemType.FILE
             Item.Description = "peers:2<br>"
-            items.Add(Item)
-            playlist.Items = items.ToArray()
+            Items.Add(Item)
+            playlist.Items = Items.ToArray()
             Return playlist
         End Function
 
@@ -473,7 +474,7 @@ Namespace RemoteFork.Plugins
             Return PlayList
         End Function
 
-        Function PlayListPlugPar(ByVal items As System.Collections.Generic.List(Of Item), ByVal context As IPluginContext, Optional ByVal next_page_url As String = "") As PluginApi.Plugins.Playlist
+        Function PlayListPlugPar(ByVal Items As System.Collections.Generic.List(Of Item), ByVal context As IPluginContext, Optional ByVal next_page_url As String = "") As PluginApi.Plugins.Playlist
             If next_page_url <> "" Then
                 Dim pluginParams = New NameValueCollection()
                 pluginParams(PLUGIN_PATH) = next_page_url
@@ -483,7 +484,7 @@ Namespace RemoteFork.Plugins
             End If
             PlayList.Timeout = "60" 'sec
 
-            PlayList.Items = items.ToArray()
+            PlayList.Items = Items.ToArray()
             For Each Item As Item In PlayList.Items
                 If ItemType.DIRECTORY = Item.Type Then
                     Dim pluginParams = New NameValueCollection()
@@ -496,7 +497,7 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTopList(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim WC As New System.Net.WebClient
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:47.0) Gecko/20100101 Firefox/47.0")
             WC.Encoding = System.Text.Encoding.UTF8
@@ -583,13 +584,13 @@ Namespace RemoteFork.Plugins
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ /><p>" & Description_Kinozal & "</html>"
                 End With
 
-                items.Add(ItemTop)
-                items.Add(ItemTV)
-                items.Add(ItemTTVFilms)
-                items.Add(ItemRuTor)
-                items.Add(ItemRuTracker)
-                items.Add(ItemNNMClub)
-                items.Add(ItemKinozal)
+                Items.Add(ItemTop)
+                Items.Add(ItemTV)
+                Items.Add(ItemTTVFilms)
+                Items.Add(ItemRuTor)
+                Items.Add(ItemRuTracker)
+                Items.Add(ItemNNMClub)
+                Items.Add(ItemKinozal)
 
             Catch ex As Exception
                 AceProxEnabl = False
@@ -600,7 +601,7 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.FILE
                     .Description = "Ответ от движка Ace Media не получен!" & "<p>" & ex.Message & "</p>"
                 End With
-                items.Add(ItemTop)
+                Items.Add(ItemTop)
             End Try
 
             Dim ListDisk() As System.IO.DriveInfo = System.IO.DriveInfo.GetDrives
@@ -615,7 +616,7 @@ Namespace RemoteFork.Plugins
                         .Description = .Name & Chr(10) & Chr(13) & " <html><p> Метка диска: " & Disk.VolumeLabel & "</html>"
                     End With
 
-                    items.Add(Item)
+                    Items.Add(Item)
                 End If
             Next
 
@@ -628,7 +629,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_ClearCache
                 .Description = "<html>Очистка кеша Ace Stram <p>Текущий размер кеша: " & GetSizeCache() & " мб.</html>"
             End With
-            items.Add(ItemClearCacheACEStream)
+            Items.Add(ItemClearCacheACEStream)
 
 
             Dim ItemSettings As New Item
@@ -638,11 +639,11 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .ImageLink = ICO_Settings
             End With
-            items.Add(ItemSettings)
+            Items.Add(ItemSettings)
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function SearchDescriptions(ByVal Name As String) As String
@@ -714,7 +715,7 @@ Namespace RemoteFork.Plugins
         Dim LogoTTVFilm As String = "http://p2pfilms.online/images/logo-tv.png"
 
         Public Function GetPageTTVFilms(ByVal URL As String, context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim HTML As String = GetHTMLPageTTVFilms(URL)
             Dim ReGexItem As New System.Text.RegularExpressions.Regex("(<div id=""film_container).*?(</a>      </div>)")
@@ -732,7 +733,7 @@ Namespace RemoteFork.Plugins
                     .Link = ReGexLink.Match(Macthe.Value).Value & ";TTVFilm"
                     .Description = FormatDescriptionTTVFilmsPage(Macthe.Value, .ImageLink, .Name)
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             PlayList.IsIptv = "False"
@@ -741,10 +742,10 @@ Namespace RemoteFork.Plugins
             If ReGexNext.IsMatch(HTML) = True Then
                 Dim ReGexNextPage = New System.Text.RegularExpressions.Regex("(&page=).*?(?="")")
                 If ReGexNext.IsMatch(HTML) = True Then
-                    Return PlayListPlugPar(items, context, URL & ReGexNextPage.Match(ReGexNext.Match(HTML).Value).Value & ";PageTTVFilm")
+                    Return PlayListPlugPar(Items, context, URL & ReGexNextPage.Match(ReGexNext.Match(HTML).Value).Value & ";PageTTVFilm")
                 End If
             End If
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionTTVFilmsPage(ByVal HTML As String, ByVal ImagePath As String, ByVal Title As String) As String
@@ -758,7 +759,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTopTTVFilms(context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -769,7 +770,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LogoTTVFilm & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Dim HTML As String = GetHTMLPageTTVFilms(TTVFilmsAdress & "/films")
 
@@ -791,7 +792,7 @@ Namespace RemoteFork.Plugins
                     Select Case UCase(.Name)
                         Case "МОИ ПОСЛЕДНИЕ ФИЛЬМЫ"
                         Case Else
-                            items.Add(Item)
+                            Items.Add(Item)
                     End Select
                 End With
 
@@ -813,10 +814,10 @@ Namespace RemoteFork.Plugins
                     .Link = ReGexLink.Match(Macthe.Value).Value & ";PageTTVFilm"
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LogoTTVFilm & """ />"
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionTTVFilms(ByVal HTML As String, Optional ByVal AllText As Boolean = False) As String
@@ -836,7 +837,7 @@ Namespace RemoteFork.Plugins
         End Function
 
         Public Function GetTTVFilms(ByVal URL As String, context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim HTML As String = GetHTMLPageTTVFilms(URL)
             Dim Description As String = FormatDescriptionTTVFilms(HTML)
@@ -872,7 +873,7 @@ Namespace RemoteFork.Plugins
                         .Description = Description & Macthe(I).Value
                         .Link = ReGexLink.Match(Macthe(I).Value).Value & ";" & URL & ";TorrentTTVFilms"
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
 
             Else
@@ -883,11 +884,11 @@ Namespace RemoteFork.Plugins
             End If
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetTorrentTTVFilms(ByVal PathTorrent As String, ByVal URLDescription As String, context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
 
@@ -902,10 +903,10 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.FILE
                     .Description = Description
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Dim CookiesTTVFilms As String = "torrenttv_remember=PDDxxlBkF1FGr5tLHcruSSkDHDo7GHSm"
@@ -939,7 +940,7 @@ Namespace RemoteFork.Plugins
         Dim KategoriRuTracker As String
         Public Function GetListRuTrCategory(context As IPluginContext, ByVal Groop As String, Optional ByVal SubGroop As String = Nothing) As PluginApi.Plugins.Playlist
 
-            Dim items As New List(Of Item)
+            Dim Items As New List(Of Item)
             If SubGroop <> Nothing Then SubGroop = SubGroop.Replace("[]", ";")
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<optgroup label=""&nbsp;" & Groop & ").*?(optgroup>)")
@@ -966,7 +967,7 @@ Namespace RemoteFork.Plugins
                         .ImageLink = ICO_Search
                         .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" '& UserAuthorization
                     End With
-                    items.Add(ItemSearch)
+                    Items.Add(ItemSearch)
 
                     Regex = New System.Text.RegularExpressions.Regex("(?<=class=""root_forum has_sf"">).*?(?=&nbsp;)")
                     For Each SGroop As System.Text.RegularExpressions.Match In Regex.Matches(GroopText)
@@ -981,7 +982,7 @@ Namespace RemoteFork.Plugins
                                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" '& UserAuthorization
                                     .Link = Groop & ";" & .Name.Replace(";", "[]") & ";RuTrSubGroop"
 
-                                    items.Add(Item)
+                                    Items.Add(Item)
                                 End With
                         End Select
                     Next
@@ -1017,7 +1018,7 @@ Namespace RemoteFork.Plugins
                         .ImageLink = ICO_Search
                         .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" '& UserAuthorization
                     End With
-                    items.Add(ItemSearch)
+                    Items.Add(ItemSearch)
 
                     For Each SSGroop As System.Text.RegularExpressions.Match In Matches
                         Dim Item As New Item
@@ -1027,7 +1028,7 @@ Namespace RemoteFork.Plugins
                             .ImageLink = ICO_FolderVideo
                             .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" '& UserAuthorization
                             .Link = TrackerServer & "/forum/tracker.php?f=" & RegexOptionsID.Match(SSGroop.Value).Value & ";PAGERUTR"
-                            items.Add(Item)
+                            Items.Add(Item)
                         End With
                     Next
 
@@ -1037,7 +1038,7 @@ Namespace RemoteFork.Plugins
 
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetPageRuTr(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
@@ -1058,7 +1059,7 @@ Namespace RemoteFork.Plugins
             Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
             Dim ResponseFromServer As String = reader.ReadToEnd()
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
 
             Dim Regex As New System.Text.RegularExpressions.Regex("start|f-1")
             If Regex.IsMatch(URL) = False Then
@@ -1071,7 +1072,7 @@ Namespace RemoteFork.Plugins
                     .SearchOn = "Поик в категории"
                     .ImageLink = ICO_Search
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" '& UserAuthorization
-                    items.Add(ItemSearch)
+                    Items.Add(ItemSearch)
                 End With
             End If
 
@@ -1087,7 +1088,7 @@ Namespace RemoteFork.Plugins
                     Item.Name = Regex.Matches(Match.Value)(0).Value
                     Item.ImageLink = ICO_TorrentFile
                     Item.Description = GetDescriptionRuTr(Match.Value)
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
             Else
                 Return NonSearch(context, True)
@@ -1108,8 +1109,8 @@ Namespace RemoteFork.Plugins
             End If
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context, next_page_url)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context, next_page_url)
         End Function
 
         Function GetDescriptionRuTr(ByVal HTML As String) As String
@@ -1190,7 +1191,7 @@ Namespace RemoteFork.Plugins
             Load_Settings()
             '  If AuthorizationTest() = False Then Return SetLogin(context)
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -1200,7 +1201,7 @@ Namespace RemoteFork.Plugins
                 .SearchOn = "Поик на RuTracker"
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" ' & UserAuthorization
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -1210,7 +1211,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .ImageLink = ICO_FolderVideo
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" ' & UserAuthorization
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             If (System.IO.File.Exists(System.IO.Path.GetTempPath & "GroopRuTr") AndAlso System.IO.File.Exists(System.IO.Path.GetTempPath & "UpdateGroopRuTr")) = False Then
@@ -1243,7 +1244,7 @@ Namespace RemoteFork.Plugins
                             .Type = ItemType.DIRECTORY
                             .ImageLink = ICO_Folder
                             .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_RuTr & """ /> <p>" ' & UserAuthorization
-                            items.Add(Item)
+                            Items.Add(Item)
                         End With
                 End Select
             Next
@@ -1255,7 +1256,7 @@ Namespace RemoteFork.Plugins
             '    .Link = ""
             '    .Type = ItemType.FILE
             '    .ImageLink = ICO_Pusto
-            '    items.Add(Item)
+            '    Items.Add(Item)
             'End With
 
 
@@ -1266,10 +1267,10 @@ Namespace RemoteFork.Plugins
             '    .Type = ItemType.DIRECTORY
             '    .ImageLink = ICO_Delete
             'End With
-            'items.Add(Item)
+            'Items.Add(Item)
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetTorrentPageRuTr(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
@@ -1314,7 +1315,7 @@ Namespace RemoteFork.Plugins
 
             Dim PlayListtoTorrent() As TorrentPlayList = GetFileList(System.IO.Path.GetTempPath & "TorrentTemp.torrent")
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
 
             Dim Description As String = FormatDescriptionFileRuTr(responseFromServer)
             For Each PlayListItem As TorrentPlayList In PlayListtoTorrent
@@ -1327,13 +1328,13 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.FILE
                     .Description = Description
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionFileRuTr(ByVal HTML As String) As String
@@ -1403,7 +1404,7 @@ Namespace RemoteFork.Plugins
             Dim ResponseFromServer As String = reader.ReadToEnd()
 
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Regex As New System.Text.RegularExpressions.Regex("(<tr class=""tCenter hl-tr"">).*?(</tr>)")
             Dim Result As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer.Replace(Microsoft.VisualBasic.vbLf, " "))
 
@@ -1418,7 +1419,7 @@ Namespace RemoteFork.Plugins
                     Item.Name = Regex.Matches(Match.Value)(0).Value
                     Item.ImageLink = ICO_TorrentFile
                     Item.Description = GetDescriptionRuTr(Match.Value)
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
             Else
                 Return NonSearch(context)
@@ -1426,8 +1427,8 @@ Namespace RemoteFork.Plugins
 
             next_page_url = Nothing
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
 #End Region
@@ -1456,7 +1457,7 @@ Namespace RemoteFork.Plugins
             Dim ResponseFromServer As String = reader.ReadToEnd()
             ' Dim ResponseFromServer As String = GetRequest(TrackerServerNNM & "/forum/tracker.php", CookiesNNM, ProxyEnablerNNM, "POST", DataStr)
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Regex As New System.Text.RegularExpressions.Regex("(<tr class=""prow).*?(</tr>)")
             Dim Result As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer.Replace(Microsoft.VisualBasic.vbLf, "   "))
 
@@ -1471,18 +1472,18 @@ Namespace RemoteFork.Plugins
                     Item.Name = Regex.Matches(Match.Value)(0).Value
                     Item.ImageLink = ICO_TorrentFile
                     Item.Description = GetDescriptionSearhNNM(Match.Value)
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
             Else
                 Return NonSearch(context)
             End If
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function NonSearch(context As IPluginContext, Optional ByVal Categor As Boolean = False) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Item.Link = ""
             Item.ImageLink = ICO_Pusto
@@ -1495,10 +1496,10 @@ Namespace RemoteFork.Plugins
             End If
 
 
-            items.Add(Item)
+            Items.Add(Item)
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function GetDescriptionSearhNNM(ByVal HTML As String) As String
@@ -1538,7 +1539,7 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTopNNMClubList(context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -1552,7 +1553,7 @@ Namespace RemoteFork.Plugins
 
 
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1562,7 +1563,7 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
 
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1571,7 +1572,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1580,7 +1581,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1589,7 +1590,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1598,7 +1599,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1607,7 +1608,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1616,7 +1617,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1625,7 +1626,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1634,7 +1635,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1643,7 +1644,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1652,7 +1653,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1661,14 +1662,14 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
-            items.Add(Item)
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            Items.Add(Item)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function GetPAGENNM(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
 
-            Dim items As New System.Collections.Generic.List(Of Item)()
+            Dim Items As New System.Collections.Generic.List(Of Item)()
 
             Try
                 Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(URL)
@@ -1683,32 +1684,39 @@ Namespace RemoteFork.Plugins
                 Dim dataStream As System.IO.Stream = Response2.GetResponseStream()
                 Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
                 Dim responseFromServer As String = reader.ReadToEnd()
-                '  Dim responseFromServer As String = GetRequest(URL, CookiesNNM, ProxyEnablerNNM)
+
 
                 Dim Regex As New System.Text.RegularExpressions.Regex("(<td class=""pcatHead""><img class=""picon"").*?("" /></span>)")
 
-
                 For Each MAtch As System.Text.RegularExpressions.Match In Regex.Matches(responseFromServer.Replace(Constants.vbLf, "   "))
-                    Regex = New System.Text.RegularExpressions.Regex("(?<=title="").*?(?="">)")
                     Dim Item As New Item()
-                    Item.Name = Regex.Matches(MAtch.Value)(1).Value
+                    Try
+                        Regex = New System.Text.RegularExpressions.Regex("(?<=title="").*?(?="">)")
+                        Item.Name = Regex.Matches(MAtch.Value)(1).Value
+                        Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
+                        Item.ImageLink = Regex.Match(MAtch.Value).Value
+                        Try
+                            If ProxyEnablerNNM = True Then
+                                Item.ImageLink = System.Uri.UnescapeDataString(Item.ImageLink)
+                                Item.ImageLink = Item.ImageLink.Replace(New Text.RegularExpressions.Regex("(http).*?(link=//)").Match(Item.ImageLink).Value, "http://")
+                            End If
+                        Catch ex As Exception
+                        End Try
 
-                    'Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
-                    Regex = New System.Text.RegularExpressions.Regex("(?<=<var class=""portalImg"" title="").*?(?="">)")
-                    Item.ImageLink = Regex.Match(MAtch.Value).Value
-                    If ProxyEnablerNNM = True Then
-                        Item.ImageLink = System.Uri.UnescapeDataString(Item.ImageLink)
-                        Item.ImageLink = Item.ImageLink.Replace(New Text.RegularExpressions.Regex("(http).*?(link=//)").Match(Item.ImageLink).Value, "http://")
-                    End If
+                        Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
+                        Item.Link = TrackerServerNNM & "/forum/" & Regex.Matches(MAtch.Value)(0).Value & ";PAGEFILMNNM"
+                        Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
+                        Item.Description = FormatDescriptionNNM(MAtch.Value, Item.ImageLink)
 
-                    Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
-                    Item.Link = TrackerServerNNM & "/forum/" & Regex.Matches(MAtch.Value)(0).Value & ";PAGEFILMNNM"
-
-                    Regex = New System.Text.RegularExpressions.Regex("(?<=<a class=""pgenmed"" href="").*?(?=&)")
-                    Item.Description = FormatDescriptionNNM(MAtch.Value, Item.ImageLink)
-
-
-                    items.Add(Item)
+                    Catch exs As Exception
+                        With Item
+                            .Name = "ERROR"
+                            .ImageLink = ICO_Error
+                            .Description = exs.Message
+                            .Link = ""
+                        End With
+                    End Try
+                    Items.Add(Item)
                 Next MAtch
 
                 Regex = New System.Text.RegularExpressions.Regex("(?<=&nbsp;&nbsp;<a href="").*?(?=sid=)")
@@ -1717,18 +1725,18 @@ Namespace RemoteFork.Plugins
                 next_page_url = TrackerServerNNM & "/forum/" & Rzult(Rzult.Count - 1).Value.Replace("amp;", "") & ";PAGENNM"
 
             Catch ex As Exception
-                Dim Item As New Item()
-                With Item
-                    .Name = "ERROR"
-                    .ImageLink = ICO_Error
-                    .Description = ex.Message
-                    .Link = ""
-                    items.Add(Item)
-                End With
+            Dim Item As New Item()
+            With Item
+                .Name = "ERROR"
+                .ImageLink = ICO_Error
+                .Description = ex.Message
+                .Link = ""
+                Items.Add(Item)
+            End With
             End Try
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context, next_page_url)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context, next_page_url)
 
         End Function
 
@@ -1789,7 +1797,7 @@ Namespace RemoteFork.Plugins
             'Response.Close()
 
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
 
 
 
@@ -1807,7 +1815,7 @@ Namespace RemoteFork.Plugins
                         .Type = ItemType.FILE
                         .Description = Description
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
 
             Catch ex As Exception
@@ -1819,10 +1827,10 @@ Namespace RemoteFork.Plugins
                     .Description = ex.Message
                     .ImageLink = ICO_Error
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             End Try
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionFileNNM(ByVal HTML As String) As String
@@ -1956,6 +1964,9 @@ Namespace RemoteFork.Plugins
             Catch ex As Exception
                 InfoPro = ex.Message
             End Try
+
+
+
             Return "<div id=""poster"" style=""float:left;padding:4px;        background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br><b style=""font-size: 14px"">" & InfoFile & "<b/><b style=""font-size: 18px"">" & InfoPro & "<br><span style=""color:#3090F0"">Описание: </span>" & InfoFilms & "</b>"
         End Function
 
@@ -1966,7 +1977,7 @@ Namespace RemoteFork.Plugins
         Dim CookiesKNZL As String = "__cfduid=d6de6389e33d747cad9a1dad0b7e89e151508321950; uid=20229744; pass=JPiL8H1EPt"
         Public Function GetTopListKinozal(context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -1977,7 +1988,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1986,7 +1997,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -1995,7 +2006,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2004,7 +2015,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2013,7 +2024,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2022,7 +2033,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/browse.php")
             RequestGet.Method = "Get"
@@ -2052,18 +2063,18 @@ Namespace RemoteFork.Plugins
                     .ImageLink = ICO_Folder
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
 
 
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function GetPAGETopKinozal(ByVal context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
 
             Dim RequestGet As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & URL)
             RequestGet.Method = "Get"
@@ -2086,12 +2097,12 @@ Namespace RemoteFork.Plugins
                     .ImageLink = New Text.RegularExpressions.Regex("(?<=<img src=').*?(?=')").Match(Reg.Value).Value : If Left(.ImageLink, 4) = "http" Then Else .ImageLink = TrackerServerKinozal & .ImageLink
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """ />"
                     .Link = New Text.RegularExpressions.Regex("(id=).*?(?=')").Match(Reg.Value).Value & ";PAGEFILMKNZL"
-                    items.Add(Item)
+                    Items.Add(Item)
                 End With
             Next
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
 
@@ -2133,7 +2144,7 @@ Namespace RemoteFork.Plugins
 
             Dim ImageReGex As New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")")
 
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             With Item
                 .Name = "Поиск"
@@ -2143,7 +2154,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & "http://" & IPAdress & ":8027/proxym3u8B" & Base64Encode(LOGO_Kinozal & "OPT:ContentType--image/jpegOPEND:/") & "/" & """ />"
             End With
-            If Search = "" Then items.Add(Item)
+            If Search = "" Then Items.Add(Item)
             For Each ItemFile As System.Text.RegularExpressions.Match In TopReGex.Matches(ResponseFromServer)
 
                 Item = New Item
@@ -2153,7 +2164,7 @@ Namespace RemoteFork.Plugins
                     .ImageLink = TrackerServerKinozal & ImageReGex.Match(ItemFile.Value).Value
                     .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
             For Each ItemFile As System.Text.RegularExpressions.Match In FullReGex.Matches(ResponseFromServer)
 
@@ -2164,21 +2175,21 @@ Namespace RemoteFork.Plugins
                     .ImageLink = TrackerServerKinozal & ImageReGex.Match(ItemFile.Value).Value
                     .Description = ItemFile.Value.Replace("</td>", "</td><p>").Replace("<td class='sl_s'>", "<td class='sl_s'> Сиды: ").Replace("<td class='sl_p'>", "<td class='sl_p'> Пиры: ").Replace("<img src=""", "<img src=""" & TrackerServerKinozal)
                 End With
-                items.Add(Item)
+                Items.Add(Item)
 
             Next
             PlayList.IsIptv = "False"
             Dim ReGexNext As New System.Text.RegularExpressions.Regex(">Вперед</a>")
             If ReGexNext.IsMatch(ResponseFromServer) = True Then
-                Return PlayListPlugPar(items, context, Category & ";" & Search & ";" & CInt(Page) + 1 & ";PAGEKNZL")
+                Return PlayListPlugPar(Items, context, Category & ";" & Search & ";" & CInt(Page) + 1 & ";PAGEKNZL")
             Else
-                Return PlayListPlugPar(items, context)
+                Return PlayListPlugPar(Items, context)
             End If
 
         End Function
 
         Function GetPAGEFilmKinozal(ByVal context As IPluginContext, ByVal ID As String)
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim RequestPost As System.Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/get_srv_details.php?" & ID & "&action=2")
             RequestPost.Method = "POST"
@@ -2222,7 +2233,7 @@ Namespace RemoteFork.Plugins
                         .Type = ItemType.FILE
                         .Description = Description
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
 
             Catch ex As Exception
@@ -2234,7 +2245,7 @@ Namespace RemoteFork.Plugins
                     .Description = ex.Message
                     .ImageLink = ICO_Error
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             End Try
 
 
@@ -2249,7 +2260,7 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.DIRECTORY
                     .ImageLink = ICO_Pusto
                 End With
-                items.Add(Item)
+                Items.Add(Item)
 
                 For Each Reg As Text.RegularExpressions.Match In ReGexElement.Matches(ReGexPodob.Match(ResponseFromServer).Value)
                     Item = New Item
@@ -2259,14 +2270,14 @@ Namespace RemoteFork.Plugins
                         .Description = Reg.Value.Replace("</a></td><td class='s'>", "</a></td><td class='s'> Коментариев: ").Replace("<td", "<P><td").Replace("green b'>", "green b'>Сиды: ").Replace("red b'>", "red b'>Пиры: ")
                         .ImageLink = ICO_TorrentFile2
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
             End If
 
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionKinozal(ByVal HTML As String) As String
@@ -2380,7 +2391,7 @@ Namespace RemoteFork.Plugins
 
 
         Public Function GetTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             With Item
                 .Name = "Поиск"
@@ -2390,7 +2401,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>ПОИСК ТВ ТРАНСЛЯЦИЙ...</font></b><p><img width=""100%""  src=""https://tvfeed.in/img/acestream-main.jpg"" />"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2401,7 +2412,7 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>"
 
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2412,7 +2423,7 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><img src=""http://static.acestream.net/sites/acestream/img/ACE-logo.png""></html><p>"
 
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2422,7 +2433,7 @@ Namespace RemoteFork.Plugins
                 .ImageLink = "https://im0-tub-ru.yandex.net/i?id=b35051113d77e4b6cb0e75b7d7ef80b7-sr&n=13"
                 .Description = "<html><img src=""" & .ImageLink & """></html><p>"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2432,14 +2443,14 @@ Namespace RemoteFork.Plugins
                 .ImageLink = "https://www.hidemyass-freeproxy.com/proxy/en-ww/aHR0cHM6Ly90di1wMnAucnUvZmF2aWNvbi5pY28"
                 .Description = "<html><img src=""" & .ImageLink & """></html><p>"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             PlayList.IsIptv = "False"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetTvP2P(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim ReGexTop As New System.Text.RegularExpressions.Regex("(<div class=""modal-body category-body"">).*?(</div>)")
             Dim ReGex As New System.Text.RegularExpressions.Regex("(<a href="").*?(</a>)")
@@ -2462,15 +2473,15 @@ Namespace RemoteFork.Plugins
                     .Link = ReGexLink.Match(Mstch.Value).Value & ";TvP2PCategory"
                     .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetCategoryTvP2P(ByVal CategoryTvP2P As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
 
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim WC As New Net.WebClient
             WC.Proxy = New Net.WebProxy(ProxyServr, ProxyPort)
@@ -2490,7 +2501,7 @@ Namespace RemoteFork.Plugins
                     .ImageLink = "http://tv-p2p.ru" & ReGexIcon.Match(Mstch.Value).Value
                     .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """></html><p>"
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             Dim ReGexNext As New System.Text.RegularExpressions.Regex("(?<=</a>  <a href=""http://tv-p2p.ru).*?(?="">Вперед)")
@@ -2498,11 +2509,11 @@ Namespace RemoteFork.Plugins
 
 
             PlayList.IsIptv = "True"
-            Return PlayListPlugPar(items, context, next_page_url)
+            Return PlayListPlugPar(Items, context, next_page_url)
         End Function
 
         Public Function GetTvChanel(ByVal ChanelTvP2P As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
             Dim ReGexLink As New System.Text.RegularExpressions.Regex("(?<=http://127.0.0.1:6878/ace/manifest.m3u8\?id=).*?(?="")")
             Dim ReGexName As New System.Text.RegularExpressions.Regex("(?<=<title>).*?(?=&raquo;)")
@@ -2519,14 +2530,14 @@ Namespace RemoteFork.Plugins
                 ' .Description = .Link
             End With
 
-            items.Add(Item)
+            Items.Add(Item)
             PlayList.IsIptv = "true"
-            Return PlayListPlugPar(items, context)
+            Return PlayListPlugPar(Items, context)
         End Function
 
 
         Public Function GetAceStreamNetTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             Item = New Item
@@ -2536,7 +2547,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.entertaining.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2545,7 +2556,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.kids.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2554,7 +2565,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.educational.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2563,7 +2574,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.movies.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2572,7 +2583,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.series.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2581,7 +2592,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.informational.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2590,7 +2601,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.sport.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2599,7 +2610,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.music.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2608,7 +2619,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.regional.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2617,7 +2628,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.erotic_18_plus.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2626,15 +2637,15 @@ Namespace RemoteFork.Plugins
                 .Link = "ace.all.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function GetTorrentTV(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            Dim items = New Collections.Generic.List(Of Item)
+            Dim Items = New Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -2643,7 +2654,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.ent.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2652,7 +2663,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.child.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2661,7 +2672,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.discover.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2670,7 +2681,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.HD.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2679,7 +2690,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.common.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2688,7 +2699,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.film.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2697,7 +2708,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.man.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2706,7 +2717,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.music.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2715,7 +2726,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.news.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2724,7 +2735,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.region.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2733,7 +2744,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.relig.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2742,7 +2753,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.sport.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2751,7 +2762,7 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.porn.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
+            Items.Add(Item)
 
             Item = New Item
             With Item
@@ -2760,9 +2771,9 @@ Namespace RemoteFork.Plugins
                 .Link = "ttv.all.iproxy"
                 .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
             End With
-            items.Add(Item)
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            Items.Add(Item)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Public Function LastModifiedPlayList(ByVal NamePlayList As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
@@ -2785,7 +2796,7 @@ Namespace RemoteFork.Plugins
             WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36")
             WC.Encoding = System.Text.Encoding.UTF8
 
-            Dim items As New System.Collections.Generic.List(Of Item)()
+            Dim Items As New System.Collections.Generic.List(Of Item)()
             Dim Item As New Item()
 
             If (System.IO.File.Exists(PathFileUpdateTime) AndAlso System.IO.File.Exists(PathFilePlayList)) = False Then
@@ -2829,7 +2840,7 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
             Load_Settings()
-            Dim items As New System.Collections.Generic.List(Of Item)()
+            Dim Items As New System.Collections.Generic.List(Of Item)()
             Dim WC As New System.Net.WebClient
             If EnableProxyRuTor = True Then WC.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             WC.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
@@ -2853,7 +2864,7 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.FILE
                     .Description = Description
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             Regex = New System.Text.RegularExpressions.Regex("(Связанные раздачи).*?(Файлы)")
@@ -2867,7 +2878,7 @@ Namespace RemoteFork.Plugins
                     .ImageLink = ICO_Pusto
                     .Type = ItemType.FILE
                 End With
-                items.Add(Item)
+                Items.Add(Item)
 
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<a href="").*?(?="")")
                 Dim MatchesSearchNext As System.Text.RegularExpressions.MatchCollection = Regex.Matches(Matches(0).Value)
@@ -2908,9 +2919,9 @@ Namespace RemoteFork.Plugins
                         .Description = "</div><span style=""color:#3090F0"">" & .Name & "</span><p><br>" & SizeFile & "<br><p>" & Seeders & "<br>" & Leechers
 
                     End With
-                    items.Add(Item)
+                    Items.Add(Item)
                 Next
-                items.Add(ItemSearchNext)
+                Items.Add(ItemSearchNext)
 
             End If
 
@@ -2918,8 +2929,8 @@ Namespace RemoteFork.Plugins
 
 
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
         Function FormatDescriptionFileRuTor(ByVal HTML As String) As String
@@ -2975,7 +2986,7 @@ Namespace RemoteFork.Plugins
 
         Public Function GetPAGERUTOR(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
 
-            Dim items As New System.Collections.Generic.List(Of Item)()
+            Dim Items As New System.Collections.Generic.List(Of Item)()
             Dim WC As New System.Net.WebClient
             If EnableProxyRuTor = True Then WC.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
             WC.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
@@ -3025,20 +3036,20 @@ Namespace RemoteFork.Plugins
 
 
                 End With
-                items.Add(Item)
+                Items.Add(Item)
             Next
 
             Regex = New System.Text.RegularExpressions.Regex("(?<=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="").*?(?=""><b>След)")
             Dim MatchNext As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer)
             If MatchNext.Count > 0 Then next_page_url = TrackerServerRuTor & MatchNext(0).Value & ";PAGERUTOR" Else next_page_url = Nothing
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context, next_page_url)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context, next_page_url)
         End Function
 
         Public Function GetTopListRuTor(context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
-            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
             With Item
@@ -3048,7 +3059,7 @@ Namespace RemoteFork.Plugins
                 .SearchOn = "Поик на RuTor"
                 .ImageLink = ICO_Search
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3057,7 +3068,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
 
@@ -3067,7 +3078,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/top/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3076,7 +3087,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/1/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3085,7 +3096,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/5/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
 
@@ -3095,7 +3106,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/12/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
 
@@ -3105,7 +3116,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/4/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3114,7 +3125,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/6/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
 
@@ -3124,7 +3135,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/7/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3133,7 +3144,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/10/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3142,7 +3153,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/2/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3151,7 +3162,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/15/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3160,7 +3171,7 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/browse/0/13/0/0/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
             Item = New Item
@@ -3169,11 +3180,11 @@ Namespace RemoteFork.Plugins
                 .Link = TrackerServerRuTor & "/byt/;PAGERUTOR"
                 .ImageLink = ICO_Folder
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_TrackerRutor & """ />"
-                items.Add(Item)
+                Items.Add(Item)
             End With
 
-            PlayList.IsIptv = "false"
-            Return PlayListPlugPar(items, context)
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(Items, context)
         End Function
 
 #End Region
