@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.23b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.25b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -43,8 +43,8 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Token As String = "awt46fUWgnf5gObDV25QI6nmC9jaqSqv"
-        Dim Sessionid As String = "v0vtb75gga8ih84cey5ko4ochtvi9lw6"
+        Dim Token As String = "uRqQ7Bj2XUzVtJCwxtARM9eRxLPCQRdd"
+        Dim Sessionid As String = "0qxelqwzcbpeap1oarlykgz8q6gly6hm"
 
         Dim AdressTvFeed As String = "https://tvfeed.in"
 
