@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.34", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.35", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -150,7 +150,7 @@ Namespace RemoteFork.Plugins
                 Items.Add(Item_TrackerServerNNM)
             End With
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(Items, context)
         End Function
 
@@ -209,7 +209,7 @@ Namespace RemoteFork.Plugins
             End With
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(Items, context)
         End Function
 #End Region
@@ -305,6 +305,8 @@ Namespace RemoteFork.Plugins
                   'Тв
                 Case "SEARCHTV"
                     Return GetPageSearchStreamTV(context, PathSpliter(PathSpliter.Length - 2), PathSpliter(PathSpliter.Length - 3))
+                Case "tuchkatv"
+                    Return GetTuchkaPlayList(context)
                 Case "torrenttv"
                     Return GetTorrentTV(context)
                 Case "acestreamnettv"
@@ -447,7 +449,7 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             Next
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
 
         End Function
@@ -582,7 +584,7 @@ Namespace RemoteFork.Plugins
 
                 items.Add(ItemTop)
                 items.Add(ItemTV)
-                items.Add(ItemTTVFilms)
+                ' items.Add(ItemTTVFilms)
                 items.Add(ItemRuTor)
                 items.Add(ItemRuTracker)
                 items.Add(ItemNNMClub)
@@ -638,7 +640,7 @@ Namespace RemoteFork.Plugins
             items.Add(ItemSettings)
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1094,7 +1096,7 @@ Namespace RemoteFork.Plugins
 
 
 
-        '    PlayList.IsIptv = "false"
+        '    PlayList.IsIptv = "False"
         '    Return PlayListPlugPar(items, context)
         'End Function
 
@@ -1111,7 +1113,7 @@ Namespace RemoteFork.Plugins
         '    End With
         '    items.Add(Item)
 
-        '    PlayList.IsIptv = "false"
+        '    PlayList.IsIptv = "False"
         '    Return PlayListPlugPar(items, context)
         'End Function
 
@@ -1129,7 +1131,7 @@ Namespace RemoteFork.Plugins
         '    End With
         '    items.Add(Item)
 
-        '    PlayList.IsIptv = "false"
+        '    PlayList.IsIptv = "False"
         '    Return PlayListPlugPar(items, context)
         'End Function
 #End Region
@@ -1306,7 +1308,7 @@ Namespace RemoteFork.Plugins
             End If
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context, next_page_url)
         End Function
 
@@ -1530,7 +1532,7 @@ Namespace RemoteFork.Plugins
 
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1623,7 +1625,7 @@ Namespace RemoteFork.Plugins
 
             next_page_url = Nothing
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1673,7 +1675,7 @@ Namespace RemoteFork.Plugins
                 Return NonSearch(context)
             End If
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1693,7 +1695,7 @@ Namespace RemoteFork.Plugins
 
             items.Add(Item)
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1858,7 +1860,7 @@ Namespace RemoteFork.Plugins
                 .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_NoNaMeClub & """ />"
             End With
             items.Add(Item)
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -1921,7 +1923,7 @@ Namespace RemoteFork.Plugins
                 End With
             End Try
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context, next_page_url)
 
         End Function
@@ -2015,7 +2017,7 @@ Namespace RemoteFork.Plugins
                 End With
                 items.Add(Item)
             End Try
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -2356,7 +2358,7 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End Try
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -2422,6 +2424,32 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "TorrentTV"
+        'ТУЧКА
+        Public Function GetTuchkaPlayList(ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim Request As Net.HttpWebRequest = System.Net.HttpWebRequest.CreateHttp("http://tuchkatv.org/engine/download.php?id=88&area=static")
+            Request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"
+            Request.Headers.Add("Accept-Encoding", "gzip, deflate")
+            Request.Headers.Add("Accept-Language", "ru, en;q=0.9")
+            'Request.Connection = "keep-alive"
+            'Request.Headers.Add("Cookie", "dle_user_id=54254; dle_password=2bc94c50b07cd6971767e4e9023cfed7; dle_newpm=0")
+            Request.Host = "tuchkatv.org"
+            Request.Referer = "http://tuchkatv.org/playlist.html"
+            Request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/72.0.3626.121 YaBrowser/19.3.1.828 Yowser/2.5 Safari/537.36"
+
+            Dim WebResponse As Net.HttpWebResponse = Request.GetResponse
+            Dim ResponseStream As IO.Stream = WebResponse.GetResponseStream()
+            If (WebResponse.ContentEncoding.ToLower().Contains("gzip")) Then
+                ResponseStream = New System.IO.Compression.GZipStream(ResponseStream, System.IO.Compression.CompressionMode.Decompress)
+            ElseIf (WebResponse.ContentEncoding.ToLower().Contains("deflate")) Then
+                ResponseStream = New System.IO.Compression.DeflateStream(ResponseStream, System.IO.Compression.CompressionMode.Decompress)
+            End If
+
+            Dim Reader As IO.StreamReader = New IO.StreamReader(ResponseStream)
+
+            PlayList.IsIptv = "True"
+            Return toSource(Reader.ReadToEnd.Replace("acestream://", "http://" & IPAdress & ":" & PortAce & "/ace/getstream?id="), context)
+        End Function
+        'ТУЧКА FIN
 
         'Поиск ТВ
         Public Function GetPageSearchStreamTV(context As IPluginContext, ByVal URL As String, Optional ByVal Page As Integer = 0) As PluginApi.Plugins.Playlist
@@ -2449,7 +2477,7 @@ Namespace RemoteFork.Plugins
 
 
             next_page_url = Page + 1 & ";" & URL & ";SEARCHTV"
-            PlayList.IsIptv = "true"
+            PlayList.IsIptv = "True"
             Return PlayListPlugPar(Items, context, next_page_url)
         End Function
         Function Requesters(ByVal Path As String) As String
@@ -2483,16 +2511,28 @@ Namespace RemoteFork.Plugins
             End With
             items.Add(Item)
 
+
             Item = New Item
             With Item
-                .Name = "Torrent TV"
+                .Name = "Тучка ТВ"
                 .Type = ItemType.DIRECTORY
-                .Link = "torrenttv"
-                .ImageLink = "https://cs5-2.4pda.to/7342878.png"
-                .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>"
+                .Link = "tuchkatv"
+                .ImageLink = "https://images.wishstorage.com/bookmarks/21/f6/57/21f657202d3e3b476438124ea3cc6aef.png"
+                .Description = "<html><img src=""https://images.wishstorage.com/bookmarks/21/f6/57/21f657202d3e3b476438124ea3cc6aef.png""></html><p>"
 
             End With
             items.Add(Item)
+
+            'Item = New Item
+            'With Item
+            '    .Name = "Torrent TV"
+            '    .Type = ItemType.DIRECTORY
+            '    .Link = "torrenttv"
+            '    .ImageLink = "https://cs5-2.4pda.to/7342878.png"
+            '    .Description = "<html><img src="" http://torrent-tv.ru/images/logo.png""></html><p>"
+
+            'End With
+            'items.Add(Item)
 
             Item = New Item
             With Item
@@ -2551,11 +2591,11 @@ Namespace RemoteFork.Plugins
                     .Type = ItemType.DIRECTORY
                     .Name = ReGexName.Match(Mstch.Value).Value
                     .Link = ReGexLink.Match(Mstch.Value).Value & ";TvP2PCategory"
-                    .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                    .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
                 End With
                 items.Add(Item)
             Next
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -2611,7 +2651,7 @@ Namespace RemoteFork.Plugins
             End With
 
             items.Add(Item)
-            PlayList.IsIptv = "true"
+            PlayList.IsIptv = "True"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -2625,7 +2665,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "РАЗВЛЕКАТЕЛЬНЫЕ"
                 .Link = "ace.entertaining.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2634,7 +2674,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ДЕТСКИЕ"
                 .Link = "ace.kids.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2643,7 +2683,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ОБРАЗОВАТЕЛЬНЫЕ"
                 .Link = "ace.educational.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2652,7 +2692,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ФИЛЬМЫ"
                 .Link = "ace.movies.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2661,7 +2701,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "СЕРИАЛЫ"
                 .Link = "ace.series.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2670,7 +2710,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ИНФОРМАЦИОННЫЕ"
                 .Link = "ace.informational.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2679,7 +2719,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "СПОРТИВНЫЕ"
                 .Link = "ace.sport.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2688,7 +2728,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "МУЗЫКАЛЬНЫЕ"
                 .Link = "ace.music.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2697,7 +2737,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "РЕГИОНАЛЬНЫЕ"
                 .Link = "ace.regional.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2706,7 +2746,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ЭРОТИКА 18+"
                 .Link = "ace.erotic_18_plus.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2715,12 +2755,12 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ВСЕ КАНАЛЫ"
                 .Link = "ace.all.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -2732,7 +2772,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "РАЗВЛЕКАТЕЛЬНЫЕ"
                 .Link = "ttv.ent.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2741,7 +2781,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ДЕТСКИЕ"
                 .Link = "ttv.child.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2750,7 +2790,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ПОЗНАВАТЕЛЬНЫЕ"
                 .Link = "ttv.discover.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2759,7 +2799,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "HD"
                 .Link = "ttv.HD.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2768,7 +2808,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ОБЩИЕ"
                 .Link = "ttv.common.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2777,7 +2817,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ФИЛЬМЫ"
                 .Link = "ttv.film.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2786,7 +2826,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "МУЖСКИЕ"
                 .Link = "ttv.man.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2795,7 +2835,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "МУЗЫКАЛЬНЫЕ"
                 .Link = "ttv.music.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2804,7 +2844,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ИНФОРМАЦИОННЫЕ"
                 .Link = "ttv.news.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2813,7 +2853,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "РЕГИОНАЛЬНЫЕ"
                 .Link = "ttv.region.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2822,7 +2862,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "РЕЛИГИОЗНЫЕ"
                 .Link = "ttv.relig.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2831,7 +2871,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "СПОРТИВНЫЕ"
                 .Link = "ttv.sport.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2840,7 +2880,7 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ЭРОТИКА 18+"
                 .Link = "ttv.porn.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
 
@@ -2849,15 +2889,15 @@ Namespace RemoteFork.Plugins
                 .Type = ItemType.DIRECTORY
                 .Name = "ВСЕ КАНАЛЫ"
                 .Link = "ttv.all.iproxy"
-                .ImageLink = "http://torrent-tv.ru/images/all_channels.png"
+                .ImageLink = "https://img00.deviantart.net/fa23/i/2009/143/a/9/tv_content___leopard_icon_by_mind_body_and_soul.png"
             End With
             items.Add(Item)
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
         Public Function LastModifiedPlayList(ByVal NamePlayList As String, ByVal context As IPluginContext) As PluginApi.Plugins.Playlist
-            PlayList.IsIptv = "true"
+            PlayList.IsIptv = "True"
             Dim PathFileUpdateTime As String = System.IO.Path.GetTempPath() & NamePlayList & ".UpdateTime.tmp"
             Dim PathFilePlayList As String = System.IO.Path.GetTempPath() & NamePlayList & ".PlayList.m3u8"
 
@@ -3015,7 +3055,7 @@ Namespace RemoteFork.Plugins
 
 
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
@@ -3130,7 +3170,7 @@ Namespace RemoteFork.Plugins
             Dim MatchNext As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer)
             If MatchNext.Count > 0 Then next_page_url = TrackerServerRuTor & MatchNext(0).Value & ";PAGERUTOR" Else next_page_url = Nothing
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context, next_page_url)
         End Function
 
@@ -3270,7 +3310,7 @@ Namespace RemoteFork.Plugins
                 items.Add(Item)
             End With
 
-            PlayList.IsIptv = "false"
+            PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
         End Function
 
