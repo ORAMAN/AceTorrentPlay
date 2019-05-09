@@ -66,7 +66,6 @@ Namespace RemoteFork.Plugins
         Dim TrackerServerNNM As String
 #End Region
 
-
         Sub Load_Settings()
 
 
