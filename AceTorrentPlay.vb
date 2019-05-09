@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.36", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.37", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -2628,13 +2628,13 @@ Namespace RemoteFork.Plugins
                             If .ImageLink = "" Then .ImageLink = ICO_TV
                             .Name = New Text.RegularExpressions.Regex("(?<=name"":"").*?(?="")").Match(It.Value).Value
                             Dim StatusIt As String = New Text.RegularExpressions.Regex("(?<=status"":).*?(?=\,|\}|"")").Match(It.Value).Value
-                            Select Case StatusIt
-                                Case "2"
-                                    .Name = "<span style=""color:#f0ffd5"">" & .Name & "</span>"
-                                Case "1"
-                                    .Name = "<span style=""color:#fff2d5"">" & .Name & "</span>"
-                            End Select
-                            .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """ style=""width:40%;float:centr;""/>"
+                            'Select Case StatusIt
+                            '    Case "2"
+                            '        .Name = "<span style=""color:#f0ffd5"">" & .Name & "</span>"
+                            '    Case "1"
+                            '        .Name = "<span style=""color:#fff2d5"">" & .Name & "</span>"
+                            'End Select
+                            .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """ style=""width:40%;float:centr;""/><P>Статус: " & StatusIt
                             .Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?&infohash=" & MatchInfoHash(0).Value
                             If .Link <> "" Then Items.Add(Item)
                         End If
@@ -2662,14 +2662,14 @@ Namespace RemoteFork.Plugins
                     .ImageLink = New Text.RegularExpressions.Regex("(?<=icon"":"").*?(?="")").Match(It.Value).Value
                     .Name = New Text.RegularExpressions.Regex("(?<=name"":"").*?(?="")").Match(It.Value).Value
                     Dim StatusIt As String = New Text.RegularExpressions.Regex("(?<=status"":).*?(?=\,|\}|"")").Match(It.Value).Value
-                    Select Case StatusIt
-                        Case "2"
-                            .Name = "<span style=""color:#f0ffd5"">" & .Name & "</span>"
-                        Case "1"
-                            .Name = "<span style=""color:#fff2d5"">" & .Name & "</span>"
-                    End Select
+                    ''Select Case StatusIt
+                    ''    Case "2"
+                    ''        .Name = "<span style=""color:#f0ffd5"">" & .Name & "</span>"
+                    ''    Case "1"
+                    ''        .Name = "<span style=""color:#fff2d5"">" & .Name & "</span>"
+                    ''End Select
                     .Link = "http://" & IPAdress & ":" & PortAce & "/ace/manifest.m3u8?&infohash=" & New Text.RegularExpressions.Regex("(?<=infohash"":"").*?(?="")").Match(It.Value).Value
-                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """ style=""width:40%;float:centr;""/>"
+                    .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & .ImageLink & """ style=""width:40%;float:centr;""/><P>Статус: " & StatusIt
                 End With
                 Items.Add(Item)
             Next
