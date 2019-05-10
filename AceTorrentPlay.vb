@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.37", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.38", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -65,6 +65,7 @@ Namespace RemoteFork.Plugins
         Dim ProxyEnablerNNM As Boolean
         Dim TrackerServerNNM As String
 #End Region
+
 
         Sub Load_Settings()
 
@@ -270,6 +271,8 @@ Namespace RemoteFork.Plugins
 
             Select Case PathSpliter(PathSpliter.Length - 1)
                 'Трекер Кинозал
+                Case "PAGEKNZLTOP"
+                    Return GetTopRazdach(context)
                 Case "PAGEKNZL"
                     Return GetPAGEKinozal(context, PathSpliter(PathSpliter.Length - 4), context.GetRequestParams("search"), PathSpliter(PathSpliter.Length - 2))
                 Case "PAGEFILMKNZL"
@@ -2177,6 +2180,15 @@ Namespace RemoteFork.Plugins
 
             Item = New Item
             With Item
+                .Name = "Топ раздач"
+                .Link = ";PAGEKNZLTOP"
+                .ImageLink = ICO_Folder
+                .Description = "<html><font face=""Arial"" size=""5""><b>" & .Name & "</font></b><p><img src=""" & LOGO_Kinozal & """ />"
+            End With
+            items.Add(Item)
+
+            Item = New Item
+            With Item
                 .Name = "Последние добавления"
                 .Link = ";;0;PAGEKNZL"
                 .ImageLink = ICO_Folder
@@ -2396,7 +2408,7 @@ Namespace RemoteFork.Plugins
 
                 Regex = New System.Text.RegularExpressions.Regex("(?<=<img src="").*?(?="")", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
                 ImagePath = Regex.Matches(HTML)(2).Value
-                If Left(ImagePath, 1) = "/" Then ImagePath = TrackerServerKinozal & ImagePath
+                If Left(ImagePath, 1) = "/" Then ImagePath = "https://kinozal-tv.appspot.com" & ImagePath
             Catch ex As Exception
 
             End Try
@@ -2429,6 +2441,39 @@ Namespace RemoteFork.Plugins
             Return "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & ImagePath & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & Title & "</span><br>" & "<br>" & Opisanie & "<p><span style=""color:#3090F0"">Информация</span><br>" & InfoFile
         End Function
 
+        Public Function GetTopRazdach(context As IPluginContext) As PluginApi.Plugins.Playlist
+            Dim items As New System.Collections.Generic.List(Of Item)
+            Dim Item As New Item
+            Dim RequestGet As System.Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp(TrackerServerKinozal & "/top.php")
+            If ProxyEnablerKZ = True Then RequestGet.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
+            RequestGet.Method = "GET"
+            RequestGet.Headers.Add("Cookie", CookiesKNZL)
+            RequestGet.ContentType = "text/html; charset=windows-1251"
+            Dim Response As System.Net.HttpWebResponse = RequestGet.GetResponse
+            Dim DataStream As System.IO.Stream = Response.GetResponseStream
+            Dim Reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.GetEncoding(1251))
+            Dim ResponseFromServer As String = reader.ReadToEnd()
+            ResponseFromServer = ResponseFromServer.Replace(vbLf, " ")
+            Dim ReGex As New Text.RegularExpressions.Regex("(<div class='bx1 stable'>).*?(</a> </div></div>)")
+            Dim ItReGex As New Text.RegularExpressions.Regex("(<a href='/details).*?(</a>)")
+            For Each ItemReg As Text.RegularExpressions.Match In ItReGex.Matches(ReGex.Match(ResponseFromServer).Value)
+                Item = New Item
+                With Item
+                    .Type = ItemType.DIRECTORY
+                    .Name = New Text.RegularExpressions.Regex("(?<=title=').*?(?=')").Match(ItemReg.Value).Value
+                    .Link = New Text.RegularExpressions.Regex("(id=).*?(?=')").Match(ItemReg.Value).Value & ";PAGEFILMKNZL"
+                    .ImageLink = New Text.RegularExpressions.Regex("(?<=<img src=').*?(?=')").Match(ItemReg.Value).Value
+                    If Left(.ImageLink, 3) = "/i/" Then
+                        .ImageLink = "https://kinozal-tv.appspot.com" & .ImageLink
+                    End If
+                    .Description = "<div id=""poster"" style=""float:left;padding:4px;  background-color:#EEEEEE;margin:0px 13px 1px 0px;"">" & "<img src=""" & .ImageLink & """ style=""width:240px;float:left;"" /></div><span style=""color:#3090F0"">" & .Name & "</span><br>"
+                End With
+                items.Add(Item)
+            Next
+
+            PlayList.IsIptv = "False"
+            Return PlayListPlugPar(items, context)
+        End Function
 #End Region
 
 #Region "TorrentTV"
