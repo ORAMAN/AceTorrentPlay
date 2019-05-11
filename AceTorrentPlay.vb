@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.4", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.41", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -3354,13 +3354,28 @@ Namespace RemoteFork.Plugins
         Public Function GetPAGERUTOR(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
 
             Dim items As New System.Collections.Generic.List(Of Item)()
-            Dim WC As New System.Net.WebClient
-            If EnableProxyRuTor = True Then WC.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
-            WC.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
-            WC.Encoding = System.Text.Encoding.UTF8
-            WC.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36")
-            Dim ResponseFromServer As String = WC.DownloadString(URL).Replace(vbLf, " ")
+            ' Dim WC As New System.Net.WebClient
+            Dim Req As Net.HttpWebRequest = Net.HttpWebRequest.Create(URL)
+            If EnableProxyRuTor = True Then Req.Proxy = New System.Net.WebProxy(ProxyServr, ProxyPort)
 
+
+            Req.Headers.Add("Cookie", "userid=1506245; nick=AceTorrentPlay; userpass=f0c65bfe9d59b2811d69f91099ce62f3; class=1; userpass=f0c65bfe9d59b2811d69f91099ce6")
+            Req.Headers.Add("Accept-Encoding", "gzip, deflate, br")
+            Req.Headers.Add("Accept-Language", "ru,en;q=0.9")
+            Req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/56.0.2924.87 Safari/537.36"
+
+            Dim WebResponse As Net.HttpWebResponse = Req.GetResponse()
+            Dim ResponseStream As IO.Stream = WebResponse.GetResponseStream()
+
+            If (WebResponse.ContentEncoding.ToLower().Contains("gzip")) Then
+                ResponseStream = New System.IO.Compression.GZipStream(ResponseStream, System.IO.Compression.CompressionMode.Decompress)
+            ElseIf (WebResponse.ContentEncoding.ToLower().Contains("deflate")) Then
+                ResponseStream = New System.IO.Compression.DeflateStream(ResponseStream, System.IO.Compression.CompressionMode.Decompress)
+            End If
+            Dim Reader As IO.StreamReader = New IO.StreamReader(ResponseStream, Text.Encoding.UTF8)
+
+            Dim ResponseFromServer As String = Reader.ReadToEnd.Replace(vbLf, " ")
+            IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer)
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<a href=""magnet).*?(</span></td></tr>)")
             Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer)
