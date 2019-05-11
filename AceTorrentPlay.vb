@@ -3375,7 +3375,7 @@ Namespace RemoteFork.Plugins
             Dim Reader As IO.StreamReader = New IO.StreamReader(ResponseStream, Text.Encoding.UTF8)
 
             Dim ResponseFromServer As String = Reader.ReadToEnd.Replace(vbLf, " ")
-            IO.File.WriteAllText("d:\My Desktop\test.html", ResponseFromServer)
+
 
             Dim Regex As New System.Text.RegularExpressions.Regex("(<a href=""magnet).*?(</span></td></tr>)")
             Dim Matches As System.Text.RegularExpressions.MatchCollection = Regex.Matches(ResponseFromServer)
