@@ -118,7 +118,6 @@ Namespace RemoteFork.Plugins
                             TrackerServerNNM = "http://nnm-club.me"
                         Case "http://nnm-club.me"
                             TrackerServerNNM = "https://nnmclub.to"
-
                         Case Else
                             TrackerServerNNM = "https://nnm-club.name"
                     End Select
@@ -1454,24 +1453,24 @@ Namespace RemoteFork.Plugins
             Next
 
 
-            Item = New Item
-            With Item
-                .Name = ""
-                .Link = ""
-                .Type = ItemType.FILE
-                .ImageLink = ICO_Pusto
-                items.Add(Item)
-            End With
+            'Item = New Item
+            'With Item
+            '    .Name = ""
+            '    .Link = ""
+            '    .Type = ItemType.FILE
+            '    .ImageLink = ICO_Pusto
+            '    items.Add(Item)
+            'End With
 
 
-            Item = New Item
-            With Item
-                .Name = "Выйти с RuTracker"
-                .Link = "RuTrNonAuthorization"
-                .Type = ItemType.DIRECTORY
-                .ImageLink = ICO_Delete
-            End With
-            items.Add(Item)
+            'Item = New Item
+            'With Item
+            '    .Name = "Выйти с RuTracker"
+            '    .Link = "RuTrNonAuthorization"
+            '    .Type = ItemType.DIRECTORY
+            '    .ImageLink = ICO_Delete
+            'End With
+            'items.Add(Item)
 
             PlayList.IsIptv = "False"
             Return PlayListPlugPar(items, context)
