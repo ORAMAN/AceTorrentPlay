@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.43", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.44", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -58,9 +58,7 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Параметры"
-        '  Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
-        Dim ProxyServr As String = "67.205.151.211"
-
+        Dim ProxyServr As String = "proxy.antizapret.prostovpn.org"
         Dim ProxyPort As Integer = 3128
 
         Dim FunctionsGetTorrentPlayList As String
