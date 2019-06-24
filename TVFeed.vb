@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.25b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.26b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -43,13 +43,13 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Token As String = "uRqQ7Bj2XUzVtJCwxtARM9eRxLPCQRdd"
-        Dim Sessionid As String = "0qxelqwzcbpeap1oarlykgz8q6gly6hm"
+        Dim Token As String = "RTPeJNleTZKMjZXT1CTYUDkUCNrtfZYe"
+        Dim Sessionid As String = "rm8nzoe9r6h6xb7ad1hqz78vw4le1gzl"
 
         Dim AdressTvFeed As String = "https://tvfeed.in"
 
-        Dim ProxyServr As String = "149.56.102.220" ' "proxy.antizapret.prostovpn.org"
-        Dim ProxyPort As Integer = 3128
+        Dim ProxyServr As String = "proxy-nossl.antizapret.prostovpn.org"
+        Dim ProxyPort As Integer = 29976
         Dim ProxyEnabler As Boolean = False
         Dim WC As New System.Net.WebClient
 #End Region
