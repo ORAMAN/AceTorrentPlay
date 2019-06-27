@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.45", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.46", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -717,8 +717,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "Rutracker"
-        Dim ProxyEnablerRuTr As Boolean = True
-        Dim TrackerServer As String = "https://rutracker.org"
+        Dim ProxyEnablerRuTr As Boolean
+        Dim TrackerServer As String
         Dim CookiesRuTr As String = "bb_ssl=1; bb_session=0-18287815-Sp4ZWp6DqsF8KDOWbRN9; _ym_uid=1534583259217897160; _ym_isad=1"
 
         Dim KategoriRuTracker As String
@@ -973,6 +973,17 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTopListRuTr(context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
+
+            Dim REQT As Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp("http://rutracker.lib")
+            REQT.Method = "HEAD"
+            If REQT.GetResponse.Headers.ToString <> "" Then
+                ProxyEnablerRuTr = False
+                TrackerServer = "http://rutracker.lib"
+            Else
+                ProxyEnablerRuTr = True
+                TrackerServer = "https://rutracker.org"
+            End If
+
             '  If AuthorizationTest() = False Then Return SetLogin(context)
 
             Dim items As New System.Collections.Generic.List(Of Item)
@@ -2118,8 +2129,8 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "RuTor"
-        Dim TrackerServerRuTor As String = "http://rutor.info"
-        Dim EnableProxyRuTor As Boolean = True
+        Dim TrackerServerRuTor As String ' = "http://rutor.info"
+        Dim EnableProxyRuTor As Boolean '= True
         Dim LOGO_TrackerRutor As String = "https://lh3.googleusercontent.com/8dpm7d5-lATGK3Ueum-Rb5qlbk4MicL3SDA1fjvgRCLtUz1t-aVDeqtv_NSrUEez9Pc"
 
         Public Function GetTorrentPageRuTor(context As IPluginContext, ByVal URL As String) As PluginApi.Plugins.Playlist
@@ -2344,6 +2355,17 @@ Namespace RemoteFork.Plugins
 
         Public Function GetTopListRuTor(context As IPluginContext) As PluginApi.Plugins.Playlist
             Load_Settings()
+            Dim REQT As Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp("http://rutracker.lib")
+            REQT.Method = "HEAD"
+            If REQT.GetResponse.Headers.ToString <> "" Then
+                EnableProxyRuTor = False
+                TrackerServerRuTor = "http://rutor.lib"
+            Else
+                EnableProxyRuTor = True
+                TrackerServerRuTor = "http://rutor.info"
+            End If
+
+
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim Item As New Item
 
