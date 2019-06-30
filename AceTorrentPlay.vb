@@ -9,7 +9,7 @@ Imports Microsoft.VisualBasic
 Imports System
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="acetorrentplay", Version:="1.46", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
+    <PluginAttribute(Id:="acetorrentplay", Version:="1.47", Author:="ORAMAN", Name:="AceTorrentPlay", Description:="Воспроизведение файлов TORRENT через меда-сервер Ace Stream", ImageLink:="http://s1.iconbird.com/ico/1012/AmpolaIcons/w256h2561350597291utorrent2.png")>
     Public Class AceTorrentPlay
         Implements IPlugin
 
@@ -976,13 +976,17 @@ Namespace RemoteFork.Plugins
 
             Dim REQT As Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp("http://rutracker.lib")
             REQT.Method = "HEAD"
-            If REQT.GetResponse.Headers.ToString <> "" Then
-                ProxyEnablerRuTr = False
-                TrackerServer = "http://rutracker.lib"
-            Else
+
+            Try
+                If REQT.GetResponse.Headers.ToString <> "" Then
+                    ProxyEnablerRuTr = False
+                    TrackerServer = "http://rutracker.lib"
+                End If
+            Catch ex As Exception
                 ProxyEnablerRuTr = True
                 TrackerServer = "https://rutracker.org"
-            End If
+            End Try
+
 
             '  If AuthorizationTest() = False Then Return SetLogin(context)
 
@@ -2357,13 +2361,16 @@ Namespace RemoteFork.Plugins
             Load_Settings()
             Dim REQT As Net.HttpWebRequest = Net.HttpWebRequest.CreateHttp("http://rutracker.lib")
             REQT.Method = "HEAD"
-            If REQT.GetResponse.Headers.ToString <> "" Then
-                EnableProxyRuTor = False
-                TrackerServerRuTor = "http://rutor.lib"
-            Else
+            Try
+
+                If REQT.GetResponse.Headers.ToString <> "" Then
+                    EnableProxyRuTor = False
+                    TrackerServerRuTor = "http://rutor.lib"
+                End If
+            Catch ex As Exception
                 EnableProxyRuTor = True
                 TrackerServerRuTor = "http://rutor.info"
-            End If
+            End Try
 
 
             Dim items As New System.Collections.Generic.List(Of Item)
