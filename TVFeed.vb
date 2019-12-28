@@ -619,7 +619,7 @@ Namespace RemoteFork.Plugins
 
             Reader.Close()
             Res.Close()
-            IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
+         
             Return STR
         End Function
 
