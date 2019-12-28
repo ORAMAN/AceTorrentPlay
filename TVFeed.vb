@@ -10,7 +10,7 @@ Imports System
 
 
 Namespace RemoteFork.Plugins
-    <PluginAttribute(Id:="tvfeed", Version:="0.26b", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
+    <PluginAttribute(Id:="tvfeed", Version:="0.27", Author:="ORAMAN", Name:="TVFeed", Description:="Воспроизведение видео с сайта https://tvfeed.in через меда-сервер Ace Stream", ImageLink:="https://tvfeed.in/img/tvfeedin.png")>
     Public Class TVFeed
         Implements IPlugin
 
@@ -43,8 +43,8 @@ Namespace RemoteFork.Plugins
         Dim next_page_url As String
         Dim IDPlagin As String = "tvfeed"
         Dim FunctionsGetTorrentPlayList As String
-        Dim Token As String = "RTPeJNleTZKMjZXT1CTYUDkUCNrtfZYe"
-        Dim Sessionid As String = "rm8nzoe9r6h6xb7ad1hqz78vw4le1gzl"
+        Dim Token As String = "JiTOD7oxaffaq8rifiEa5JOCI4jTCdxc"
+        Dim Sessionid As String = "pp6hq130u83ha4p6lmdl4wgn1kb42nxf"
 
         Dim AdressTvFeed As String = "https://tvfeed.in"
 
@@ -409,69 +409,6 @@ Namespace RemoteFork.Plugins
 #End Region
 
 #Region "ПОИСК"
-        'Public Function GetSearchListJSON(ByVal context As IPluginContext, ByVal SearchText As String) As PluginApi.Plugins.Playlist
-        '    Dim Req As Net.HttpWebRequest = Net.HttpWebRequest.Create(AdressTvFeed  & "/ajax_search/")
-        '    Req.Method = "POST"
-        '    Req.ContentType = "application/x-www-form-urlencoded; charset=UTF-8"
-        '    Req.Headers.Add("cookie", "csrftoken=RqfGuMA3tO2VQWjdFdYhVqxLZJWCX2wE")
-        '    Req.Referer = AdressTvFeed 
-        '    Req.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, Like Gecko) Chrome/59.0.3071.115 Safari/537.36"
-        '    Req.Headers.Add("x-requested-with", "XMLHttpRequest")
-
-        '    Dim myStream As System.IO.Stream = Req.GetRequestStream
-        '    Dim DataStr As String = "q=" & SearchText & "&csrfmiddlewaretoken=RqfGuMA3tO2VQWjdFdYhVqxLZJWCX2wE"
-        '    Dim DataByte() As Byte = System.Text.Encoding.UTF8.GetBytes(DataStr)
-        '    myStream.Write(DataByte, 0, DataByte.Length)
-        '    myStream.Close()
-
-        '    Dim Response As System.Net.HttpWebResponse = Req.GetResponse
-        '    Dim dataStream As System.IO.Stream = Response.GetResponseStream
-        '    Dim reader As New System.IO.StreamReader(dataStream, System.Text.Encoding.UTF8)
-
-        '    Dim STR As String = reader.ReadToEnd()
-        '    Dim CodeZnaki() As String = {"\U0430", "\U0431", "\U0432", "\U0433", "\U0434", "\U0435", "\U0451", "\U0436", "\U0437", "\U0438", "\U0439", "\U043A", "\U043B", "\U043C", "\U043D", "\U043E", "\U043F", "\U0440", "\U0441", "\U0442", "\U0443",
-        '        "\U0444", "\U0445", "\U0446", "\U0447", "\U0448", "\U0449", "\U044A", "\U044B", "\U044C", "\U044D", "\U044E", "\U044F", "\U0410", "\U0411", "\U0412", "\U0413", "\U0414", "\U0415", "\U0401", "\U0416", "\U0417", "\U0418", "\U0419", "\U041A",
-        '        "\U041B", "\U041C", "\U041D", "\U041E", "\U041F", "\U0420", "\U0421", "\U0422", "\U0423", "\U0424", "\U0425", "\U0426", "\U0427", "\U0428", "\U0429", "\U042A", "\U042B", "\U042C", "\U042D", "\U042E", "\U042F", "\U00AB", "\U00BB", "U2116"}
-        '    Dim DecodeZnaki() As String = {"а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "х", "ц", "ч", "ш", "щ", "ъ", "ы", "ь", "э", "ю", "я",
-        '        "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Х", "Ц", "Ч", "Ш", "Щ", "Ъ", "Ы", "Ь", "Э", "Ю", "Я", "«", "»", "№"}
-
-        '    For I As Integer = 0 To 68
-        '        STR = Microsoft.VisualBasic.Strings.Replace(STR, Microsoft.VisualBasic.Strings.LCase(CodeZnaki(I)), DecodeZnaki(I))
-        '    Next
-
-
-
-        '    Dim items As New System.Collections.Generic.List(Of Item)
-        '    If STR = "{""error"" 2}" Then
-        '        Dim Item As New Item
-        '        Item.Link = ""
-        '        Item.ImageLink = ICO_Pusto
-        '        Item.Name = "<span style=""color#F68648"">" & " - Ничего не найдено - " & "</span>"
-        '        Item.Description = "Поиск не дал результатов"
-        '        items.Add(Item)
-        '        PlayList.IsIptv = "False"
-        '        Return PlayListPlugPar(items, context)
-        '    End If
-
-        '    Dim Regex As New System.Text.RegularExpressions.Regex("({).*?(})")
-        '    Dim RegexUrl As New System.Text.RegularExpressions.Regex("(?<=""url"": "").*?(?="")")
-        '    Dim RegexName As New System.Text.RegularExpressions.Regex("(?<=""name"": "").*?(?="")")
-        '    Dim RegexImg As New System.Text.RegularExpressions.Regex("(?<=""img"": "").*?(?="")")
-
-        '    For Each Reg As System.Text.RegularExpressions.Match In Regex.Matches(STR)
-        '        Dim Item As New Item
-        '        Item.Type = ItemType.DIRECTORY
-        '        Item.Link = RegexUrl.Match(Reg.Value).Value & ";PAGE_FILM"
-        '        Item.Name = RegexName.Match(Reg.Value).Value
-        '        Item.ImageLink = RegexImg.Match(Reg.Value).Value
-        '        Item.Description = Item.ImageLink
-        '        items.Add(Item)
-        '    Next
-
-        '    PlayList.IsIptv = "False"
-        '    Return PlayListPlugPar(items, context)
-        'End Function
-
         Public Function GetSearchList(ByVal context As IPluginContext, ByVal SearchText As String) As PluginApi.Plugins.Playlist
             Dim items As New System.Collections.Generic.List(Of Item)
             Dim STR As String = ReqHTML(AdressTvFeed & "/search/", SearchText, "POST")
@@ -651,7 +588,7 @@ Namespace RemoteFork.Plugins
 
 #Region "ЗАПРОСЫ"
 
-        Public Function ReqHTML(ByVal URL As String, Optional ByVal DatStr As String = "", Optional ByVal Method As String = "GET")
+        Public Function ReqHTML(ByVal URL As String, Optional ByVal DatStr As String = "", Optional ByVal Method As String = "GET") As String
             If Left(URL, 1) = "/" Then
                 URL = AdressTvFeed & URL
             End If
@@ -682,7 +619,7 @@ Namespace RemoteFork.Plugins
 
             Reader.Close()
             Res.Close()
-            '''  IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
+            IO.File.WriteAllText("d:\My Desktop\Str.htm", STR)
             Return STR
         End Function
 
@@ -864,6 +801,7 @@ Namespace RemoteFork.Plugins
             If RegAkters.IsMatch(STR) = True Then
                 Dim Item As New Item
                 Item.ImageLink = ICO_Pusto
+                Item.Name = "..."
                 items.Add(Item)
                 Dim RegAkter As New System.Text.RegularExpressions.Regex("(<a href="").*?(</a>)")
                 For Each Reg As System.Text.RegularExpressions.Match In RegAkter.Matches(RegAkters.Match(STR).Value)
@@ -946,6 +884,7 @@ Namespace RemoteFork.Plugins
             If RegRegisers.IsMatch(STR) = True Then
                 Dim Item As New Item
                 Item.ImageLink = ICO_Pusto
+                Item.Name = "..."
                 items.Add(Item)
                 Dim RegRgiser As New System.Text.RegularExpressions.Regex("(<div class=""column"">).*?(</div>)")
                 For Each Reg As System.Text.RegularExpressions.Match In RegRgiser.Matches(RegRegisers.Match(STR).Value)
@@ -964,8 +903,9 @@ Namespace RemoteFork.Plugins
             If RegAkters.IsMatch(STR) = True Then
                 Dim Item As New Item
                 Item.ImageLink = ICO_Pusto
+                Item.Name = "..."
                 items.Add(Item)
-                Dim RegAkter As New System.Text.RegularExpressions.Regex("(<a href="").*?(</a>)")
+                Dim RegAkter As New System.Text.RegularExpressions.Regex("(<a href=""/actor/).*?(</a>)")
                 For Each Reg As System.Text.RegularExpressions.Match In RegAkter.Matches(RegAkters.Match(STR).Value)
                     Item = New Item
                     Item.Type = ItemType.DIRECTORY
